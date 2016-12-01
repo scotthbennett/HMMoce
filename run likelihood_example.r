@@ -4,13 +4,9 @@ ptt <- 106795
 iniloc <- data.frame(matrix(c(27, 9, 2013, 46.47683333, -45.5640, 
                    2, 11, 2013, 30.92645, -39.6919), nrow = 2, ncol = 5, byrow = T))
 
-pdt <- read.table('106795-PDTs.csv',sep=',',header=T,blank.lines.skip=F, skip = 2)
-pdt <- pdt[,c(grep('X.Ox', colnames(pdt)) * -1)]
-pdt <- pdt[,c(grep('Disc', colnames(pdt)) * -1)]
-data  <- pdt
+pdt <- read.table(paste(ptt,'-PDTs.csv', sep=''), sep=',',header=T,blank.lines.skip=F, skip = 2)
 
 pdt <- extract.pdt(pdt)
-pdt <- pdt[!is.na(pdt$Depth),]
 tag <- as.POSIXct(paste(iniloc[1,1], '/', iniloc[1,2], '/', iniloc[1,3], sep=''), format = '%d/%m/%Y')
 pop <- as.POSIXct(paste(iniloc[2,1], '/', iniloc[2,2], '/', iniloc[2,3], sep=''), format = '%d/%m/%Y')
 dts <- as.POSIXct(pdt$Date, format = findDateFormat(pdt$Date))
@@ -23,6 +19,7 @@ lat = c(20, 60)
 ohc.dir <- paste('~/Documents/WHOI/RData/HYCOM/', ptt, '/',sep = '')
 
 udates <- unique(as.Date(pdt$Date))
+dateVec <- as.Date(seq(tag, pop, by = 'day'))
 
 for(i in 1:length(udates)){
   time <- as.Date(udates[i])
@@ -38,15 +35,11 @@ for(i in 1:length(udates)){
 
 
 # calc.ohc
-# how to paramaterize sdx? seems like it should scale relative to
-# magnitude of ohc?
-# maybe best way is, after testing double tag data, to use known locations
-# and ohc at those positions compared to that calculated from the tags
-# pdt data. that should be a great way to get sd estimates for ohc based on real data
 
-L.ohc <- calc.ohc(pdt, ohc.dir = ohc.dir, ptt = 106795, sdx = 10)
+L.ohc <- calc.ohc(pdt, ohc.dir = ohc.dir)
 
-plot.ohc(lik = L.ohc, ohc.dir = ohcdir, pdt = pdt.data, filename = '106795_lik.pdf', write.dir = getwd())
+plot.ohc(lik = L.ohc, ohc.dir = ohcdir, pdt = pdt.data, 
+         filename = paste(ptt,'_ohclik.pdf', sep = ''), write.dir = getwd())
 
 
 ##
@@ -54,7 +47,7 @@ plot.ohc(lik = L.ohc, ohc.dir = ohcdir, pdt = pdt.data, filename = '106795_lik.p
 ##
 
 # set limits of interest
-limits = c(lon,lat) # (min long, max long, min lat, max lat)
+limits = c(lon, lat) # (min long, max long, min lat, max lat)
 
 nc.dir = '/Users/Cam/Documents/WHOI/RData/pdtMatch/WOA_25deg/global/'
 
@@ -65,27 +58,36 @@ dat = return.woa$dat; lon = return.woa$lon; lat = return.woa$lat; depth = return
 dat = removePacific(dat, lat, lon)
 
 # perform matching
-L.pdt = calc.pdt(pdt, dat, lat, lon)
-plot.woa(L.pdt, return.woa, '106795_woa.pdf', pdt = pdt, write.dir = getwd())
+L.pdt = calc.pdt(pdt, dat, lat, lon, raster = T, dateVec = dateVec)
 
+plot.woa(as.array(L.pdt), return.woa, paste(ptt, '_woalik.pdf', sep=''), pdt = pdt, write.dir = getwd())
 
 #list.pdt <- list(x=lon,y=lat,z=L.pdt)
-#L.pdt <- rasterizeStack(L.pdt, lon, lat)
-#br <- brick(list.pdt$z, xmn=ex[1], xmx=ex[2], ymn=ex[3], ymx=ex[4])
 #ex <- extent(list.pdt)
+#br <- brick(L.pdt, xmn=ex[1], xmx=ex[2], ymn=ex[3], ymx=ex[4],transpose=T,crs)
+#br <- flip(br,direction='y')
+#projection(br) <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
+plot(L.pdt[[10]])
+plot(countriesLow,add=T)
+#sync.l <- spatial_sync_raster(l,br)
+# now they have same extent and resolution and can be multiplied!
+
+#plot(sync.l[[5]])
+#plot(countriesLow,add=T)
 
 ##
 # Light-based Longitude Likelihood
 ##
 
-locs <- read.table('106795-Locations.csv', sep=',', header = T, blank.lines.skip = F)
+locs <- read.table(paste(ptt, '-Locations.csv', sep=''), sep=',', header = T, blank.lines.skip = F)
 #light <- light[light$Type == 'GPE',]
 dts <- format(as.POSIXct(locs$Date, format = findDateFormat(locs$Date)), '%Y-%m-%d')
 didx <- dts > tag & dts < pop
 locs <- locs[didx,]
 
-ngrid <- c(limits[2] - limits[1], limits[4] - limits[3])
-g <- setup.grid(locs)
+#ngrid <- c(limits[2] - limits[1], limits[4] - limits[3])
+g <- setup.grid(locs) # make sure loading function from misc_funs.r
+ngrid <- rev(dim(g$lon))
 lon <- g$lon[1,]
 lat <- g$lat[,1]
 
@@ -95,7 +97,65 @@ lat <- g$lat[,1]
 
 colnames(iniloc) = list('day','month','year','lat','lon')
 
-L.locs <- lik.locs(locs, iniloc, g)
+L.locs.a <- calc.locs(locs, iniloc, g, raster = F, dateVec = dateVec)
+#plot(L.locs[[10]])
+#plot(countriesLow, add = T)
+
+# this does the same for formatting as raster = F in calc.locs
+#La <- as.array(L.locs)
+#Laa <- aperm(La, c(2,1,3))
+
+# now need to re-format the array to match dims in sphmm (time, lat, lon)
+La.re <- aperm(L.locs.a, c(3,2,1))
+# maybe this worked but need to ensure correct orientation in each matrix
+# looks to be right
+
+image.plot(g$lon,g$lat,La.re[10,,])
+
+# try sphmm
+## Number of time steps
+T <- dim(La.re)[1]
+
+## Fixed parameter values
+par0=c(8.908,10.27,1.152,0.0472,0.707,0.866)
+D1 <- par0[1:2]
+D2 <- par0[3:4]
+p <- par0[5:6]
+
+#if(do.fit){
+#  guess <- c(log(10),log(10),log(0.5),log(0.5),log(0.95/0.05),log(0.95/0.05))
+#  fit <- nlm(neg.log.lik.fun,guess,g,L,dt)
+#  D1 <- exp(fit$estimate[1:2])
+#  D2 <- exp(fit$estimate[3:4])
+#  p <- 1/(1+exp(-fit$estimate[5:6]))
+#}
+
+# LOAD SPHMMFUNS.R
+
+## Setup transition matrices
+G1 <- make.kern(D1,g)
+K1 <- uniformization(G1,dt)
+G2 <- make.kern(D2,g)
+K2 <- uniformization(G2,dt)
+P <- matrix(c(p[1],1-p[1],1-p[2],p[2]),2,2,byrow=TRUE)
+
+## Run smoother and filter
+f <- hmm.filter(g,L,K1,K2,P)
+s <- hmm.smoother(f,K1,K2,P)
+sphmm <- calc.track(s,g)
+sphmm$date <- lsst$date
+sphmm$p.resid <- apply(s,c(1,2),sum)[2,]
+
+tr <- read.table('../sim/argosdata.csv',header=TRUE,sep=',')
+
+
+
+
+# convert to rasterBrick and project
+#L.ext <- extent(c(xmin=min(lon),xmax=max(lon),ymin=min(lat),ymax=max(lat)))
+#crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
+#l <- brick(L.locs,xmn=L.ext[1],xmx=L.ext[2],ymn=L.ext[3],ymx=L.ext[4],transpose=T,crs)
+
 
 
 ##
@@ -104,34 +164,34 @@ L.locs <- lik.locs(locs, iniloc, g)
 
 #data <- read.table(file='106795-PDTs.csv',sep=',',header=T,blank.lines.skip=F, skip = 2)
 
-depths = as.vector(as.matrix(cbind(data[,c(seq(15,ncol(data)-2,by=3))])))
-mintemps = as.vector(as.matrix(cbind(data[,c(seq(16,ncol(data)-1,by=3))])))
-maxtemps = as.vector(as.matrix(cbind(data[,c(seq(17,ncol(data),by=3))])))
+depths = as.vector(as.matrix(cbind(data[,c(seq(15, ncol(data) - 2, by = 3))])))
+mintemps = as.vector(as.matrix(cbind(data[,c(seq(16, ncol(data) - 1, by = 3))])))
+maxtemps = as.vector(as.matrix(cbind(data[,c(seq(17, ncol(data), by = 3))])))
 midtemps = (maxtemps + mintemps) / 2
 
-ddates = as.POSIXct(strptime(as.character(data$Date),format = findDateFormat(data$Date))) #reads dates as dates
+ddates = as.POSIXct(strptime(as.character(data$Date), format = findDateFormat(data$Date))) #reads dates as dates
 year = as.numeric(format(ddates, '%Y')) #extracts year
 tagyear <- year[1]
-DOY = round(julian(ddates,origin=as.Date(paste(year[1],'-01-01',sep=''))),digits=0) #calculate DOY
-jday = as.numeric(DOY+((year[1]-tagyear)*365)) #finish DOY calculation
+DOY = round(julian(ddates, origin = as.Date(paste(year[1], '-01-01', sep = ''))), digits = 0) #calculate DOY
+jday = as.numeric(DOY + ((year[1] - tagyear) * 365)) #finish DOY calculation
 
 #creates matrix of days
 jd_for_interp <- as.vector(as.matrix(cbind(rep(jday, (ncol(data) - 14 / 3)))))
 
 # clean data using NA values in depths
-ii=which(!is.na(depths));
-depths=depths[ii];midtemps=midtemps[ii];jd_for_interp=jd_for_interp[ii];
+ii = which(!is.na(depths));
+depths = depths[ii]; midtemps = midtemps[ii]; jd_for_interp = jd_for_interp[ii];
 
 # sets depth constraint
 z = 1:max(depths, na.rm = T)
 
 # run the LOESS interp
-results=grid2dloess(data=midtemps,xgrid=jd_for_interp,ygrid=depths,
-                    span_x=5,span_y=150,xgrid_est=jday,ygrid_est=z)
+results = grid2dloess(data = midtemps, xgrid = jd_for_interp, ygrid = depths,
+                    span_x = 5, span_y = 150, xgrid_est = jday, ygrid_est = z)
 
 # then plot
-plot.days=seq(0,length(jday)-1,by=1) #x axis setup
-plot.loess.pdt(plot.days,z,results$sm_data,year,filename='106795_pdt.pdf',DOY.first=min(jday),zissou=FALSE,tempRange=c(4,26))
+plot.days = seq(0, length(jday) - 1, by = 1) #x axis setup
+plot.loess.pdt(plot.days, z, results$sm_data, year, filename = '106795_pdt.pdf', DOY.first = min(jday), zissou = FALSE, tempRange = c(4, 26))
 
 
 #######

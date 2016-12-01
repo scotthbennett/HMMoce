@@ -1,99 +1,141 @@
-calc.ohc <- function(pdt, isotherm = '', ohc.dir, ptt, sdx){
-  # compare tag data to ohc map and calculate likelihoods
+#' Calculate Ocean Heat Content (OHC) probability surface
+#' 
+#' Compare tag data to OHC map and calculate likelihoods
+#' 
+#' @param pdt is variable containing tag-collected PDT data
+#' @param isotherm default '' in which isotherm is calculated on the fly based 
+#'   on daily tag data. Otherwise, numeric isotherm constraint can be specified 
+#'   (e.g. 20 deg C).
+#' @param ohc.dir local directory where get.hycom downloads are stored.
+#' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
+#'   
+#' @return likelihood is raster brick of likelihood surfaces representing 
+#'   estimated position based on tag-based OHC compared to calculated OHC using 
+#'   HYCOM
+#' @export
+
+calc.ohc <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE){
+
+  options(warn=1)
   
-  #' @param: tagdata is variable containing tag-collected PDT data
-  #' @param: time is vector of unique dates (daily) used to step
-  #' through the integration / ohc calculations
-  #' @param: isotherm is default '' in which isotherm is calculated
-  #' on the fly based on daily shark data. Otherwise, numeric isotherm
-  #' constraint can be specified.
-  #' @param: ohc.dir is local directory where get.hycom downloads are
-  #' stored.
-  #' @return: likelihood is array of likelihood surfaces representing
-  #' matches between daily tag-based ohc and hycom ohc maps
+  start.t <- Sys.time()
   
   # constants for OHC calc
-  cp <- 3.993 # kJ/kg*C
-  rho <- 1025 # kg/m3
+  cp <- 3.993 # kJ/kg*C <- heat capacity of seawater
+  rho <- 1025 # kg/m3 <- assumed density of seawater
   
   # calculate midpoint of tag-based min/max temps
   pdt$MidTemp <- (pdt$MaxTemp + pdt$MinTemp) / 2
   
+  # get unique time points
   udates <- unique(pdt$Date)
-  
-  ohcVec <- vector(0, length = length(udates))
+  T <- length(udates)
   
   if(isotherm != '') iso.def <- TRUE else iso.def <- FALSE
   
-  for(i in 1:length(udates)){
+  print(paste('Starting iterations through time ', '...'))
+  
+  for(i in 1:T){
+    
+    time <- udates[i]
+    pdt.i <- pdt[which(pdt$Date == time),]
+
+    # open day's hycom data
+    nc <- RNetCDF::open.nc(paste(ohc.dir, ptt,'_', as.Date(time), '.nc', sep=''))
+    dat <- RNetCDF::var.get.nc(nc, 'water_temp') * RNetCDF::att.get.nc(nc, 'water_temp', attribute='scale_factor') + 
+      RNetCDF::att.get.nc(nc, variable='water_temp', attribute='add_offset')
     
     if(i == 1){
-      i = 2
-      time <- udates[i]
-      pdt.i <- pdt[which(pdt$Date == time),]
-      if(iso.def == FALSE) isotherm <- min(pdt.i$MidTemp, na.rm = T)
-      
-      # perform tag data integration
-      tag <- approx(pdt.i$Depth, pdt.i$MidTemp, xout = depth)
-      tag <- tag$y - isotherm
-      tag.ohc <- cp * rho * sum(tag, na.rm = T) / 10000
-      
-      ohcVec[i] <- tag.ohc
-      
+      depth <- RNetCDF::var.get.nc(nc, 'depth')
+      lon <- RNetCDF::var.get.nc(nc, 'lon')
+      lat <- RNetCDF::var.get.nc(nc, 'lat')
     }
     
-    # define time based on tag data
-    time <- udates[i]
+    #extracts depth from tag data for day i
+    y <- pdt.i$Depth[!is.na(pdt.i$Depth)] 
+    y[y<0] <- 0
     
-    nc <- open.ncdf(paste(ohc.dir, ptt, '_', as.Date(time), '.nc', sep=''))
-    dat <- get.var.ncdf(nc, 'temperature')
-    depth <- get.var.ncdf(nc, 'Depth')
+    #extract temperature from tag data for day i
+    x <- pdt.i$MidTemp[!is.na(pdt.i$Depth)]  
     
-    pdt.i <- pdt[which(pdt$Date == time),]
+    # use the which.min
+    depIdx = unique(apply(as.data.frame(pdt.i$Depth), 1, FUN=function(x) which.min((x - depth) ^ 2)))
+    hycomDep <- depth[depIdx]
     
-    # calculate daily isotherm based on tag data
-    if(iso.def == FALSE) isotherm <- min(pdt.i$MidTemp, na.rm = T)
+    if(bathy){
+      mask <- dat[,,max(depIdx)]
+      mask[is.na(mask)] <- NA
+      mask[!is.na(mask)] <- 1
+      for(bb in 1:length(depth)){
+        dat[,,bb] <- dat[,,bb] * mask
+      }
+    }
     
-    dat[dat<isotherm] <- NA
+    # make predictions based on the regression model earlier for the temperature at standard WOA depth levels for low and high temperature at that depth
+    suppressWarnings(
+    fit.low <- locfit::locfit(pdt.i$MinTemp ~ pdt.i$Depth)
+    )
+    suppressWarnings(
+    fit.high <- locfit::locfit(pdt.i$MaxTemp ~ pdt.i$Depth)
+    )
+    n = length(hycomDep)
+      
+    #suppressWarnings(
+    pred.low = stats::predict(fit.low, newdata = hycomDep, se = T, get.data = T)
+    #suppressWarnings(
+    pred.high = stats::predict(fit.high, newdata = hycomDep, se = T, get.data = T)
+      
+
+    # data frame for next step
+    df = data.frame(low = pred.low$fit - pred.low$se.fit * sqrt(n),
+                    high = pred.high$fit + pred.high$se.fit * sqrt(n),
+                    depth = hycomDep)
+
+    # isotherm is minimum temperature recorded for that time point
+    if(iso.def == FALSE) isotherm <- min(df$low, na.rm = T)
+    
+    # perform tag data integration at limits of model fits
+    minT.ohc <- cp * rho * sum(df$low - isotherm, na.rm = T) / 10000
+    maxT.ohc <- cp * rho * sum(df$high - isotherm, na.rm = T) / 10000
     
     # Perform hycom integration
+    dat[dat<isotherm] <- NA
     dat <- dat - isotherm
-    ohc <- cp * rho * apply(dat, 1:2, sum, na.rm = T) / 10000 
+    ohc <- cp * rho * apply(dat[,,depIdx], 1:2, sum, na.rm = T) / 10000 
+    ohc[ohc == 0] <- NA
     
-    # perform tag data integration
-    tag <- approx(pdt.i$Depth, pdt.i$MidTemp, xout = depth)
-    tag <- tag$y - isotherm
-    tag.ohc <- cp * rho * sum(tag, na.rm = T) / 10000
-    
-    ohcVec[i] <- tag.ohc
-    
-    if(i == 1){
-      sdx <- sd(ohcVec[c(1,2)])
-    } else{
-      sdx <- sd(ohcVec[c((i - 1), i, (i + 1))])
-    }
+    # calc sd of OHC
+    # focal calc on mean temp and write to sd var
+    r = raster::flip(raster::raster(t(ohc)), 2)
+    sdx = raster::focal(r, w = matrix(1, nrow = 9, ncol = 9),
+                        fun = function(x) stats::sd(x, na.rm = T))
+    sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
+
     # compare hycom to that day's tag-based ohc
-    #lik.dt <- matrix(dtnorm(ohc, tag.ohc, sdx, 0, 150), dim(ohc)[1], dim(ohc)[2])
-    lik <- dnorm(ohc, tag.ohc, sdx) 
-    lik <- (lik / max(lik, na.rm = T)) - .05
-    print(paste(max(lik), time))
-    
-    # result should be array of likelihood surfaces
+    lik.ohc <- likint3(ohc, sdx, minT.ohc, maxT.ohc)
+
     if(i == 1){
-      
-      likelihood <- as.array(lik)
-      
-    } else{
-      
-      likelihood <- abind(likelihood, lik, along = 3)
-      
+      # result will be array of likelihood surfaces
+      L.ohc <- array(0, dim = c(dim(lik.ohc), length(dateVec)))
     }
     
-    print(paste(time, ' finished.', sep=''))
-    
+    idx <- which(dateVec == as.Date(time))
+    L.ohc[,,idx] = (lik.ohc / max(lik.ohc, na.rm=T)) - 0.2
+
   }
+
+  print(paste('Making final likelihood raster...'))
   
-  # return ohc likelihood surfaces as an array
-  return(likelihood)
+  crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
+  list.ohc <- list(x = lon-360, y = lat, z = L.ohc)
+  ex <- raster::extent(list.ohc)
+  L.ohc <- raster::brick(list.ohc$z, xmn=ex[1], xmx=ex[2], ymn=ex[3], ymx=ex[4], transpose=T, crs)
+  L.ohc <- raster::flip(L.ohc, direction = 'y')
+
+  L.ohc[L.ohc < 0] <- 0
+  
+  # return ohc likelihood surfaces
+  return(L.ohc)
   
 }
+

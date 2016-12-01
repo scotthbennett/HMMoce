@@ -7,7 +7,7 @@
 #' @param wd is the directory where your data lives
 #' @param tag is POSIXct object of the tagging date
 #' @param pop is POSIXct object of the pop-up date
-#' @param type is character indicating which type of data to read. Choices are
+#' @param type is character indicating which type of data to read. Choices are 
 #'   'sst', 'pdt', 'light' corresponding to those data files output from WC Data
 #'   Portal
 #'   

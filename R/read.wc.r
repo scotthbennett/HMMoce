@@ -14,21 +14,6 @@
 #' @return a list containing: the data read as a data.frame and a date vector of
 #'   unique dates in that data
 #' @export
-#' @examples
-#' # READ IN TAG DATA
-#' ptt <- '141256'
-#' 
-#' # TAG/POPUP DATES AND LOCATIONS (dd, mm, YYYY, lat, lon)
-#' iniloc <- data.frame(matrix(c(13, 10, 2015, 41.575, -69.423, 
-#'                              24, 2, 2016, 26.6798, -69.0147), nrow = 2, ncol = 5, byrow = T))
-#' colnames(iniloc) = list('day','month','year','lat','lon')
-#' tag <- as.POSIXct(paste(iniloc[1,1], '/', iniloc[1,2], '/', iniloc[1,3], sep=''), format = '%d/%m/%Y')
-#' pop <- as.POSIXct(paste(iniloc[2,1], '/', iniloc[2,2], '/', iniloc[2,3], sep=''), format = '%d/%m/%Y')
-#' myDir <- '~/Documents/WHOI/RCode/hmmwoa/inst/extdata/' # WHERE YOUR DATA LIVES, THIS IS THE EXAMPLE DATA
-#' tag.sst <- read.wc(ptt, wd = myDir, type = 'sst', tag=tag, pop=pop)
-#' str(tag.sst)
-
-
 
 read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst'){
   

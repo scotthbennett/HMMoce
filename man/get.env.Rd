@@ -9,9 +9,13 @@ get.env(uniqueDates, ptt, type = NA, spatLim, save.dir = getwd())
 \arguments{
 \item{uniqueDates}{is a POSIXct vector of desired dates}
 
-\item{type}{is a character string indicating whether you're after sea surface temperature 'sst' or hybrid coordinate ocean model 'ohc' data}
+\item{ptt}{is unique tag identifier}
 
-\item{spatLim}{is a list of spatial limits as \code{list(xmin, xmax, ymin, ymax)}}
+\item{type}{is a character string indicating whether you're after sea surface
+temperature 'sst' or hybrid coordinate ocean model 'ohc' data}
+
+\item{spatLim}{is a list of spatial limits as \code{list(xmin, xmax, ymin,
+ymax)}}
 
 \item{save.dir}{is the directory to save the downloaded data to}
 }
@@ -19,7 +23,9 @@ get.env(uniqueDates, ptt, type = NA, spatLim, save.dir = getwd())
 nothing, just downloads the data to your local machine
 }
 \description{
-\code{get.env} accesses oceanographic data like sea surface temperature from a remote server and downloads the temporal and spatial extent of interest for further use
+\code{get.env} accesses oceanographic data like sea surface temperature from
+a remote server and downloads the temporal and spatial extent of interest for
+further use
 }
 \examples{
 splim <- list(xmin=-60, xmax=-40, ymin=10, ymax=30)

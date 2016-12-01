@@ -9,6 +9,8 @@ calc.sst(tag.sst, ptt, sst.dir, dateVec)
 \arguments{
 \item{tag.sst}{variable containing tag-collected SST data}
 
+\item{ptt}{is unique tag identifier}
+
 \item{sst.dir}{local directory where remote sensing SST downloads are stored}
 
 \item{dateVec}{is vector of dates from tag to pop-up in 1 day increments.}

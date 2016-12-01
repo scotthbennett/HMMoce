@@ -1,5 +1,5 @@
-# RUN BLUE 259 VIA HMMWOA
-library(hmmwoa)
+# RUN BLUE 259 VIA HMMoce
+library(HMMoce)
 
 # SETWD
 setwd('~/Documents/WHOI/Data/Blues/2015/141259/') 
@@ -23,7 +23,7 @@ pop <- as.POSIXct(paste(iniloc[2,1], '/', iniloc[2,2], '/', iniloc[2,3], sep='')
 dateVec <- as.Date(seq(tag, pop, by = 'day')) 
 
 # READ IN DATA FROM WC FILES
-#myDir <- '~/Documents/WHOI/RCode/hmmwoa/inst/extdata/' # WHERE YOUR DATA LIVES, THIS IS THE EXAMPLE DATA
+#myDir <- '~/Documents/WHOI/RCode/HMMoce/inst/extdata/' # WHERE YOUR DATA LIVES, THIS IS THE EXAMPLE DATA
 myDir <- getwd()
 tag.sst <- read.wc(ptt, wd = myDir, type = 'sst', tag=tag, pop=pop); 
 sst.udates <- tag.sst$udates; tag.sst <- tag.sst$data

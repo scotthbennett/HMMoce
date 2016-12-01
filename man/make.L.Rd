@@ -14,19 +14,28 @@ make.L(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res,
 
 \item{L3}{a likelihood array}
 
-\item{L.mle.res}{is a coarse resolution array of dim(L1) that speeds up the parameter estimation step later on}
+\item{known.locs}{is data frame of known locations containing named columns
+of date, lon, lat. Default is NULL.}
 
-\item{L.locs}{is array of dim(L1) that contains any known locations during the deployment that will supersede any other likelihood at that time point}
+\item{L.mle.res}{is a coarse resolution array of dim(L1) that speeds up the 
+parameter estimation step later on}
 
-\item{plot}{is logical indicating whether you want an example plot}
+\item{dateVec}{is vector of dates from tag to pop-up date by day. Only required if known.locs is not NULL.}
+
+\item{locs.grid}{is output grid from \code{setup.locs.grid}. Only required if known.locs is not NULL.}
+
+\item{iniloc}{is matrix of tag and pop locations. Default is NULL because this should be taken care of elsewhere.}
 }
 \value{
-a list containing: L, the overall likelihood array and L.mle, a more coarse version of L used later for parameter estimation
+a list containing: L, the overall likelihood array and L.mle, a more 
+  coarse version of L used later for parameter estimation
 }
 \description{
-\code{make.L} combines individual likelihoods from various data sources (e.g. SST, OHC) to make overall combined likelihoods for each time point
+\code{make.L} combines individual likelihoods from various data sources (e.g.
+SST, OHC) to make overall combined likelihoods for each time point
 }
 \note{
-This function currently only supports the use of 3 input likelihood data sources. This will be expanded in the future based on user needs.
+This function currently only supports the use of 3 input likelihood 
+  data sources. This will be expanded in the future based on user needs.
 }
 

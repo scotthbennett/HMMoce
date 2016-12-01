@@ -2,19 +2,20 @@
 % Please edit documentation in R/calc.track.r
 \name{calc.track}
 \alias{calc.track}
-\title{HMM Smoother}
+\title{Calculate movement track from state estimates}
 \usage{
 calc.track(distr, g)
 }
 \arguments{
-\item{distr}{}
+\item{distr}{is output array from \code{hmm.smoother}}
 
-\item{g}{}
+\item{g}{is one of the outputs from \code{resample.grid} which denotes what
+spatial scale and grid you're working on}
 }
 \value{
 calculated track
 }
 \description{
-HMM Smoother
+Calculate movement track from state estimates
 }
 

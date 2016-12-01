@@ -55,7 +55,7 @@ close.ncdf(ncnew)
 woa.dir <- '/Users/Cam/Documents/WHOI/RData/pdtMatch/WOA_1deg/global/woa13_1deg_global_meantemp.nc'
 return.woa <- extract.woa(woa.dir, sp.lim, resolution = 'one')
 woa.one <- list(watertemp = woa.one$dat, lon = woa.one$lon, lat = woa.one$lat, depth = woa.one$depth)
-setwd('~/Documents/WHOI/RCode/hmmwoa/')
+setwd('~/Documents/WHOI/RCode/HMMoce/')
 devtools::use_data(woa.one)
 
 

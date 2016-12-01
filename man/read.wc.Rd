@@ -15,7 +15,7 @@ read.wc(ptt, wd = getwd(), tag, pop, type = "sst")
 
 \item{pop}{is POSIXct object of the pop-up date}
 
-\item{type}{is character indicating which type of data to read. Choices are
+\item{type}{is character indicating which type of data to read. Choices are 
 'sst', 'pdt', 'light' corresponding to those data files output from WC Data
 Portal}
 }

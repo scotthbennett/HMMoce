@@ -9,13 +9,18 @@ calc.ohc(pdt, ptt, isotherm = "", ohc.dir, dateVec, bathy = TRUE)
 \arguments{
 \item{pdt}{is variable containing tag-collected PDT data}
 
+\item{ptt}{is unique tag identifier}
+
 \item{isotherm}{default '' in which isotherm is calculated on the fly based 
 on daily tag data. Otherwise, numeric isotherm constraint can be specified 
 (e.g. 20 deg C).}
 
-\item{ohc.dir}{local directory where get.hycom downloads are stored.}
+\item{ohc.dir}{local directory where \code{get.env} downloads are stored.}
 
 \item{dateVec}{is vector of dates from tag to pop-up in 1 day increments.}
+
+\item{bathy}{is logical indicating whether or not a bathymetric mask should
+be applied}
 }
 \value{
 likelihood is raster brick of likelihood surfaces representing 
@@ -23,6 +28,6 @@ likelihood is raster brick of likelihood surfaces representing
   HYCOM
 }
 \description{
-Compare tag data to OHC map and calculate likelihoods
+Compare tag data to OHC grid and calculate likelihoods
 }
 

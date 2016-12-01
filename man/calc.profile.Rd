@@ -8,10 +8,13 @@ calc.profile(pdt, ptt, dat = NULL, lat = NULL, lon = NULL, dateVec,
   envType = "woa", hycom.dir = NULL)
 }
 \arguments{
-\item{pdt}{is -PDT data from WC psat tag summarizing depth/temperature data
+\item{pdt}{is -PDT data from WC psat tag summarizing depth/temperature data 
 over a programmed time interval}
 
-\item{dat}{is monthly global 1/4deg climatology data from WOA13. NULL if envType = 'hycom'.}
+\item{ptt}{is unique tag identifier}
+
+\item{dat}{is monthly global 1/4deg climatology data from WOA13. NULL if
+envType = 'hycom'.}
 
 \item{lat}{is vector of latitudes from dat. NULL if envType = 'hycom'.}
 
@@ -19,13 +22,14 @@ over a programmed time interval}
 
 \item{dateVec}{is vector of dates from tag to pop-up in 1 day increments.}
 
-\item{envType}{is character indicating whether to compare tag-based profile to World Ocean Atlas ('woa') or HYCOM ('hycom').}
+\item{envType}{is character indicating whether to compare tag-based profile
+to World Ocean Atlas ('woa') or HYCOM ('hycom').}
 
 \item{hycom.dir}{is path to stored HYCOM model outputs if envType = 'hycom'}
 }
 \value{
-raster of likelihoods for depth-temp profile
-       matching between tag data and oceanographic profiles
+raster of likelihoods for depth-temp profile matching between tag
+  data and oceanographic profiles
 }
 \description{
 \code{calc.profile} calculates likelihood of animal position based on 
@@ -33,10 +37,11 @@ summarized depth-temperature profiles
 }
 \details{
 Tag-based depth-temperature profile summaries are compared to climatological 
-profiles from the World Ocean Atlas (WOA) or HYbrid Coordinate Ocean Model (HYCOM) 
-and "matched" to generate position likelihoods. This essentially attempts to estimate animal position based on 
-the water mass it is in, particularly if extensive diving performs thorough 
-sampling of the environment. However, remember the in situ data is being 
-compared to climatological means or the results of an oceanographic model.
+profiles from the World Ocean Atlas (WOA) or HYbrid Coordinate Ocean Model
+(HYCOM) and "matched" to generate position likelihoods. This essentially
+attempts to estimate animal position based on the water mass it is in,
+particularly if extensive diving performs thorough sampling of the
+environment. However, remember the in situ data is being compared to
+climatological means or the results of an oceanographic model.
 }
 

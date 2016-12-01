@@ -1,4 +1,4 @@
-Package: hmmwoa
+Package: HMMoce
 Type: Package
 Title: Improved Analysis of Marine Animal Movement Data Using Hidden Markov Models
 Version: 0.0.0.9000

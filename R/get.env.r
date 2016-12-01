@@ -14,9 +14,6 @@
 #'   
 #' @return nothing, just downloads the data to your local machine
 #' @export
-#' @examples
-#' splim <- list(xmin=-60, xmax=-40, ymin=10, ymax=30)
-#' get.env('2015-01-01', type = 'sst', splim, getwd())
 
 get.env <- function(uniqueDates, ptt, type = NA, spatLim, save.dir = getwd()){
   

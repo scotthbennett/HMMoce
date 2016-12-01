@@ -4,13 +4,17 @@
 #' likelihoods
 #' 
 #' @param tag.sst variable containing tag-collected SST data
+#' @param ptt is unique tag identifier
 #' @param sst.dir local directory where remote sensing SST downloads are stored
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
-#'   
+#' 
 #' @return likelihood is raster brick of likelihood surfaces representing matches
 #'   between tag-based sst and remotely sensed sst maps
+#' 
 #' @export
+#' 
 #' @seealso \code{\link{calc.ohc}}
+#' 
 #' @examples
 #' # see example script blue256_example.r
 

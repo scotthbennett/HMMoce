@@ -1,24 +1,30 @@
 #' Combine individual source likelihoods
 #' 
-#' \code{make.L} combines individual likelihoods from various data sources (e.g. SST, OHC) to make overall combined likelihoods for each time point
+#' \code{make.L} combines individual likelihoods from various data sources (e.g.
+#' SST, OHC) to make overall combined likelihoods for each time point
 #' 
 #' @param L1 a likelihood array
 #' @param L2 a likelihood array
 #' @param L3 a likelihood array
-#' @param L.locs is array of dim(L1) that contains any known locations during the deployment that will supersede any other likelihood at that time point
-#' @param L.mle.res is a coarse resolution array of dim(L1) that speeds up the parameter estimation step later on
-#' @param plot is logical indicating whether you want an example plot
-#'   
-#' @return a list containing: L, the overall likelihood array and L.mle, a more coarse version of L used later for parameter estimation
+#' @param known.locs is data frame of known locations containing named columns
+#'   of date, lon, lat. Default is NULL.
+#' @param L.mle.res is a coarse resolution array of dim(L1) that speeds up the 
+#'   parameter estimation step later on
+#' @param dateVec is vector of dates from tag to pop-up date by day. Only required if known.locs is not NULL.
+#' @param locs.grid is output grid from \code{setup.locs.grid}. Only required if known.locs is not NULL.
+#' @param iniloc is matrix of tag and pop locations. Default is NULL because this should be taken care of elsewhere.
+
+#' @return a list containing: L, the overall likelihood array and L.mle, a more 
+#'   coarse version of L used later for parameter estimation
 #' @export
-#' @note 
-#' This function currently only supports the use of 3 input likelihood data sources. This will be expanded in the future based on user needs.
-#' 
+#' @note This function currently only supports the use of 3 input likelihood 
+#'   data sources. This will be expanded in the future based on user needs.
+#'   
 
 make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateVec = NULL, locs.grid = NULL, iniloc = NULL){
 
   if(!is.null(known.locs)){
-    print('Input known locationss are being used...')
+    print('Input known locations are being used...')
     # convert input date, lat, lon to likelihood surfaces with dim(L1)
     L.locs <- L1 * 0
     known.locs$date <- as.Date(known.locs$date)

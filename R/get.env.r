@@ -1,10 +1,15 @@
 #' Download and Read Oceanographic Data
 #' 
-#' \code{get.env} accesses oceanographic data like sea surface temperature from a remote server and downloads the temporal and spatial extent of interest for further use
+#' \code{get.env} accesses oceanographic data like sea surface temperature from
+#' a remote server and downloads the temporal and spatial extent of interest for
+#' further use
 #' 
 #' @param uniqueDates is a POSIXct vector of desired dates
-#' @param type is a character string indicating whether you're after sea surface temperature 'sst' or hybrid coordinate ocean model 'ohc' data
-#' @param spatLim is a list of spatial limits as \code{list(xmin, xmax, ymin, ymax)}
+#' @param ptt is unique tag identifier
+#' @param type is a character string indicating whether you're after sea surface
+#'   temperature 'sst' or hybrid coordinate ocean model 'ohc' data
+#' @param spatLim is a list of spatial limits as \code{list(xmin, xmax, ymin,
+#'   ymax)}
 #' @param save.dir is the directory to save the downloaded data to
 #'   
 #' @return nothing, just downloads the data to your local machine

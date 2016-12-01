@@ -1,17 +1,21 @@
 #' Calculate Ocean Heat Content (OHC) probability surface
 #' 
-#' Compare tag data to OHC map and calculate likelihoods
+#' Compare tag data to OHC grid and calculate likelihoods
 #' 
 #' @param pdt is variable containing tag-collected PDT data
+#' @param ptt is unique tag identifier
 #' @param isotherm default '' in which isotherm is calculated on the fly based 
 #'   on daily tag data. Otherwise, numeric isotherm constraint can be specified 
 #'   (e.g. 20 deg C).
-#' @param ohc.dir local directory where get.hycom downloads are stored.
+#' @param ohc.dir local directory where \code{get.env} downloads are stored.
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
+#' @param bathy is logical indicating whether or not a bathymetric mask should
+#'   be applied
 #'   
 #' @return likelihood is raster brick of likelihood surfaces representing 
 #'   estimated position based on tag-based OHC compared to calculated OHC using 
 #'   HYCOM
+#'   
 #' @export
 
 calc.ohc <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE){

@@ -1,13 +1,14 @@
-#' HMM Smoother
+#' Calculate movement track from state estimates
 #' 
-#' @param distr 
-#' @param g 
-#'
+#' @param distr is output array from \code{hmm.smoother}
+#' @param g is one of the outputs from \code{resample.grid} which denotes what
+#'   spatial scale and grid you're working on
+#'   
 #' @return calculated track
 #' @export
-#'
+#' 
 
-calc.track <- function(distr,g){
+calc.track <- function(distr, g){
   ## Calculate track from probability distribution of location
   
   T <- dim(distr)[2]

@@ -1,2 +1,2 @@
-# HMMoce
-hidden markov model for psat data v.0
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->

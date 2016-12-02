@@ -29,7 +29,8 @@
 #'   Modell 321:10-22.
 #'  }
 #'   
-#'   
 #' @docType package
 #' @name HMMoce
-NULL
+
+"_PACKAGE"
+#> [1] "_PACKAGE"

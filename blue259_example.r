@@ -123,13 +123,13 @@ L.mle <- L$L.mle; L <- L$L
 
 ## **THESE OUTPUT PARAMETERS ARE PIXEL-BASED. DON'T FORGET TO CONVERT FOR USE
 ##  WITH THE HIGHER RESOLUTION LIKELIHOOD RESULTS STORED IN L 
-D1 <- exp(fit$estimate[1:2]) # parameters for kernel 1. this is behavior mode transit. log-transformed movement parameters (diffusivities) pertaining
+#D1 <- exp(fit$estimate[1:2]) # parameters for kernel 1. this is behavior mode transit. log-transformed movement parameters (diffusivities) pertaining
 # to the first behavioural state.
 
-D2 <- exp(fit$estimate[3:4]) # parameters for kernel 2. resident behavior mode. log-transformed movement 
+#D2 <- exp(fit$estimate[3:4]) # parameters for kernel 2. resident behavior mode. log-transformed movement 
 # parameters (diffusivities) pertaining to the second behavioural state.
 
-p <- 1/(1+exp(-fit$estimate[5:6])) # logit-transformed
+#p <- 1/(1+exp(-fit$estimate[5:6])) # logit-transformed
 #transition probabilities for switching between the two behavioural states 
 #Probably need to express kernel movement in terms of pixels per time step.
 #The sparse matrix work likely renders this unnecessary, but going back to 
@@ -147,11 +147,15 @@ p <- par0[5:6]
 # GENERATE MOVEMENT KERNELS. D VALUES ARE MEAN AND SD PIXELS
 K1 = gausskern(D1[1], D1[2], muadv = 0)
 K2 = gausskern(D2[1], D2[2], muadv = 0)
-P <- matrix(c(p[1],1-p[1],1-p[2],p[2]),2,2,byrow=TRUE)
+
+#----------------------------------------------------------------------------------#
+# RUN EXPECTATION-MAXIMIZATION ROUTINE FOR MATRIX, P (STATE SWITCH PROBABILITY)
+P.init <- matrix(c(p[1],1-p[1],1-p[2],p[2]),2,2,byrow=TRUE)
+P.final <- expmax(P.init, g = g.mle, L = L.mle, K1, K2)
 
 #----------------------------------------------------------------------------------#
 # RUN THE FILTER STEP
-f = hmm.filter(g.mle, L.mle, K1, K2, P)
+f <- hmm.filter(g, L, K1, K2, P.final)
 
 # plot if you want to see confidence limits
 #res = apply(f$phi[1,,,],2:3,sum, na.rm=T)
@@ -159,7 +163,7 @@ f = hmm.filter(g.mle, L.mle, K1, K2, P)
 
 #----------------------------------------------------------------------------------#
 # RUN THE SMOOTHING STEP
-s = hmm.smoother(f, K1, K2, P)
+s = hmm.smoother(f, K1, K2, P.final)
 
 # plot if you want to see confidence limits
 #sres = apply(s[1,,,], 2:3, sum, na.rm=T)
@@ -169,13 +173,13 @@ s = hmm.smoother(f, K1, K2, P)
 # GET THE MOST PROBABLE TRACK
 #----------------------------------------------------------------------------------#
 T <- dim(s)[2]
-meanlat <- apply(apply(s, c(2, 4), sum) * repmat(t(as.matrix(g.mle$lat[,1])), T, 1), 1, sum)
-meanlon <- apply(apply(s, c(2, 3), sum) * repmat(t(as.matrix(g.mle$lon[1,])), T, 1), 1, sum)
+meanlat <- apply(apply(s, c(2, 4), sum) * repmat(t(as.matrix(g$lat[,1])), T, 1), 1, sum)
+meanlon <- apply(apply(s, c(2, 3), sum) * repmat(t(as.matrix(g$lon[1,])), T, 1), 1, sum)
 
 #**track <- calc.track(distr, g)**
 
 plot(meanlon,meanlat,type='l')
-world(add=T, fill=T, col='grey')
+fields::world(add=T, fill=T, col='grey')
 
 #=======================================================================================#
 ## END

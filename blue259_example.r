@@ -3,48 +3,47 @@ library(HMMoce)
 
 # SETWD
 setwd('~/Documents/WHOI/Data/Blues/2015/141259/') 
+load('blue259_runL.RData')
 
-#----------------------------------------------------------------------------------#
-# ADD MAP DATA
-library(rworldmap)
-data("countriesLow")
-
-#----------------------------------------------------------------------------------#
 # READ IN TAG DATA
 ptt <- 141259
 
-# TAGGING LOCATION
+# TAG/POPUP DATES AND LOCATIONS (dd, mm, YYYY, lat, lon)
 iniloc <- data.frame(matrix(c(13, 10, 2015, 41.3, -69.27, 
                               10, 4, 2016, 40.251, -36.061), nrow = 2, ncol = 5, byrow = T))
 colnames(iniloc) = list('day','month','year','lat','lon')
 tag <- as.POSIXct(paste(iniloc[1,1], '/', iniloc[1,2], '/', iniloc[1,3], sep=''), format = '%d/%m/%Y', tz='UTC')
 pop <- as.POSIXct(paste(iniloc[2,1], '/', iniloc[2,2], '/', iniloc[2,3], sep=''), format = '%d/%m/%Y', tz='UTC')
+
 # VECTOR OF DATES FROM DATA. THIS WILL BE THE TIME STEPS, T, IN THE LIKELIHOODS
 dateVec <- as.Date(seq(tag, pop, by = 'day')) 
 
 # READ IN DATA FROM WC FILES
 #myDir <- '~/Documents/WHOI/RCode/HMMoce/inst/extdata/' # WHERE YOUR DATA LIVES, THIS IS THE EXAMPLE DATA
 myDir <- getwd()
+# sst data
 tag.sst <- read.wc(ptt, wd = myDir, type = 'sst', tag=tag, pop=pop); 
 sst.udates <- tag.sst$udates; tag.sst <- tag.sst$data
 
+# depth-temp profile data
 pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop); 
 pdt.udates <- pdt$udates; pdt <- pdt$data
 
+# light data
 light <- read.wc(ptt, wd = myDir, type = 'light', tag=tag, pop=pop); 
 light.udates <- light$udates; light <- light$data
+
+# OPTIONAL: light data as output from GPE2, different filtering algorithm seems to work better for light likelihood generation
+locs <- read.table('141259-Locations-GPE2.csv', sep = ',', header = T, blank.lines.skip = F)
 
 #----------------------------------------------------------------------------------#
 # FURTHER PREPARATION
 # Set spatial limits and download env data
 #----------------------------------------------------------------------------------#
 
-# SPATIAL LIMITS
+# SET SPATIAL LIMITS, IF DESIRED
 sp.lim <- list(lonmin = -82, lonmax = -25, latmin = 15, latmax = 50)
 
-#**
-## THE LOCS PART BELOW NO LONGER RUNS BC WE DONT USE 'LOCS' FILE
-#**
 if (exists('sp.lim')){
   locs.grid <- setup.locs.grid(sp.lim)
 } else{
@@ -68,7 +67,6 @@ hycom.dir <- paste('~/Documents/WHOI/RData/HYCOM/', ptt, '/',sep = '')
 # LIGHT LIKELIHOOD
 #L.light <- calc.light(light, locs.grid = locs.grid, dateVec = dateVec)
 # OR
-locs <- read.table('141259-Locations-GPE2.csv', sep = ',', header = T, blank.lines.skip = F)
 L.light <- calc.locs(locs, iniloc = iniloc, locs.grid = locs.grid, dateVec = dateVec, errEll = TRUE, gpeOnly = TRUE)
 L.light <- L.light$L.locs
 
@@ -83,17 +81,14 @@ L.ohc <- calc.ohc(pdt, ptt, ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '
 #-------
 # GENERATE DAILY PROFILE LIKELIHOODS
 L.prof <- calc.profile(pdt, ptt, dateVec = dateVec, envType = 'hycom', hycom.dir = hycom.dir)
-
-base::save.image('blue259_runL.RData')
+#L.prof.woa <- calc.profile(pdt, dat = woa, lat = lat, lon = lon, dateVec = dateVec, envType = 'woa')
 
 #----------------------------------------------------------------------------------#
 # SETUP A COMMON GRID
 #----------------------------------------------------------------------------------#
 
-#L.rasters <- list(L.ohc = L.ohc, L.sst = L.sst, L.pdt = L.prof, L.light = L.light)
 L.rasters <- list(L.sst = L.sst, L.light = L.light)
 L.res <- resample.grid(L.rasters, L.rasters$L.sst)
-# total of ~5 mins when resampling to ohc, faster when more coarse is desired
 
 L.mle.res <- L.res$L.mle.res
 g <- L.res$g; lon <- g$lon[1,]; lat <- g$lat[,1]
@@ -114,22 +109,32 @@ L <- make.L(L1 = L.res[[1]]$L.sst,
             L2 = L.res[[1]]$L.light,
             L.mle.res = L.mle.res, dateVec = dateVec,
             locs.grid = locs.grid, iniloc = iniloc)
+
 L.mle <- L$L.mle; L <- L$L
 
 #----------------------------------------------------------------------------------#
 # TRY THE MLE.
 
 # NOT RIGHT NOW
-#t <- Sys.time()
+#t1 <- Sys.time()
 #guess <- c(log(10),log(10),log(0.5),log(0.5),log(0.95/0.05),log(0.95/0.05))
 #fit <- nlm(neg.log.lik.fun, guess, g.mle, L.mle)
-#fit <- mle2(neg.log.lik.fun, start = list(guess),
-#            method='L-BFGS-B', lower=c(0,0,0,0,0,0), upper = c(1000,1000,100,100,1,1),
-#            fixed=NULL, data=NULL, g.mle, L.mle)#, parnames = c('1','2','3','4','5','6'))
-#fit <- mle2(get.nll.fun, start = list(siz1=par0[1], sigma1=par0[2], siz2=par0[3],
-#                                      sigma2=par0[4], p1=par0[5], p2=par0[6]), g.mle, L.mle)
+#t2 <- Sys.time()
 
-#Sys.time() - t
+## **THESE OUTPUT PARAMETERS ARE PIXEL-BASED. DON'T FORGET TO CONVERT FOR USE
+##  WITH THE HIGHER RESOLUTION LIKELIHOOD RESULTS STORED IN L 
+D1 <- exp(fit$estimate[1:2]) # parameters for kernel 1. this is behavior mode transit. log-transformed movement parameters (diffusivities) pertaining
+# to the first behavioural state.
+
+D2 <- exp(fit$estimate[3:4]) # parameters for kernel 2. resident behavior mode. log-transformed movement 
+# parameters (diffusivities) pertaining to the second behavioural state.
+
+p <- 1/(1+exp(-fit$estimate[5:6])) # logit-transformed
+#transition probabilities for switching between the two behavioural states 
+#Probably need to express kernel movement in terms of pixels per time step.
+#The sparse matrix work likely renders this unnecessary, but going back to 
+#gausskern, it is. For example, if we have .25 degree and daily time step,
+#what would the speed of the fish be when moving fast? 4 pixels/day?
 
 #----------------------------------------------------------------------------------#
 # OR... JUST DEFINE THE PARAMETERS
@@ -147,7 +152,8 @@ P <- matrix(c(p[1],1-p[1],1-p[2],p[2]),2,2,byrow=TRUE)
 #----------------------------------------------------------------------------------#
 # RUN THE FILTER STEP
 f = hmm.filter(g.mle, L.mle, K1, K2, P)
-# PLOT IT IF YOU WANT TO SEE LIMITS (CI)
+
+# plot if you want to see confidence limits
 #res = apply(f$phi[1,,,],2:3,sum, na.rm=T)
 #fields::image.plot(lon, lat, res/max(res), zlim = c(.05,1))
 
@@ -155,21 +161,22 @@ f = hmm.filter(g.mle, L.mle, K1, K2, P)
 # RUN THE SMOOTHING STEP
 s = hmm.smoother(f, K1, K2, P)
 
-# PLOT IT IF YOU WANT TO SEE LIMITS (CI)
+# plot if you want to see confidence limits
 #sres = apply(s[1,,,], 2:3, sum, na.rm=T)
 #fields::image.plot(lon, lat, sres/max(sres), zlim = c(.05,1))
 
 #----------------------------------------------------------------------------------#
 # GET THE MOST PROBABLE TRACK
 #----------------------------------------------------------------------------------#
-distr = s
-T <- dim(distr)[2]
-meanlat <- apply(apply(distr, c(2, 4), sum) * repmat(t(as.matrix(g.mle$lat[,1])), T, 1), 1, sum)
-meanlon <- apply(apply(distr, c(2, 3), sum) * repmat(t(as.matrix(g.mle$lon[1,])), T, 1), 1, sum)
-#track <- calc.track(distr, g)
+T <- dim(s)[2]
+meanlat <- apply(apply(s, c(2, 4), sum) * repmat(t(as.matrix(g.mle$lat[,1])), T, 1), 1, sum)
+meanlon <- apply(apply(s, c(2, 3), sum) * repmat(t(as.matrix(g.mle$lon[1,])), T, 1), 1, sum)
+
+#**track <- calc.track(distr, g)**
+
 plot(meanlon,meanlat,type='l')
 world(add=T, fill=T, col='grey')
-lines(meanlon,meanlat,col='blue')
+
 #=======================================================================================#
 ## END
 #=======================================================================================#

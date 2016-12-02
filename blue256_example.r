@@ -13,23 +13,30 @@ iniloc <- data.frame(matrix(c(13, 10, 2015, 41.575, -69.423,
 colnames(iniloc) = list('day','month','year','lat','lon')
 tag <- as.POSIXct(paste(iniloc[1,1], '/', iniloc[1,2], '/', iniloc[1,3], sep=''), format = '%d/%m/%Y', tz='UTC')
 pop <- as.POSIXct(paste(iniloc[2,1], '/', iniloc[2,2], '/', iniloc[2,3], sep=''), format = '%d/%m/%Y', tz='UTC')
+
 # VECTOR OF DATES FROM DATA. THIS WILL BE THE TIME STEPS, T, IN THE LIKELIHOODS
 dateVec <- as.Date(seq(tag, pop, by = 'day')) 
 
 # READ IN DATA FROM WC FILES
 myDir <- '~/Documents/WHOI/RCode/HMMoce/inst/extdata/' # WHERE YOUR DATA LIVES, THIS IS THE EXAMPLE DATA
+# sst data
 tag.sst <- read.wc(ptt, wd = myDir, type = 'sst', tag=tag, pop=pop); 
 sst.udates <- tag.sst$udates; tag.sst <- tag.sst$data
 
+# depth-temp profile data
 pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop); 
 pdt.udates <- pdt$udates; pdt <- pdt$data
 
+# light data
 light <- read.wc(ptt, wd = myDir, type = 'light', tag=tag, pop=pop); 
 light.udates <- light$udates; light <- light$data
 
+# OPTIONAL: light data as output from GPE2, different filtering algorithm seems to work better for light likelihood generation
+locs <- read.table('141259-Locations-GPE2.csv', sep = ',', header = T, blank.lines.skip = F)
+
 #----------------------------------------------------------------------------------#
-# LIGHT LIKELIHOOD
-# Light-based Longitude Likelihood
+# FURTHER PREPARATION
+# Set spatial limits and download env data
 #----------------------------------------------------------------------------------#
 
 # SET SPATIAL LIMITS, IF DESIRED
@@ -43,17 +50,13 @@ if (exists('sp.lim')){
                  latmin = min(locs.grid$lat[,1]), latmax = max(locs.grid$lat[,1]))
 }
 
-# IF USING SST:
+# IF USING SST, DOWNLOAD THE SST DATA BY UNCOMMENTING THE GET.ENV FUNCTION
 sst.dir <- paste('~/Documents/WHOI/RData/SST/OI/', ptt, '/',sep = '')
+#get.env(sst.udates[1], type = 'sst', spatLim = sp.lim, save.dir = sst.dir)
 
-# DOWNLOAD THE SST DATA
-#get.env(sst.udates, type = 'sst', spatLim = sp.lim, save.dir = sst.dir)
-
-# IF USING OHC HYCOM
+# IF USING OHC, DOWNLOAD HYCOM DATA BY UNCOMMENTING THE GET.ENV FUNCTION
 hycom.dir <- paste('~/Documents/WHOI/RData/HYCOM/', ptt, '/',sep = '')
-
-# DOWNLOAD OHC(HYCOM) DATA
-#get.env(pdt.udates, type = 'ohc', spatLim = sp.lim, save.dir = ohc.dir)
+#get.env(pdt.udates, type = 'ohc', spatLim = sp.lim, save.dir = hycom.dir)
 
 #----------------------------------------------------------------------------------#
 # CALC LIKELIHOODS
@@ -62,7 +65,6 @@ hycom.dir <- paste('~/Documents/WHOI/RData/HYCOM/', ptt, '/',sep = '')
 # LIGHT LIKELIHOOD
 #L.light <- calc.light(light, locs.grid = locs.grid, dateVec = dateVec)
 # OR
-locs <- read.table('141256-Locations-GPE2.csv', sep = ',', header = T, blank.lines.skip = F)
 L.light <- calc.locs(locs, iniloc = iniloc, locs.grid = locs.grid, dateVec = dateVec, errEll = TRUE, gpeOnly = TRUE)
 L.light <- L.light$L.locs
 
@@ -77,16 +79,14 @@ L.ohc <- calc.ohc(pdt, ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '')
 #-------
 # GENERATE DAILY PROFILE LIKELIHOODS
 L.prof <- calc.profile(pdt, dateVec = dateVec, envType = 'hycom', hycom.dir = hycom.dir)
-
-base::save.image('blue256_runL.RData')
+#L.prof.woa <- calc.profile(pdt, dat = woa, lat = lat, lon = lon, dateVec = dateVec, envType = 'woa')
 
 #----------------------------------------------------------------------------------#
 # SETUP A COMMON GRID
 #----------------------------------------------------------------------------------#
 
-L.rasters <- list(L.ohc = L.ohc, L.sst = L.sst, L.light = L.light.ell$L.locs)
+L.rasters <- list(L.ohc = L.ohc, L.sst = L.sst, L.light = L.light)
 L.res <- resample.grid(L.rasters, L.rasters$L.sst)
-# total of ~5 mins when resampling to ohc, faster when more coarse is desired
 
 L.mle.res <- L.res$L.mle.res
 g <- L.res$g; lon <- g$lon[1,]; lat <- g$lat[,1]
@@ -107,19 +107,17 @@ L <- make.L(L1 = L.res[[1]]$L.ohc, L2 = L.res[[1]]$L.sst,
             L3 = L.res[[1]]$L.light,
             L.mle.res = L.mle.res, dateVec = dateVec,
             locs.grid = locs.grid, iniloc = iniloc)
-L <- make.L(L1 = L.res[[1]]$L.sst, 
-            L2 = L.res[[1]]$L.light,
-            L.mle.res = L.mle.res, dateVec = dateVec,
-            locs.grid = locs.grid, iniloc = iniloc)
+
 L.mle <- L$L.mle; L <- L$L
 
 #----------------------------------------------------------------------------------#
 # TRY THE MLE.
 
-t <- Sys.time()
-#par0=c(9, 10, 1.152, .0472, 0.707, 0.866) # from Pedersen 2011
-fit <- nlm(get.nll.fun, par0, g.mle, L.mle)
-Sys.time() - t
+# NOT RIGHT NOW
+#t1 <- Sys.time()
+#guess <- c(log(10),log(10),log(0.5),log(0.5),log(0.95/0.05),log(0.95/0.05))
+#fit <- nlm(neg.log.lik.fun, guess, g.mle, L.mle)
+#t2 <- Sys.time()
 
 ## **THESE OUTPUT PARAMETERS ARE PIXEL-BASED. DON'T FORGET TO CONVERT FOR USE
 ##  WITH THE HIGHER RESOLUTION LIKELIHOOD RESULTS STORED IN L 
@@ -138,6 +136,7 @@ p <- 1/(1+exp(-fit$estimate[5:6])) # logit-transformed
 
 #----------------------------------------------------------------------------------#
 # OR... JUST DEFINE THE PARAMETERS
+par0=c(8.908,10.27,1.152,0.0472,0.707,0.866)
 D1 <- par0[1:2] # parameters for kernel 1. this is behavior mode transit
 D2 <- par0[3:4] # parameters for kernel 2. resident behavior mode
 p <- par0[5:6]
@@ -145,13 +144,14 @@ p <- par0[5:6]
 #----------------------------------------------------------------------------------#
 # GENERATE MOVEMENT KERNELS. D VALUES ARE MEAN AND SD PIXELS
 K1 = gausskern(D1[1], D1[2], muadv = 0)
-#K2 = as.cimg(gausskern(D2[1], D2[2], muadv = 0))
 K2 = gausskern(D2[1], D2[2], muadv = 0)
 P <- matrix(c(p[1],1-p[1],1-p[2],p[2]),2,2,byrow=TRUE)
 
 #----------------------------------------------------------------------------------#
 # RUN THE FILTER STEP
 f = hmm.filter(g, L, K1, K2, P)
+
+# plot if you want to see confidence limits
 #res = apply(f$phi[1,,,],2:3,sum, na.rm=T)
 #fields::image.plot(lon, lat, res/max(res), zlim = c(.05,1))
 
@@ -159,29 +159,21 @@ f = hmm.filter(g, L, K1, K2, P)
 # RUN THE SMOOTHING STEP
 s = hmm.smoother(f, K1, K2, P)
 
-# PLOT IT IF YOU WANT TO SEE LIMITS (CI)
+# plot if you want to see confidence limits
 #sres = apply(s[1,,,], 2:3, sum, na.rm=T)
 #fields::image.plot(lon, lat, sres/max(sres), zlim = c(.05,1))
 
 #----------------------------------------------------------------------------------#
 # GET THE MOST PROBABLE TRACK
 #----------------------------------------------------------------------------------#
-distr = s
-T <- dim(distr)[2]
-meanlat <- apply(apply(distr, c(2, 4), sum) * repmat(t(as.matrix(g$lat[,1])), T, 1), 1, sum)
-meanlon <- apply(apply(distr, c(2, 3), sum) * repmat(t(as.matrix(g$lon[1,])), T, 1), 1, sum)
+T <- dim(s)[2]
+meanlat <- apply(apply(s, c(2, 4), sum) * repmat(t(as.matrix(g.mle$lat[,1])), T, 1), 1, sum)
+meanlon <- apply(apply(s, c(2, 3), sum) * repmat(t(as.matrix(g.mle$lon[1,])), T, 1), 1, sum)
 
-# ADD THE DATES AND STORE THIS VERSION OF ESTIMATED TRACK
-#mpt <- cbind(dates = dateVec, lon = meanlon, lat = meanlat)
+#**track <- calc.track(distr, g)**
 
-# PLOT IT!
-#data("countriesLow") # ADD MAP DATA
-#graphics.off()
-plot(meanlon, meanlat,type='l')
-world(add=T)
-
-#plot(countriesLow, add = T)
-
+plot(meanlon,meanlat,type='l')
+world(add=T, fill=T, col='grey')
 
 #=======================================================================================#
 ## END

@@ -3,5 +3,4 @@
 language: R
 sudo: true
 cache: packages
-r_packages: libnetcdf-dev, udunits-bin
 r_binary_packages: rnetcdf

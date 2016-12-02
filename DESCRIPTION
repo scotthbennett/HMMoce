@@ -7,6 +7,9 @@ Authors@R: c(
               person("Camrin", "Braun", email = "camrin.braun@gmail.com", role = c("aut","cre")),
               person("Benjamin", "Galuardi", email = "drdrumfish@gmail.com", role = c("aut"))
               )
+Author: Camrin Braun [aut, cre],
+    Benjamin Galuardi [aut]
+Maintainer: Camrin Braun <camrin.braun@gmail.com>
 Description: Improved analysis of marine animal movement data by implementing 
     a state-space hidden Markov model (HMM) to improve position estimates. 
     Position estimates are derived by comparing electronic tag data (from tags

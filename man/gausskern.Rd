@@ -23,7 +23,10 @@ Gaussian kernel as a 2D matrix of size (siz x siz)
 deviation, and advection
 }
 \examples{
+\dontrun{
 kern = gausskern(3, 0.5)
+}
+
 }
 \author{
 Function originally written for Matlab by Martin W. Pedersen,

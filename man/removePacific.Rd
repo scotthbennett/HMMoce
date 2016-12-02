@@ -24,9 +24,11 @@ the Pacific side of Panama enters into the model bounding box of a North
 Atlantic analysis.
 }
 \examples{
+\dontrun{
 woa.dir <- getwd()
 woa <- extract.woa(woa.dir, bbox = c(-90, -30, -10, 30), 'quarter')
 woa <- removePacific(woa, lat, lon)
 image.plot(woa[,,1,1])
+}
 }
 

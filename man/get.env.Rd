@@ -12,7 +12,7 @@ get.env(uniqueDates, ptt, type = NA, spatLim, save.dir = getwd())
 \item{ptt}{is unique tag identifier}
 
 \item{type}{is a character string indicating whether you're after sea surface
-temperature 'sst' or hybrid coordinate ocean model 'ohc' data}
+temperature 'sst' or hybrid coordinate ocean model 'hycom' data}
 
 \item{spatLim}{is a list of spatial limits as \code{list(xmin, xmax, ymin,
 ymax)}}
@@ -26,9 +26,5 @@ nothing, just downloads the data to your local machine
 \code{get.env} accesses oceanographic data like sea surface temperature from
 a remote server and downloads the temporal and spatial extent of interest for
 further use
-}
-\examples{
-splim <- list(xmin=-60, xmax=-40, ymin=10, ymax=30)
-get.env('2015-01-01', type = 'sst', splim, getwd())
 }
 

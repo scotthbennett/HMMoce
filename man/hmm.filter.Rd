@@ -28,7 +28,4 @@ a list: list(phi = phi, pred = pred, psi = psi) where
 \description{
 HMM filter functions
 }
-\examples{
-P <- matrix(c(p[1], 1-p[1], 1-p[2], p[2]), 2, 2, byrow=TRUE)
-}
 

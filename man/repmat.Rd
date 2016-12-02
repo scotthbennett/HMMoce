@@ -20,9 +20,10 @@ repeated matrix
 Repeat your matrix?
 }
 \examples{
+\dontrun{
 x <- c(1, 2, 3)
 repmat(x)
-
+}
 }
 \references{
 Pedersen MW, Patterson TA, Thygesen UH, Madsen H (2011)

@@ -29,12 +29,12 @@
 #' @return The url used to extract the requested data from the NetCDF subset 
 #'   service.
 #' @examples 
+#' \dontrun{
 #' lon <- c(-90, -60)
 #' lat <- c(0, 30)
 #' time <- as.Date('2013-03-01')
 #' get.hycom(lon, lat, time, type='a', filename = '', vars = 'water_temp')
 #' # only returns url because filename is unspecified
-#' \dontrun{ 
 #' get.hycom(lon, lat, time, type='a', filename = 'my_data.nc', vars = 'water_temp')
 #' nc <- open.nc('my_data.nc')
 #' hycom <- var.get.nc(nc, 'water_temp')
@@ -49,8 +49,6 @@
 
 get.hycom <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
                       filename='', type = 'r', download.file=TRUE, dir = getwd()) {
-  
-  
   
   dir.create(file.path(dir), recursive = TRUE, showWarnings = FALSE)
   setwd(dir)
@@ -112,8 +110,8 @@ get.hycom <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
   ## Add the time domain.
   if(length(time) == 2){
     url = sprintf('%stime_start=%s%%3A00%%3A00Z&time_end=%s%%3A00%%3A00Z&timeStride=1&',
-                  url, strftime(time[1], '%Y-%m-%dT00', start_time),
-                  strftime(time[2], '%Y-%m-%dT00', end_time))
+                  url, strftime(time[1], '%Y-%m-%dT00'),
+                  strftime(time[2], '%Y-%m-%dT00'))
   } else if(length(time) == 1){
     url = sprintf('%stime_start=%s%%3A00%%3A00Z&time_end=%s%%3A00%%3A00Z&timeStride=1&',
                   url, strftime(time[1], '%Y-%m-%dT00'),

@@ -17,8 +17,12 @@
 #' 
 #' @source \url{https://www.nodc.noaa.gov/OC5/woa13/}
 #' 
-#' @examples data(woa.quarter)
+#' @examples 
+#' \dontrun{
+#' data(woa.quarter)
 #' # need to load the 'fields' package
 #' image.plot(woa.quarter$lon, woa.quarter$lat, woa.quarter$watertemp)
+#' }
+
 "woa.quarter"
 

@@ -9,9 +9,11 @@
 #'   120:1281-1290.
 #'   
 #' @examples
+#' \dontrun{
 #' x <- c(1, 2, 3)
 #' repmat(x)
-#' 
+#' }
+
 repmat <- function(X, m, n){
   # function from Pedersen et al 2011
   mx = dim(X)[1]

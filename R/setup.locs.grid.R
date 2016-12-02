@@ -17,10 +17,11 @@
 #'   
 #' @export
 #' @examples
+#' \dontrun{
 #' # SET SPATIAL LIMITS
 #' sp.lim <- list(lonmin = -95, lonmax = -52, latmin = 10, latmax = 55)
 #' locs.grid <- setup.locs.grid(sp.lim, res = 'one')
-#' 
+#' }
 
 setup.locs.grid <- function(limits, res = 'quarter'){
 

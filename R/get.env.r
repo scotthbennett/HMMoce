@@ -7,7 +7,7 @@
 #' @param uniqueDates is a POSIXct vector of desired dates
 #' @param ptt is unique tag identifier
 #' @param type is a character string indicating whether you're after sea surface
-#'   temperature 'sst' or hybrid coordinate ocean model 'ohc' data
+#'   temperature 'sst' or hybrid coordinate ocean model 'hycom' data
 #' @param spatLim is a list of spatial limits as \code{list(xmin, xmax, ymin,
 #'   ymax)}
 #' @param save.dir is the directory to save the downloaded data to
@@ -34,7 +34,7 @@ get.env <- function(uniqueDates, ptt, type = NA, spatLim, save.dir = getwd()){
       }
     }
 
-  } else if(type == 'ohc'){
+  } else if(type == 'hycom'){
     
     for(i in 1:length(uniqueDates)){
       time <- as.Date(uniqueDates[i])

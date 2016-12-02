@@ -15,8 +15,7 @@
 #' }
 #' @export
 #'
-#' @examples
-#' P <- matrix(c(p[1], 1-p[1], 1-p[2], p[2]), 2, 2, byrow=TRUE)
+
 hmm.filter <- function(g, L, K1, K2, P){
   
   ## Filter data to estimate locations and behaviour

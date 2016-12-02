@@ -12,7 +12,7 @@ Description: Improved analysis of marine animal movement data by implementing
     Position estimates are derived by comparing electronic tag data (from tags
     deployed on marine animals, typically fish) to three-dimensional oceanographic
     data.
-License: MIT
+License: MIT + file LICENSE
 Depends:
     R (>= 2.10)
 Imports: 
@@ -21,12 +21,13 @@ Imports:
     maptools,
     lubridate,
     dplyr,
-    fields,
     locfit,
     RNetCDF,
     rworldmap,
     sp
-Suggests: knitr,
+Suggests: 
+    fields,
+    knitr,
     rmarkdown
 RoxygenNote: 5.0.1
 URL: http://www.camrinbraun.com/HMMoce/

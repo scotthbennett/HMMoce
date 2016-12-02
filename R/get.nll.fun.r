@@ -12,12 +12,13 @@
 #'   120:1281-1290. doi: 10.1111/j.1600-0706.2011.19044.x
 #'   
 #' @examples
-#' # NOT RUN
+#' \dontrun{
 #' par0 <- c(log(10), log(10), log(0.5), log(0.5), log(0.95/0.05), log(0.95/0.05))
 #' fit <- nlm(get.nll.fun, par0, g, L, dt)
 #' D1 <- exp(fit$estimate[1:2])
 #' D2 <- exp(fit$estimate[3:4])
-#' p <- 1/(1+exp(-fit$estimate[5:6])) 
+#' p <- 1/(1+exp(-fit$estimate[5:6]))
+#' }
 
 
 get.nll.fun <- function(parvec = c(10, 30, 5, 2, .707, .8), g, L){

@@ -10,10 +10,12 @@
 #' @return dat is WOA data grid with Pacific removed only tested when area of
 #'   interest is N Atlantic
 #' @examples 
+#' \dontrun{
 #' woa.dir <- getwd()
 #' woa <- extract.woa(woa.dir, bbox = c(-90, -30, -10, 30), 'quarter')
 #' woa <- removePacific(woa, lat, lon)
 #' image.plot(woa[,,1,1])
+#' }
 
 removePacific <- function(dat, lat, lon){
 

@@ -17,7 +17,11 @@
 #' 
 #' @source \url{https://www.nodc.noaa.gov/OC5/woa13/}
 #' 
-#' @examples data(woa.one)
+#' @examples 
+#' \dontrun{
+#' data(woa.one)
 #' # need to load the 'fields' package
 #' image.plot(woa.one$lon, woa.one$lat, woa.one$watertemp)
+#' }
+
 "woa.one"

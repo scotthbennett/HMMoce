@@ -10,14 +10,15 @@
 #'   temperature 'sst' or hybrid coordinate ocean model 'hycom' data
 #' @param spatLim is a list of spatial limits as \code{list(xmin, xmax, ymin,
 #'   ymax)}
+#' @param resol is character describing the desired resolution in degrees if type = 'woa', otherwise NULL.
 #' @param save.dir is the directory to save the downloaded data to
 #'   
 #' @return nothing, just downloads the data to your local machine
 #' @export
 
-get.env <- function(uniqueDates, ptt, type = NA, spatLim, save.dir = getwd()){
+get.env <- function(uniqueDates = NULL, ptt = NULL, type = NULL, spatLim = NULL, resol = NULL, save.dir = getwd()){
   
-  if(is.na(type)){
+  if(is.null(type)){
     
     stop('Type of environmental data desired not specified.')
     
@@ -47,6 +48,15 @@ get.env <- function(uniqueDates, ptt, type = NA, spatLim, save.dir = getwd()){
         if(class(err) != 'try-error') break
       }
     }
+    
+  } else if (type == 'woa'){
+    
+    if(is.null(resol)){
+      stop('Error: If type = woa then resol must be specified. See ?get.env for help.')
+    }
+    
+    filename <- get.woa(save.dir = save.dir, resol = resol)
+    print(paste('WOA data downloaded to ', filename,'...', sep=''))
     
   }
   

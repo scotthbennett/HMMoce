@@ -3,10 +3,8 @@
 #' \code{calc.locs} calculates likelihood estimates for each day of animal tag 
 #' data.
 #' 
-#' Light errors are parameterized using elliptical error values output in 
-#' '-Locations.csv' (WC tags). GPS and Argos positions are also given a 
-#' "likelihood" using this function but are currently both considered to be 
-#' "known" positions without error.
+#' GPS and Argos positions are given a "likelihood" using this function but are
+#' currently both considered to be "known" positions without error.
 #' 
 #' @param locs is -Locations file output from DAP/Tag Portal for WC tags and 
 #'   contains GPS, Argos, and GPE locations as applicable.
@@ -15,30 +13,20 @@
 #'   both tag and pop locations
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
 #' @param locs.grid is list output from \code{setup.locs.grid}
-#' @param errEll is logical indicating whether error ellipses should be 
-#'   generated for light-based likelihoods as given from output of WC-GPE. False
-#'   if only longitude should be used. If False, standard deviation on light 
-#'   measurements is currently fixed at 0.7 deg longitude following Musyl et al 
-#'   2001. Default is FALSE and will use longitude only.
-#' @param gpeOnly is logical. If TRUE, locs input is trimmed to GPE positions
-#'   only. This is most applicable in scenarios with FastGPS data and you're
-#'   adding this as a gps input (see "gps" argument).
-#' @export
+#'   
 #' @return L is an array of lon x lat likelihood surfaces (matrices) for each 
 #'   time point (3rd dimension)
+#'   
 
-calc.locs <- function(locs, gps = NULL, iniloc, locs.grid, dateVec, errEll = TRUE, gpeOnly = TRUE){
+calc.locs <- function(locs, gps = NULL, iniloc, locs.grid, dateVec){
   
   print(paste('Starting likelihood calculation...'))
   
-  # get rid of non-GPE locations if gpeOnly == TRUE and check length of resulting locs file
-  if(gpeOnly == TRUE){
-    locs <- locs[which(locs$Type == 'GPE'),]
-    if(length(locs[,1]) < 1){
-      stop('No GPE positions available in input locs file. Make sure you have calculated GPE positions and exported the resulting -Locations.csv file from WC DAP/GPE2 software.')
-    }
-  } else{
-    stop('Error: Currently gpeOnly must be set to TRUE otherwise duplicate dates are handled improperly.')
+  # get rid of GPE locations and check length of resulting locs file
+  
+  locs <- locs[which(locs$Type != 'GPE'),]
+  if(length(locs[,1]) < 1){
+    stop('No non-GPE positions available in input locs file. Make sure you have non-GPE positions in your -Locations.csv file.')
   }
   
   # set some date vectors for our input data
@@ -103,22 +91,6 @@ calc.locs <- function(locs, gps = NULL, iniloc, locs.grid, dateVec, errEll = TRU
         alo <- which.min(abs(locs.grid$lon[1,] - locs$Longitude[idx]))
         ala <- which.min(abs(locs.grid$lat[,1] - locs$Latitude[idx]))
         L.locs[alo, ala, t] <- 1
-        
-      } else if(locs$Type[idx] == 'GPE'){ #locs includes GPE
-        
-        if(errEll == FALSE){
-          # create longitude likelihood based on GPE data
-          slon.sd <- locs$Error.Semi.minor.axis[idx] / 1000 / 111 #semi minor axis
-          # use normally distributed error from position using fixed std dev
-          L.light <- stats::dnorm(t(locs.grid$lon), locs$Longitude[idx], slon.sd)
-          
-          L.locs[,,t] <- L.light
-          
-        } else if(errEll == TRUE){
-          
-          L.locs[,,t] <- calc.errEll(locs[idx,], locs.grid)
-          
-        }
         
       } else{
         

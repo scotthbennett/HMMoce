@@ -7,7 +7,7 @@
 #' @param uniqueDates is a POSIXct vector of desired dates
 #' @param ptt is unique tag identifier
 #' @param type is a character string indicating whether you're after sea surface
-#'   temperature 'sst' or hybrid coordinate ocean model 'hycom' data
+#'   temperature 'sst', hybrid coordinate ocean model 'hycom', or world ocean atlas 'woa' data
 #' @param spatLim is a list of spatial limits as \code{list(xmin, xmax, ymin,
 #'   ymax)}
 #' @param resol is character describing the desired resolution in degrees if type = 'woa', otherwise NULL.

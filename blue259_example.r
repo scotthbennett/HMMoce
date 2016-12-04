@@ -34,7 +34,7 @@ light <- read.wc(ptt, wd = myDir, type = 'light', tag=tag, pop=pop);
 light.udates <- light$udates; light <- light$data
 
 # OPTIONAL: light data as output from GPE2, different filtering algorithm seems to work better for light likelihood generation
-locs <- read.table('141259-Locations-GPE2.csv', sep = ',', header = T, blank.lines.skip = F)
+locs <- read.table(paste(ptt, '-Locations-GPE2.csv', sep = ''), sep = ',', header = T, blank.lines.skip = F)
 
 #----------------------------------------------------------------------------------#
 # FURTHER PREPARATION

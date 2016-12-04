@@ -1,6 +1,6 @@
 #' Calculate Position-based Likelihood
 #' 
-#' \code{calc.locs} calculates likelihood estimates for each day's estimated dawn dusk times from the tag
+#' \code{calc.srss} calculates likelihood estimates for each day's estimated dawn dusk times from the tag
 #' 
 #' Tag-measured sunrise/sunset (SRSS) times are first filtered according to the min/max times possible. possible values are computed based on spatial limits included in locs.grid input. after filtering, each yearday has a grid of georeferenced SRSS times that the tag-measured times are compared to in order to generate a likelihood.
 #' 
@@ -13,7 +13,7 @@
 #' @return L is a raster of dim(lon x lat x dateVec) containing likelihood surfaces for each
 #'   time point
 
-calc.light <- function(light = NULL, locs.grid, dateVec, res = 1){
+calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1){
   options(warn=2)
   start.t <- Sys.time()
   

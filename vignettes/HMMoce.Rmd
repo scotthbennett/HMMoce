@@ -223,11 +223,11 @@ We also need the probability of switching (or remaining in) each of our states. 
 
 ```{r, eval=F}
 # MAKE A GUESS AT STATE SWITCHING PROBABILITY
-p <- c(0.7, 0.8)
+# probability of staying in state 1 and 2, respectively
+p.init <- c(0.7, 0.8)
 
 # RUN EXPECTATION-MAXIMIZATION ROUTINE FOR MATRIX, P (STATE SWITCH PROBABILITY)
-P.init <- matrix(c(p[1],1-p[1],1-p[2],p[2]),2,2,byrow=TRUE)
-P.final <- expmax(P.init, g = g, L = L, K1, K2)
+P.final <- expmax(p.init, g = g, L = L, K1, K2)
 
 ```
 Now that we have our movement kernels and our switching probabilities figured out, it's time for the HMM.
@@ -379,11 +379,11 @@ K1 <- gausskern(D1[1], D1[2], muadv = 0)
 K2 <- gausskern(D2[1], D2[2], muadv = 0)
 
 # MAKE A GUESS AT STATE SWITCHING PROBABILITY
-p <- c(0.7, 0.8)
+# probability of staying in state 1 and 2, respectively
+p.init <- c(0.7, 0.8)
 
 # RUN EXPECTATION-MAXIMIZATION ROUTINE FOR MATRIX, P (STATE SWITCH PROBABILITY)
-P.init <- matrix(c(p[1],1-p[1],1-p[2],p[2]),2,2,byrow=TRUE)
-P.final <- expmax(P.init, g = g, L = L, K1, K2)
+P.final <- expmax(p.init, g = g, L = L, K1, K2)
 
 #----------------------------------------------------------------------------------#
 # RUN THE FILTER STEP

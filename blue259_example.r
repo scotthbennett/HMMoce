@@ -52,25 +52,30 @@ if (exists('sp.lim')){
                  latmin = min(locs.grid$lat[,1]), latmax = max(locs.grid$lat[,1]))
 }
 
-# IF USING SST, DOWNLOAD THE SST DATA BY UNCOMMENTING THE GET.ENV FUNCTION
-sst.dir <- paste('~/Documents/WHOI/RData/SST/OI/', ptt, '/',sep = '')
-#get.env(sst.udates[1], type = 'sst', spatLim = sp.lim, save.dir = sst.dir)
+# IF YOU NEED TO DOWNLOAD SST DATA
+sst.dir <- paste('my_sst_dir')
+get.env(sst.udates, type = 'sst', spatLim = sp.lim, save.dir = sst.dir)
 
-# IF USING OHC, DOWNLOAD HYCOM DATA BY UNCOMMENTING THE GET.ENV FUNCTION
-hycom.dir <- paste('~/Documents/WHOI/RData/HYCOM/', ptt, '/',sep = '')
-#get.env(pdt.udates, type = 'ohc', spatLim = sp.lim, save.dir = hycom.dir)
+# HYCOM DATA
+hycom.dir <- paste('my_hycom_dir')
+get.env(pdt.udates, type = 'hycom', spatLim = sp.lim, save.dir = hycom.dir)
+
+# AND/OR WOA DATA
+woa.dir <- paste('my_woa_dir')
+get.env(type = 'woa', resol = 'quarter')
 
 #----------------------------------------------------------------------------------#
 # CALC LIKELIHOODS
 #----------------------------------------------------------------------------------#
 
-# LIGHT LIKELIHOOD
-#L.light <- calc.light(light, locs.grid = locs.grid, dateVec = dateVec)
+# GENERATE LIGHT LIKELIHOOD
+# SRSS METHOD
+L.light <- calc.srss(light, locs.grid = locs.grid, dateVec = dateVec)
 # OR
-L.light <- calc.locs(locs, iniloc = iniloc, locs.grid = locs.grid, dateVec = dateVec, errEll = TRUE, gpeOnly = TRUE)
-L.light <- L.light$L.locs
+# GPE2 METHOD
+L.light <- calc.gpe2(locs, iniloc = iniloc, locs.grid = locs.grid, dateVec = dateVec, errEll = TRUE, gpeOnly = TRUE)
 
-#-------
+
 # GENERATE DAILY SST LIKELIHOODS
 L.sst <- calc.sst(tag.sst, sst.dir = sst.dir, dateVec = dateVec)
 
@@ -86,10 +91,12 @@ L.prof <- calc.profile(pdt, ptt, dateVec = dateVec, envType = 'hycom', hycom.dir
 #----------------------------------------------------------------------------------#
 # SETUP A COMMON GRID
 #----------------------------------------------------------------------------------#
-
+# create a list of all the desired input likelihood rasters
 L.rasters <- list(L.sst = L.sst, L.light = L.light)
+# L.sst is the resolution/extent we're sampling everything TO
 L.res <- resample.grid(L.rasters, L.rasters$L.sst)
 
+# pull some other helpful variables from the resample.grid() output for later use
 L.mle.res <- L.res$L.mle.res
 g <- L.res$g; lon <- g$lon[1,]; lat <- g$lat[,1]
 g.mle <- L.res$g.mle
@@ -104,7 +111,7 @@ g.mle <- L.res$g.mle
 #----------------------------------------------------------------------------------#
 # COMBINE LIKELIHOOD MATRICES
 #----------------------------------------------------------------------------------#
-
+# this example just uses L.sst and L.light. You can list up to three (L1, L2, L3 inputs).
 L <- make.L(L1 = L.res[[1]]$L.sst,
             L2 = L.res[[1]]$L.light,
             L.mle.res = L.mle.res, dateVec = dateVec,
@@ -113,45 +120,24 @@ L <- make.L(L1 = L.res[[1]]$L.sst,
 L.mle <- L$L.mle; L <- L$L
 
 #----------------------------------------------------------------------------------#
-# TRY THE MLE.
-
-# NOT RIGHT NOW
-#t1 <- Sys.time()
-#guess <- c(log(10),log(10),log(0.5),log(0.5),log(0.95/0.05),log(0.95/0.05))
-#fit <- nlm(neg.log.lik.fun, guess, g.mle, L.mle)
-#t2 <- Sys.time()
-
-## **THESE OUTPUT PARAMETERS ARE PIXEL-BASED. DON'T FORGET TO CONVERT FOR USE
-##  WITH THE HIGHER RESOLUTION LIKELIHOOD RESULTS STORED IN L 
-#D1 <- exp(fit$estimate[1:2]) # parameters for kernel 1. this is behavior mode transit. log-transformed movement parameters (diffusivities) pertaining
-# to the first behavioural state.
-
-#D2 <- exp(fit$estimate[3:4]) # parameters for kernel 2. resident behavior mode. log-transformed movement 
-# parameters (diffusivities) pertaining to the second behavioural state.
-
-#p <- 1/(1+exp(-fit$estimate[5:6])) # logit-transformed
-#transition probabilities for switching between the two behavioural states 
-#Probably need to express kernel movement in terms of pixels per time step.
-#The sparse matrix work likely renders this unnecessary, but going back to 
-#gausskern, it is. For example, if we have .25 degree and daily time step,
-#what would the speed of the fish be when moving fast? 4 pixels/day?
-
+# FIGURE OUT MOVEMENT PARAMETERS
 #----------------------------------------------------------------------------------#
-# OR... JUST DEFINE THE PARAMETERS
-par0=c(8.908,10.27,1.152,0.0472,0.707,0.866)
-D1 <- par0[1:2] # parameters for kernel 1. this is behavior mode transit
+
+# PROVIDE FIXED KERNEL PARAMETERS
+par0 <- c(8.908,10.27,1.152,0.0472)
+D1 <- par0[1:2] # parameters for kernel 1. this is migratory behavior mode
 D2 <- par0[3:4] # parameters for kernel 2. resident behavior mode
-p <- par0[5:6]
 
-#----------------------------------------------------------------------------------#
 # GENERATE MOVEMENT KERNELS. D VALUES ARE MEAN AND SD PIXELS
-K1 = gausskern(D1[1], D1[2], muadv = 0)
-K2 = gausskern(D2[1], D2[2], muadv = 0)
+K1 <- gausskern(D1[1], D1[2], muadv = 0)
+K2 <- gausskern(D2[1], D2[2], muadv = 0)
 
-#----------------------------------------------------------------------------------#
+# MAKE A GUESS AT STATE SWITCHING PROBABILITY
+p <- c(0.7, 0.8)
+
 # RUN EXPECTATION-MAXIMIZATION ROUTINE FOR MATRIX, P (STATE SWITCH PROBABILITY)
 P.init <- matrix(c(p[1],1-p[1],1-p[2],p[2]),2,2,byrow=TRUE)
-P.final <- expmax(P.init, g = g.mle, L = L.mle, K1, K2)
+P.final <- expmax(P.init, g = g, L = L, K1, K2)
 
 #----------------------------------------------------------------------------------#
 # RUN THE FILTER STEP

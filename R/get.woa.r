@@ -19,7 +19,7 @@ get.woa <- function(save.dir = getwd(), resol = 'one'){
   }
 
   ## Download the data
-  download.file(url, filename, method = 'auto')
+  utils::download.file(url, filename, method = 'auto')
   
   return(filename)
   

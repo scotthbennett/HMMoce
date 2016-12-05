@@ -1,13 +1,10 @@
 #' Expectation-maximization framework for state-switching
 #' 
-#' @param P.init 2x2 probability matrix for transitions between states (K1 and 
-#'   K2). P.init[1,1] is probability of staying in behavior state 1 if currently
-#'   in state 1. P.init[1,2] is probability of switching to state 2 if currently
-#'   in state 1. Continue this logic for P.init[2,].
-#' @param g grid from \code{\link{setup.grid}}
+#' @param p.init
+#' @param g grid from \code{setup.grid}
 #' @param L final likelihood (2D)
-#' @param K1 first movement (diffusion) kernel see \code{\link{gausskern}}
-#' @param K2 second movement (diffusion) kernel see \code{\link{gausskern}}
+#' @param K1 first movement (diffusion) kernel see \code{gausskern}
+#' @param K2 second movement (diffusion) kernel see \code{gausskern}
 #' @param niter is integer that determines number of iterations to perform
 #' @param threshold is threshold of percent change that we consider satisfactory
 #'   for convergence. Default is 1%.
@@ -15,10 +12,6 @@
 #' @return a 2x2 matrix of state switching probabilities. See P.init input for 
 #'   more information.
 #' @export
-#' @references Woillez M, Fablet R, Ngo TT, et al. (2016) A HMM-based model to
-#'   geolocate pelagic fish from high-resolution individual temperature and
-#'   depth histories: European sea bass as a case study. Ecol Modell 321:10-22.
-#'   
 
 expmax <- function(p.init, g, L, K1, K2, niter = 1000, threshold = .01){
   

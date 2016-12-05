@@ -207,6 +207,8 @@ Once you've made it this far, the observation model component is complete! The o
 ### Parameter Estimation
 We now need an idea of how our tagged animal would theoretically move assuming purely diffusive (Brownian) motion. Because we are assuming 2 behavior states, we need to parameterize diffusive movement for each of those states. Let's assume state 1 is a migratory movement and state 2 is resident behavior. We provide fixed characteristics of diffusion using kernels.
 
+WE NEED TO FIGURE OUT AN EASY WAY FOR USERS TO FIX THEIR OWN PARAMETERS.
+
 ```{r, eval=F}
 # PROVIDE FIXED KERNEL PARAMETERS
 par0 <- c(8.908,10.27,1.152,0.0472)
@@ -233,17 +235,32 @@ P.final <- expmax(p.init, g = g, L = L, K1, K2)
 Now that we have our movement kernels and our switching probabilities figured out, it's time for the HMM.
 
 ### The HMM
+First, a filtering routine provides the probability distribution of the unknown states (location and behavior) forward in time conditional on data (the observation model). These state estimates are calculated successively by alternating between so-called time and data updates of the current state. Following filtering, the recursions of the HMM smoothing step work backwards in time using the filtered state estimates and all available data to determine the smoothed state estimates. The smoothed state estimates are equivalent to the posterior distribution of the state (at each time) which can be used for calculating the most probable track, utilization distributions and behavior metrics.
 
-filter
+```{r, eval=F}
+#----------------------------------------------------------------------------------#
+# RUN THE FILTER STEP
+f <- hmm.filter(g, L, K1, K2, P.final)
 
-smoother
+#----------------------------------------------------------------------------------#
+# RUN THE SMOOTHING STEP
+s = hmm.smoother(f, K1, K2, P.final)
 
+```
 
 ### Most Probable Track and Plotting
+There are a number of ways we can use the posterior distribution of the state to estimate animal movements. The two most simple methods are to calculate the mean or mode value (lat/lon) across the distributions at each time. These are performed using `calc.track`. Finally, use `plot.hmm` for visualizing the final track and state estimates.
 
-calc.track
+```{r, eval = F}
+#----------------------------------------------------------------------------------#
+# GET AND PLOT THE MOST PROBABLE TRACK
+#----------------------------------------------------------------------------------#
 
-some plotting functionality
+tr <- calc.track(s, g, dateVec)
+
+plot.hmm(s, tr, dateVec, save.plot = TRUE)
+
+```
 
 ## A Full Example Script
 
@@ -402,16 +419,12 @@ s = hmm.smoother(f, K1, K2, P.final)
 #fields::image.plot(lon, lat, sres/max(sres), zlim = c(.05,1))
 
 #----------------------------------------------------------------------------------#
-# GET THE MOST PROBABLE TRACK
+# GET AND PLOT THE MOST PROBABLE TRACK
 #----------------------------------------------------------------------------------#
-T <- dim(s)[2]
-meanlat <- apply(apply(s, c(2, 4), sum) * repmat(t(as.matrix(g$lat[,1])), T, 1), 1, sum)
-meanlon <- apply(apply(s, c(2, 3), sum) * repmat(t(as.matrix(g$lon[1,])), T, 1), 1, sum)
 
-#**track <- calc.track(distr, g)**
+tr <- calc.track(s, g, dateVec)
 
-plot(meanlon,meanlat,type='l')
-fields::world(add=T, fill=T, col='grey')
+plot.hmm(s, tr, dateVec, save.plot = TRUE)
 
 #=======================================================================================#
 # END

@@ -4,8 +4,7 @@
 \alias{calc.locs}
 \title{Calculate Position-based Likelihood}
 \usage{
-calc.locs(locs, gps = NULL, iniloc, locs.grid, dateVec, errEll = TRUE,
-  gpeOnly = TRUE)
+calc.locs(locs, gps = NULL, iniloc, locs.grid, dateVec)
 }
 \arguments{
 \item{locs}{is -Locations file output from DAP/Tag Portal for WC tags and 
@@ -19,16 +18,6 @@ both tag and pop locations}
 \item{locs.grid}{is list output from \code{setup.locs.grid}}
 
 \item{dateVec}{is vector of dates from tag to pop-up in 1 day increments.}
-
-\item{errEll}{is logical indicating whether error ellipses should be 
-generated for light-based likelihoods as given from output of WC-GPE. False
-if only longitude should be used. If False, standard deviation on light 
-measurements is currently fixed at 0.7 deg longitude following Musyl et al 
-2001. Default is FALSE and will use longitude only.}
-
-\item{gpeOnly}{is logical. If TRUE, locs input is trimmed to GPE positions
-only. This is most applicable in scenarios with FastGPS data and you're
-adding this as a gps input (see "gps" argument).}
 }
 \value{
 L is an array of lon x lat likelihood surfaces (matrices) for each 
@@ -39,9 +28,7 @@ L is an array of lon x lat likelihood surfaces (matrices) for each
 data.
 }
 \details{
-Light errors are parameterized using elliptical error values output in 
-'-Locations.csv' (WC tags). GPS and Argos positions are also given a 
-"likelihood" using this function but are currently both considered to be 
-"known" positions without error.
+GPS and Argos positions are given a "likelihood" using this function but are
+currently both considered to be "known" positions without error.
 }
 

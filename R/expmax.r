@@ -1,16 +1,20 @@
 #' Expectation-maximization framework for state-switching
 #' 
-#' @param P.init 2x2 probability matrix for transitions between states (K1 and 
-#'   K2). P.init[1,1] is probability of staying in behavior state 1 if currently
-#'   in state 1. P.init[1,2] is probability of switching to state 2 if currently
-#'   in state 1. Continue this logic for P.init[2,].
+#' \code{expmax} performs expectation-maximization for state switching 
+#' probability
+#' 
+#' Light errors are parameterized using elliptical error values output in.
+#' 
+#' @param p.init a vector of length 2. The first is the probability of staying 
+#'   in behavior state 1 if currently in state 1 and the second for staying in 
+#'   state 2.
 #' @param g grid from \code{\link{setup.grid}}
-#' @param L final likelihood (2D)
+#' @param L final likelihood
 #' @param K1 first movement (diffusion) kernel see \code{\link{gausskern}}
 #' @param K2 second movement (diffusion) kernel see \code{\link{gausskern}}
 #' @param niter is integer that determines number of iterations to perform
 #' @param threshold is threshold of percent change that we consider satisfactory
-#'   for convergence. Default is 1%.
+#'   for convergence. Default is 1\%.
 #'   
 #' @return a 2x2 matrix of state switching probabilities. See P.init input for 
 #'   more information.
@@ -18,7 +22,6 @@
 #' @references Woillez M, Fablet R, Ngo TT, et al. (2016) A HMM-based model to
 #'   geolocate pelagic fish from high-resolution individual temperature and
 #'   depth histories: European sea bass as a case study. Ecol Modell 321:10-22.
-#'   
 
 expmax <- function(p.init, g, L, K1, K2, niter = 1000, threshold = .01){
   
@@ -26,6 +29,8 @@ expmax <- function(p.init, g, L, K1, K2, niter = 1000, threshold = .01){
   options(warn = -1)
   
   print(paste('Starting EM for state switching...'))
+  
+  p.init <- matrix(c(p.init[1], 1 - p.init[1], 1 - p.init[2], p.init[2]), 2, 2, byrow = TRUE)
   
   if (niter < 25){
     stop('Maximum number of iterations (niter) must be > 25.')

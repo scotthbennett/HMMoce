@@ -4,7 +4,8 @@
 \alias{get.env}
 \title{Download and Read Oceanographic Data}
 \usage{
-get.env(uniqueDates, ptt, type = NA, spatLim, save.dir = getwd())
+get.env(uniqueDates = NULL, ptt = NULL, type = NULL, spatLim = NULL,
+  resol = NULL, save.dir = getwd())
 }
 \arguments{
 \item{uniqueDates}{is a POSIXct vector of desired dates}
@@ -12,10 +13,12 @@ get.env(uniqueDates, ptt, type = NA, spatLim, save.dir = getwd())
 \item{ptt}{is unique tag identifier}
 
 \item{type}{is a character string indicating whether you're after sea surface
-temperature 'sst' or hybrid coordinate ocean model 'hycom' data}
+temperature 'sst', hybrid coordinate ocean model 'hycom', or world ocean atlas 'woa' data}
 
 \item{spatLim}{is a list of spatial limits as \code{list(xmin, xmax, ymin,
 ymax)}}
+
+\item{resol}{is character describing the desired resolution in degrees if type = 'woa', otherwise NULL.}
 
 \item{save.dir}{is the directory to save the downloaded data to}
 }

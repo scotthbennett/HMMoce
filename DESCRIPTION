@@ -2,7 +2,7 @@ Package: HMMoce
 Type: Package
 Title: Improved Analysis of Marine Animal Movement Data Using Hidden Markov Models
 Version: 0.0.0.9000
-Date: 2016-12-01
+Date: 2016-12-06
 Authors@R: c(
               person("Camrin", "Braun", email = "camrin.braun@gmail.com", role = c("aut","cre")),
               person("Benjamin", "Galuardi", email = "drdrumfish@gmail.com", role = c("aut"))
@@ -19,12 +19,12 @@ License: MIT + file LICENSE
 Depends:
     R (>= 2.10)
 Imports: 
-    raster,
-    imager,
-    maptools,
-    lubridate,
     dplyr,
+    imager,
     locfit,
+    lubridate,
+    maptools,
+    raster,
     RNetCDF,
     rworldmap,
     sp,
@@ -34,7 +34,8 @@ Imports:
 Suggests: 
     fields,
     knitr,
-    rmarkdown
+    rmarkdown,
+    rworldmap
 RoxygenNote: 5.0.1
 URL: http://www.camrinbraun.com/HMMoce/
 BugReports: https://github.com/camrinbraun/HMMoce/issues

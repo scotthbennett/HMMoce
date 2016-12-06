@@ -15,12 +15,14 @@
 #'
 #' @examples
 #' # load workspace
-#' load('~/DATA/blue259_forParallel.RData')
+#' \dontrun{
+#' load('~/DATA/blue259.RData')
 
 #' # define ohc.dir
 #' ohc.dir = '~/hycom/'
 #' # run in parallel
 #' res = calc.ohc.par(pdt, ptt, isotherm = '', ohc.dir = ohc.dir, dateVec = dateVec, bathy = T)
+#' }
 
 
 calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE, ncores = detectCores()){

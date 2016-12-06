@@ -13,6 +13,8 @@
 #' @param save.plot is logical indicating whether you want the plot written to disk using \code{pdf}.
 #' 
 #' @return NULL. A plot is rendered on screen or written to disk.
+#' @import grDevices
+#' @import graphics
 #' @export
 
 plot.hmm <- function(distr, track, dateVec, known = NULL, resid = FALSE, save.plot = FALSE){
@@ -64,18 +66,18 @@ plot.hmm <- function(distr, track, dateVec, known = NULL, resid = FALSE, save.pl
     dev.new()
     par(mfrow = c(2,2))
     ssterr <- sst - lsst$sst
-    sdsst <- sqrt(var(ssterr))
+    sdsst <- sqrt(stats::var(ssterr))
     ssterr <- ssterr / sdsst
     lonerr <- sphmm$meanlon - lsst$lon
-    sdlon <- sqrt(var(lonerr))
+    sdlon <- sqrt(stats::var(lonerr))
     lonerr <- lonerr / sdlon
     plot(track$date[ind], ssterr, xlab = 'Date', ylab = 'SST residual', main = 'Residuals through time', ylim = c(-3,3), pch = ".", cex = 3)
     abline(h = c(-2,0,2), col = 'grey', lwd = 2, lty = 2)
-    qqnorm(ssterr, main = 'QQ-plot of residuals', pch = ".", cex = 2)
+    stats::qqnorm(ssterr, main = 'QQ-plot of residuals', pch = ".", cex = 2)
     abline(a = 0, b = 1, col = 'grey', lwd = 2)
     plot(track$date[ind], lonerr, xlab = 'Date', ylab = 'Longitude residual', ylim = c(-3,3), pch = ".", cex = 3)
     abline(h = c(-2,0,2), col = 'grey', lwd = 2, lty = 2)
-    qqnorm(lonerr, main = '', pch = ".", cex = 2)
+    stats::qqnorm(lonerr, main = '', pch = ".", cex = 2)
     abline(a = 0, b = 1, col = 'grey', lwd = 2)
   }
   #if(save.plot) dev.off()

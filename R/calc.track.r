@@ -6,7 +6,7 @@
 #' @param distr is output array from \code{hmm.smoother}
 #' @param g is one of the outputs from \code{resample.grid} which denotes what 
 #'   spatial scale and grid you're working on
-#' @param dateVec
+#' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
 #' @param method is character indicating what method to use for track 
 #'   calculation. Currently only 'mean' is supported.
 #'   

@@ -2,7 +2,7 @@
 #' 
 #' Calculate Depth-temperature profile based likelihood
 #' 
-#' \code{calc.profile.par} calculates likelihood of animal position based on 
+#' \code{calc.woa.par} calculates likelihood of animal position based on 
 #' summarized depth-temperature profiles
 #' 
 #' Tag-based depth-temperature profile summaries are compared to climatological 
@@ -39,7 +39,7 @@
 #' }
 #'
 
-calc.profile.par <- function(pdt, ptt, dat = NULL, lat = NULL, lon = NULL, dateVec, ncores = detectCores()){
+calc.woa.par <- function(pdt, ptt, dat = NULL, lat = NULL, lon = NULL, dateVec, ncores = detectCores()){
   
   options(warn=-1)
   start.t <- Sys.time()

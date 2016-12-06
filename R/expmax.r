@@ -22,6 +22,20 @@
 #' @references Woillez M, Fablet R, Ngo TT, et al. (2016) A HMM-based model to
 #'   geolocate pelagic fish from high-resolution individual temperature and
 #'   depth histories: European sea bass as a case study. Ecol Modell 321:10-22.
+#' @examples 
+#' \dontrun{
+#' 
+#' # GENERATE MOVEMENT KERNELS. D VALUES ARE MEAN AND SD PIXELS
+#' K1 <- gausskern(D1[1], D1[2], muadv = 0)
+#' K2 <- gausskern(D2[1], D2[2], muadv = 0)
+#' 
+#' # MAKE A GUESS AT STATE SWITCHING PROBABILITY
+#' # probability of staying in state 1 and 2, respectively
+#' p.init <- c(0.7, 0.8)
+#' # RUN EXPECTATION-MAXIMIZATION ROUTINE FOR MATRIX, P (STATE SWITCH PROBABILITY)
+#' P.final <- expmax(p.init, g = g, L = L, K1, K2)
+#' 
+#' }
 
 expmax <- function(p.init, g, L, K1, K2, niter = 1000, threshold = .01){
   

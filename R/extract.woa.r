@@ -15,6 +15,16 @@
 #'   by default and levels are defined in variable 'depth' contained here. time 
 #'   is monthly and spans the entire year. LON/LAT are vectors of lon/lat bounds
 #' @export
+#' @examples 
+#' \dontrun{
+#' # download WOA data from GitHub
+#' woa.dir <- paste('my_woa_dir')
+#' get.env(type = 'woa', resol = 'quarter')
+#' 
+#' # extract desired data
+#' woa <- extract.woa(woa.dir, bbox, 'quarter')
+#' 
+#' }
 #' 
 
 extract.woa <- function(nc.dir, bbox=NULL, resolution){

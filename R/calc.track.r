@@ -12,6 +12,16 @@
 #'   
 #' @return calculated track
 #' @export
+#' @examples 
+#' \dontrun{
+#' 
+#' # RUN THE SMOOTHING STEP
+#' s = hmm.smoother(f, K1, K2, P.final)
+#' 
+#' # GET AND PLOT THE MOST PROBABLE TRACK
+#' tr <- calc.track(s, g, dateVec)
+#' 
+#' }
 #' 
 
 calc.track <- function(distr, g, dateVec, method = 'mean'){

@@ -23,8 +23,8 @@ if only longitude should be used. If False, standard deviation on light
 measurements is currently fixed at 0.7 deg longitude following Musyl et al 
 2001. Default is FALSE and will use longitude only.}
 
-\item{gpeOnly}{is logical. If TRUE, locs input is trimmed to GPE positions
-only. This is most applicable in scenarios with FastGPS data and you're
+\item{gpeOnly}{is logical. If TRUE, locs input is trimmed to GPE positions 
+only. This is most applicable in scenarios with FastGPS data and you're 
 adding this as a gps input (see "gps" argument).}
 }
 \value{
@@ -38,5 +38,15 @@ data.
 \details{
 Light errors are parameterized using elliptical error values output in 
 '-Locations.csv' (WC tags).
+}
+\examples{
+\dontrun{
+# light data as output from GPE2, different filtering algorithm seems to work
+# better for light likelihood generation
+locs <- read.table(paste(ptt, '-Locations-GPE2.csv', sep = ''), sep = ',', 
+                   header = T, blank.lines.skip = F)
+L.light <- calc.gpe2(locs, iniloc = iniloc, locs.grid = locs.grid,
+                     dateVec = dateVec, errEll = TRUE, gpeOnly = TRUE)
+}
 }
 

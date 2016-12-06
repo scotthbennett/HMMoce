@@ -17,6 +17,16 @@
 #'   HYCOM
 #'   
 #' @export
+#' @seealso \code{\link{calc.profile}}
+#' @examples
+#' \dontrun{
+#' # depth-temp profile data
+#' pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop); 
+#' pdt.udates <- pdt$udates; pdt <- pdt$data
+#' # GENERATE DAILY OCEAN HEAT CONTENT (OHC) LIKELIHOODS
+#' L.ohc <- calc.ohc(pdt, ptt, ohc.dir = hycom.dir, dateVec = dateVec,
+#'                   isotherm = '')
+#' }
 
 calc.ohc <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE){
 

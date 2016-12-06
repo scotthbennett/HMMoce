@@ -24,8 +24,22 @@
 #' @param hycom.dir is path to stored HYCOM model outputs if envType = 'hycom'
 #' @export
 #' @return raster of likelihoods for depth-temp profile matching between tag
-#'   data and oceanographic profiles
-#'   
+#'  data and oceanographic profiles
+#' @seealso \code{\link{calc.ohc}}
+#' @examples 
+#' \dontrun{
+#' # depth-temp profile data
+#' pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop); 
+#' pdt.udates <- pdt$udates; pdt <- pdt$data
+#' 
+#' # GENERATE DAILY PROFILE LIKELIHOODS
+#' L.prof <- calc.profile(pdt, ptt, dateVec = dateVec, envType = 'hycom',
+#'                        hycom.dir = hycom.dir)
+#' # OR FOR WOA DATA:
+#' L.prof.woa <- calc.profile(pdt, dat = woa, lat = lat, lon = lon,
+#'                            dateVec = dateVec, envType = 'woa')
+#' }
+#'
 
 calc.profile <- function(pdt, ptt, dat = NULL, lat = NULL, lon = NULL, dateVec, envType = 'woa', hycom.dir = NULL){
   

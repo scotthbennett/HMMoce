@@ -29,7 +29,7 @@ to World Ocean Atlas ('woa') or HYCOM ('hycom').}
 }
 \value{
 raster of likelihoods for depth-temp profile matching between tag
-  data and oceanographic profiles
+ data and oceanographic profiles
 }
 \description{
 \code{calc.profile} calculates likelihood of animal position based on 
@@ -43,5 +43,20 @@ attempts to estimate animal position based on the water mass it is in,
 particularly if extensive diving performs thorough sampling of the
 environment. However, remember the in situ data is being compared to
 climatological means or the results of an oceanographic model.
+}
+\examples{
+\dontrun{
+# depth-temp profile data
+pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop); 
+pdt.udates <- pdt$udates; pdt <- pdt$data
+
+# GENERATE DAILY PROFILE LIKELIHOODS
+L.prof <- calc.profile(pdt, ptt, dateVec = dateVec, envType = 'hycom',
+                       hycom.dir = hycom.dir)
+# OR FOR WOA DATA:
+L.prof.woa <- calc.profile(pdt, dat = woa, lat = lat, lon = lon,
+                           dateVec = dateVec, envType = 'woa')
+}
+
 }
 

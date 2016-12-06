@@ -27,7 +27,10 @@ Imports:
     locfit,
     RNetCDF,
     rworldmap,
-    sp
+    sp,
+    parallel,
+    doParallel,
+    foreach
 Suggests: 
     fields,
     knitr,

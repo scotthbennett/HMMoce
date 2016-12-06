@@ -4,3 +4,6 @@ language: R
 sudo: true
 cache: packages
 r_binary_packages: rnetcdf
+env:
+  global:
+    - R_CHECK_ARGS="--no-build-bignettes"

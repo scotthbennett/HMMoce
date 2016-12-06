@@ -112,9 +112,10 @@ ans = foreach(i = 1:T) %dopar%{
         dat.i = dat[,,,pdtMonth] #extract months climatology
         
         # calculate sd using Le Bris neighbor method and focal()
-        sd.i = array(NA, dim = c(dim(dat.i)[1:2], length(depth)))
+        # sd.i = array(NA, dim = c(dim(dat.i)[1:2], length(depth)))
+        sd.i = array(NA, dim = c(dim(dat.i)[1:2], length(depIdx)))
         
-        for(ii in 1:length(depth)){
+        for(ii in 1:length(depIdx)){
           r = raster::flip(raster::raster(t(dat.i[,,ii])), 2)
           f1 = raster::focal(r, w = matrix(1, nrow = 3, ncol = 3), fun = function(x) stats::sd(x, na.rm = T))
           f1 = t(raster::as.matrix(raster::flip(f1, 2)))
@@ -130,7 +131,7 @@ ans = foreach(i = 1:T) %dopar%{
 
     for (b in 1:length(depIdx)) {
         #calculate the likelihood for each depth level, b
-        lik.pdt[,,b] = likint3(dat.i[,,depIdx[b]], sd.i[,,depIdx[b]], df[b,1], df[b,2])
+        lik.pdt[,,b] = likint3(dat.i[,,b], sd.i[,,b], df[b,1], df[b,2])
       }
     # multiply likelihood across depth levels for each day
     lik.pdt <- apply(lik.pdt, 1:2, prod, na.rm = F)

@@ -8,6 +8,7 @@
 #' @param maxT is an integer representing the upper limit of the tag-measured variable
 #' 
 #' @return an array of dim(w) that represents the likelihood of the tag-measured variable as compared to the input grid
+#' @export
 #'   
 
 likint3 <- function(w, wsd, minT, maxT){

@@ -75,19 +75,19 @@ calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE
   
   ans = foreach(i = 1:T) %dopar%{
 
-    # function not being recognized i nnamespace.. 
-  likint3 <- function(w, wsd, minT, maxT){
-    midT = (maxT + minT) / 2
-    Tsd = (maxT - minT) / 4
-    widx = w >= minT & w <= maxT & !is.na(w)
-    wdf = data.frame(w = as.vector(w[widx]), wsd = as.vector(wsd[widx]))
-    wdf$wsd[is.na(wdf$wsd)] = 0
-    # wint = apply(wdf, 1, function(x) pracma::integral(dnorm, minT, maxT, mean = x[1], sd = x[2]))
-    wint = apply(wdf, 1, function(x) stats::integrate(stats::dnorm, x[1]-x[2], x[1]+x[2], mean = midT, sd = Tsd * 2)$value) 
-    w = w * 0
-    w[widx] = wint
-    w
-  }
+  # function not being recognized i nnamespace.. 
+  # likint3 <- function(w, wsd, minT, maxT){
+  #   midT = (maxT + minT) / 2
+  #   Tsd = (maxT - minT) / 4
+  #   widx = w >= minT & w <= maxT & !is.na(w)
+  #   wdf = data.frame(w = as.vector(w[widx]), wsd = as.vector(wsd[widx]))
+  #   wdf$wsd[is.na(wdf$wsd)] = 0
+  #   # wint = apply(wdf, 1, function(x) pracma::integral(dnorm, minT, maxT, mean = x[1], sd = x[2]))
+  #   wint = apply(wdf, 1, function(x) stats::integrate(stats::dnorm, x[1]-x[2], x[1]+x[2], mean = midT, sd = Tsd * 2)$value) 
+  #   w = w * 0
+  #   w[widx] = wint
+  #   w
+  # }
     
     time <- as.Date(udates[i])
     pdt.i <- pdt[which(pdt$Date == time),]
@@ -158,7 +158,7 @@ calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE
     sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
     
     # compare hycom to that day's tag-based ohc
-    lik.ohc <- likint3(ohc, sdx, minT.ohc, maxT.ohc)
+    lik.ohc <- HMMoce::likint3(ohc, sdx, minT.ohc, maxT.ohc)
     
     # if(i == 1){
     #   # result will be array of likelihood surfaces

@@ -249,7 +249,7 @@ s = hmm.smoother(f, K1, K2, P.final)
 ```
 
 ### Most Probable Track and Plotting
-There are a number of ways we can use the posterior distribution of the state to estimate animal movements. The two most simple methods are to calculate the mean or mode value (lat/lon) across the distributions at each time. These are performed using `calc.track`. Finally, use `plot.hmm` for visualizing the final track and state estimates.
+There are a number of ways we can use the posterior distribution of the state to estimate animal movements. The two most simple methods are to calculate the mean or mode value (lat/lon) across the distributions at each time. These are performed using `calc.track`. Finally, use `plotHMM` for visualizing the final track and state estimates.
 
 ```{r, eval = F}
 #----------------------------------------------------------------------------------#
@@ -258,7 +258,7 @@ There are a number of ways we can use the posterior distribution of the state to
 
 tr <- calc.track(s, g, dateVec)
 
-plot.hmm(s, tr, dateVec, save.plot = TRUE)
+plotHMM(s, tr, dateVec, save.plot = TRUE)
 
 ```
 
@@ -424,7 +424,7 @@ s = hmm.smoother(f, K1, K2, P.final)
 
 tr <- calc.track(s, g, dateVec)
 
-plot.hmm(s, tr, dateVec, save.plot = TRUE)
+plotHMM(s, tr, dateVec, save.plot = TRUE)
 
 #=======================================================================================#
 # END

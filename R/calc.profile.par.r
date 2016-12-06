@@ -24,15 +24,17 @@
 #' @seealso \code{\link{calc.ohc}}
 #' @examples 
 #' \dontrun{
-#' # depth-temp profile data
-#' pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop); 
-#' pdt.udates <- pdt$udates; pdt <- pdt$data
+#' # READ DATA
+#' pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop)
+#' pdt.udates <- pdt$udates
+#' pdt <- pdt$data
+#' 
+#' # make dateVec, lat and lon
+#' 
+#' # define where woa is 
 #' 
 #' # GENERATE DAILY PROFILE LIKELIHOODS
-#' L.prof <- calc.profile(pdt, ptt, dateVec = dateVec, envType = 'hycom',
-#'                        hycom.dir = hycom.dir)
-#' # OR FOR WOA DATA:
-#' L.prof.woa <- calc.profile(pdt, dat = woa, lat = lat, lon = lon,
+#' L.prof.woa <- calc.profile.par(pdt, dat = woa, lat = lat, lon = lon,
 #'                            dateVec = dateVec, envType = 'woa')
 #' }
 #'

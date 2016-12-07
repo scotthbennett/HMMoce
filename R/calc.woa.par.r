@@ -32,20 +32,37 @@
 #' # make dateVec, lat and lon
 #' 
 #' # define where woa is 
+#' get.env(type = 'woa', resol = 'one')
 #' 
 #' # GENERATE DAILY PROFILE LIKELIHOODS
-#' L.prof.woa <- calc.profile.par(pdt, dat = woa, lat = lat, lon = lon,
+#' L.prof.woa <- calc.woa.par(pdt, dat = woa, lat = lat, lon = lon,
 #'                            dateVec = dateVec, envType = 'woa')
 #' }
 #'
 
-calc.woa.par <- function(pdt, ptt, dat = NULL, lat = NULL, lon = NULL, dateVec, ncores = detectCores()){
+calc.woa.par <- function(pdt, ptt, dat = NULL, dateVec, ncores = detectCores()){
+  
+  # remove this later.. 
+  
+  likint3 <- function(w, wsd, minT, maxT){
+    midT = (maxT + minT) / 2
+    Tsd = (maxT - minT) / 4
+    widx = w >= minT & w <= maxT & !is.na(w)
+    wdf = data.frame(w = as.vector(w[widx]), wsd = as.vector(wsd[widx]))
+    wdf$wsd[is.na(wdf$wsd)] = 0
+    # wint = apply(wdf, 1, function(x) pracma::integral(dnorm, minT, maxT, mean = x[1], sd = x[2]))
+    wint = apply(wdf, 1, function(x) stats::integrate(stats::dnorm, x[1]-x[2], x[1]+x[2], mean = midT, sd = Tsd * 2)$value) 
+    w = w * 0
+    w[widx] = wint
+    w
+  } 
+  
   
   options(warn=-1)
   start.t <- Sys.time()
   
-  if(is.null(dat) | is.null(lat) | is.null(lon)){
-      stop('Error: dat, lat, lon must all be specified')
+  if(is.null(dat)){
+      stop('Error: data must be specified')
     }
   depth <- c(0, seq(2.5, 97.5, by=5), seq(112.5, 487.5, by=25), seq(525, 1475, by=50))
 
@@ -64,7 +81,7 @@ calc.woa.par <- function(pdt, ptt, dat = NULL, lat = NULL, lon = NULL, dateVec, 
   cl = makeCluster(ncores)
   registerDoParallel(cl, cores = ncores)
   
-  L.prof <- array(0, dim = c(dim(dat)[1:2], length(dateVec)))
+  L.prof <- array(0, dim = c(length(dat$lon), length(dat$lat), length(dateVec)))
   
 ans = foreach(i = 1:T) %dopar%{
     
@@ -85,6 +102,7 @@ ans = foreach(i = 1:T) %dopar%{
     # make predictions based on the regression model earlier for the temperature at standard WOA depth levels for low and high temperature at that depth
     fit.low <- locfit::locfit(pdt.i$MinTemp ~ pdt.i$Depth)
     fit.high <- locfit::locfit(pdt.i$MaxTemp ~ pdt.i$Depth)
+    
     n = length(depth[depIdx])
     
     pred.low <- stats::predict(fit.low, newdata = depth[depIdx], se = T, get.data = T)
@@ -97,19 +115,22 @@ ans = foreach(i = 1:T) %dopar%{
     
 
       
-      if(i == 1){
+      # if(i == 1){
         pdtMonth <- as.numeric(format(as.Date(pdt.i$Date), format = '%m'))[1]
-      } 
+      # } 
       
-      newMonth <- as.numeric(format(as.Date(pdt.i$Date), format = '%m'))[1]
+      # newMonth <- as.numeric(format(as.Date(pdt.i$Date), format = '%m'))[1]
       
-      if(i == 1 | newMonth != pdtMonth) {
+      # if(i == 1 | newMonth != pdtMonth) {
         # calculates sd but "if" statement ensures it is only calculated at
         # the beginning and when the date switches into a new month
         # because it's relatively computationally intensive
         
-        pdtMonth <- as.numeric(format(as.Date(pdt.i$Date), format = '%m'))[1]
-        dat.i = dat[,,,pdtMonth] #extract months climatology
+        # pdtMonth <- as.numeric(format(as.Date(pdt.i$Date), format = '%m'))[1]
+        
+        wdat = dat[[1]]
+        
+        dat.i = wdat[,,,pdtMonth] #extract months climatology
         
         # calculate sd using Le Bris neighbor method and focal()
         # sd.i = array(NA, dim = c(dim(dat.i)[1:2], length(depth)))
@@ -122,7 +143,7 @@ ans = foreach(i = 1:T) %dopar%{
           sd.i[,,ii] = f1
         }
         
-      }
+      # }
     
     print(paste('Calculating likelihood for ', as.Date(time), '...', sep=''))
 
@@ -161,7 +182,7 @@ for(i in didx){
 print(paste('Making final likelihood raster...'))
   
 crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
-list.pdt <- list(x = lon, y = lat, z = L.prof)
+list.pdt <- list(x = dat$lon, y = dat$lat, z = L.prof)
 ex <- raster::extent(list.pdt)
 L.prof <- raster::brick(list.pdt$z, xmn = ex[1], xmx = ex[2], ymn = ex[3], ymx = ex[4], transpose = T, crs)
 L.prof <- raster::flip(L.prof, direction = 'y')
@@ -171,4 +192,8 @@ L.prof
   
 }
 
+# load('C:/Users/benjamin.galuardi/Documents/GitHub/CAM_DATA/woa.one.rda')
+# load('C:/Users/benjamin.galuardi/Documents/GitHub/CAM_DATA/blue259_forParallel.RData')
+# 
+# res = calc.woa.par(pdt, dat = woa.one, dateVec = dateVec)
 

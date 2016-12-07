@@ -28,9 +28,11 @@ Tag-measured sunrise/sunset (SRSS) times are first filtered according to the min
 }
 \examples{
 \dontrun{
+
 # light data
 light <- read.wc(ptt, wd = myDir, type = 'light', tag=tag, pop=pop); 
 light.udates <- light$udates; light <- light$data
+
 # GENERATE LIGHT LIKELIHOOD
 # SRSS METHOD
 L.light <- calc.srss(light, locs.grid = locs.grid, dateVec = dateVec)

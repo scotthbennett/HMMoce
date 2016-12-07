@@ -26,4 +26,16 @@ a list containing: DAT is an array of temperature data with
 dataset derived from monthly gridded climatology data contained in the 2013 
 World Ocean Atlas
 }
+\examples{
+\dontrun{
+# download WOA data from GitHub
+woa.dir <- paste('my_woa_dir')
+get.env(type = 'woa', resol = 'quarter')
+
+# extract desired data
+woa <- extract.woa(woa.dir, bbox, 'quarter')
+
+}
+
+}
 

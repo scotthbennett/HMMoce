@@ -40,4 +40,7 @@ L.ohc <- calc.ohc(pdt, ptt, ohc.dir = hycom.dir, dateVec = dateVec,
                   isotherm = '')
 }
 }
+\seealso{
+\code{\link{calc.profile}}
+}
 

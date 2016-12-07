@@ -2,10 +2,12 @@
 
 export(calc.gpe2)
 export(calc.ohc)
+export(calc.ohc.par)
 export(calc.profile)
 export(calc.srss)
 export(calc.sst)
 export(calc.track)
+export(calc.woa.par)
 export(expmax)
 export(extract.woa)
 export(gausskern)

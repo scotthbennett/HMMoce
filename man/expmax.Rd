@@ -7,11 +7,6 @@
 expmax(p.init, g, L, K1, K2, niter = 1000, threshold = 0.01)
 }
 \arguments{
-<<<<<<< HEAD
-\item{g}{grid from \code{\link{setup.grid}}}
-
-\item{L}{final likelihood (2D)}
-=======
 \item{p.init}{a vector of length 2. The first is the probability of staying 
 in behavior state 1 if currently in state 1 and the second for staying in 
 state 2.}
@@ -19,7 +14,6 @@ state 2.}
 \item{g}{grid from \code{\link{setup.grid}}}
 
 \item{L}{final likelihood}
->>>>>>> 65497a0516455e2c632d44e7a58c380b317aca31
 
 \item{K1}{first movement (diffusion) kernel see \code{\link{gausskern}}}
 
@@ -28,31 +22,33 @@ state 2.}
 \item{niter}{is integer that determines number of iterations to perform}
 
 \item{threshold}{is threshold of percent change that we consider satisfactory
-<<<<<<< HEAD
-for convergence. Default is 1%.}
-
-\item{P.init}{2x2 probability matrix for transitions between states (K1 and 
-K2). P.init[1,1] is probability of staying in behavior state 1 if currently
-in state 1. P.init[1,2] is probability of switching to state 2 if currently
-in state 1. Continue this logic for P.init[2,].}
-=======
 for convergence. Default is 1\%.}
->>>>>>> 65497a0516455e2c632d44e7a58c380b317aca31
 }
 \value{
 a 2x2 matrix of state switching probabilities. See P.init input for 
   more information.
 }
 \description{
-<<<<<<< HEAD
-Expectation-maximization framework for state-switching
-=======
 \code{expmax} performs expectation-maximization for state switching 
 probability
 }
 \details{
 Light errors are parameterized using elliptical error values output in.
->>>>>>> 65497a0516455e2c632d44e7a58c380b317aca31
+}
+\examples{
+\dontrun{
+
+# GENERATE MOVEMENT KERNELS. D VALUES ARE MEAN AND SD PIXELS
+K1 <- gausskern(D1[1], D1[2], muadv = 0)
+K2 <- gausskern(D2[1], D2[2], muadv = 0)
+
+# MAKE A GUESS AT STATE SWITCHING PROBABILITY
+# probability of staying in state 1 and 2, respectively
+p.init <- c(0.7, 0.8)
+# RUN EXPECTATION-MAXIMIZATION ROUTINE FOR MATRIX, P (STATE SWITCH PROBABILITY)
+P.final <- expmax(p.init, g = g, L = L, K1, K2)
+
+}
 }
 \references{
 Woillez M, Fablet R, Ngo TT, et al. (2016) A HMM-based model to

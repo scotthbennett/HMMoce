@@ -15,9 +15,7 @@
 #' @param pdt is PDT data from WC psat tag summarizing depth/temperature data 
 #'   over a programmed time interval
 #' @param ptt is unique tag identifier
-#' @param dat is monthly global 1/4deg climatology data from WOA13
-#' @param lat is vector of latitudes from dat. 
-#' @param lon is vector of longitudes from dat. 
+#' @param woa.data is monthly global 1/4deg climatology data from WOA13
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
 #' @export
 #' @return raster brick of likelihood
@@ -41,13 +39,13 @@
 #' }
 #'
 
-calc.woa.par <- function(pdt, ptt, dat = NULL, lat = NULL, lon = NULL, dateVec, ncores = parallel::detectCores()){
-#calc.woa.par <- function(pdt, ptt, dat = NULL, dateVec, ncores = detectCores()){
+#calc.woa.par <- function(pdt, ptt, dat = NULL, lat = NULL, lon = NULL, dateVec, ncores = parallel::detectCores()){
+calc.woa.par <- function(pdt, ptt, woa.data = NULL, dateVec, ncores = parallel::detectCores()){
   
   options(warn=-1)
   start.t <- Sys.time()
   
-  if(is.null(dat)){
+  if(is.null(woa.data)){
       stop('Error: data must be specified')
     }
   depth <- c(0, seq(2.5, 97.5, by=5), seq(112.5, 487.5, by=25), seq(525, 1475, by=50))
@@ -67,7 +65,7 @@ calc.woa.par <- function(pdt, ptt, dat = NULL, lat = NULL, lon = NULL, dateVec, 
   cl = parallel::makeCluster(ncores)
   doParallel::registerDoParallel(cl, cores = ncores)
   
-  L.prof <- array(0, dim = c(length(dat$lon), length(dat$lat), length(dateVec)))
+  L.prof <- array(0, dim = c(length(woa.data$lon), length(woa.data$lat), length(dateVec)))
   
 ans = foreach(i = 1:T) %dopar%{
   
@@ -109,7 +107,7 @@ ans = foreach(i = 1:T) %dopar%{
   pdtMonth <-
     as.numeric(format(as.Date(pdt.i$Date), format = '%m'))[1]
   
-  wdat = dat[[1]]
+  wdat = woa.data[[1]]
   
   dat.i = wdat[, , , pdtMonth] #extract months climatology
   
@@ -172,10 +170,10 @@ crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
 L.ras <-
   raster::brick(
     L.prof,
-    xmn = min(dat$lon),
-    xmx = max(dat$lon),
-    ymn = min(dat$lat),
-    ymx = max(dat$lat),
+    xmn = min(woa.data$lon),
+    xmx = max(woa.data$lon),
+    ymn = min(woa.data$lat),
+    ymx = max(woa.data$lat),
     transpose = T,
     crs
   )

@@ -4,8 +4,8 @@
 \alias{calc.woa.par}
 \title{Calculate WOA profile in parallel}
 \usage{
-calc.woa.par(pdt, ptt, dat = NULL, lat = NULL, lon = NULL, dateVec,
-  ncores = detectCores())
+calc.woa.par(pdt, ptt, woa.data = NULL, dateVec,
+  ncores = parallel::detectCores())
 }
 \arguments{
 \item{pdt}{is PDT data from WC psat tag summarizing depth/temperature data 
@@ -13,11 +13,7 @@ over a programmed time interval}
 
 \item{ptt}{is unique tag identifier}
 
-\item{dat}{is monthly global 1/4deg climatology data from WOA13}
-
-\item{lat}{is vector of latitudes from dat.}
-
-\item{lon}{is vector of longitudes from dat.}
+\item{woa.data}{is monthly global 1/4deg climatology data from WOA13}
 
 \item{dateVec}{is vector of dates from tag to pop-up in 1 day increments.}
 }
@@ -48,9 +44,10 @@ pdt <- pdt$data
 # make dateVec, lat and lon
 
 # define where woa is 
+get.env(type = 'woa', resol = 'one')
 
 # GENERATE DAILY PROFILE LIKELIHOODS
-L.prof.woa <- calc.profile.par(pdt, dat = woa, lat = lat, lon = lon,
+L.prof.woa <- calc.woa.par(pdt, dat = woa, lat = lat, lon = lon,
                            dateVec = dateVec, envType = 'woa')
 }
 

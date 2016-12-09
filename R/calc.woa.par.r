@@ -51,9 +51,9 @@ calc.woa.par <- function(pdt, ptt, dat = NULL, lat = NULL, lon = NULL, dateVec, 
 
   
   # get unique time points
-  dateVec = parse_date_time(dateVec, '%Y-%m-%d')
+  dateVec = lubridate::parse_date_time(dateVec, '%Y-%m-%d')
   
-  udates <- unique(parse_date_time(pdt$Date, orders = '%Y-%m-%d %H%:%M:%S'))
+  udates <- unique(lubridate::parse_date_time(pdt$Date, orders = '%Y-%m-%d %H%:%M:%S'))
   T <- length(udates)
   
   pdt$MidTemp <- (pdt$MaxTemp + pdt$MinTemp) / 2

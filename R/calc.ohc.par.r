@@ -49,9 +49,9 @@ calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE
   pdt$MidTemp <- (pdt$MaxTemp + pdt$MinTemp) / 2
   
   # get unique time points
-  dateVec = parse_date_time(dateVec, '%Y-%m-%d')
+  dateVec = lubridate::parse_date_time(dateVec, '%Y-%m-%d')
   
-  udates <- unique(parse_date_time(pdt$Date, orders = '%Y-%m-%d %H%:%M:%S'))
+  udates <- unique(lubridate::parse_date_time(pdt$Date, orders = '%Y-%m-%d %H%:%M:%S'))
   T <- length(udates)
 
   if(isotherm != '') iso.def <- TRUE else iso.def <- FALSE

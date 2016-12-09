@@ -6,16 +6,19 @@
 #' summarized depth-temperature profiles
 #' 
 #' Tag-based depth-temperature profile summaries are compared to climatological 
-#' profiles from the World Ocean Atlas (WOA) "matched" to generate position likelihoods. This essentially
-#' attempts to estimate animal position based on the water mass it is in,
-#' particularly if extensive diving performs thorough sampling of the
-#' environment. However, remember the in situ data is being compared to
-#' climatological means or the results of an oceanographic model.
+#' profiles from the World Ocean Atlas (WOA) "matched" to generate position
+#' likelihoods. This essentially attempts to estimate animal position based on
+#' the water mass it is in, particularly if extensive diving performs thorough
+#' sampling of the environment. However, remember the in situ data is being
+#' compared to climatological means or the results of an oceanographic model.
 #' 
 #' @param pdt is PDT data from WC psat tag summarizing depth/temperature data 
 #'   over a programmed time interval
 #' @param ptt is unique tag identifier
 #' @param woa.data is monthly global 1/4deg climatology data from WOA13
+#' @param focalDim is integer for dimensions of raster::focal used to calculate
+#'   sd() of temperature grid cell. Recommend focalDim = 3 if woa.data = woa.one
+#'   and 9 if using woa.quarter.
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
 #' @export
 #' @return raster brick of likelihood
@@ -37,17 +40,21 @@
 #' L.prof.woa <- calc.woa.par(pdt, dat = woa, lat = lat, lon = lon,
 #'                            dateVec = dateVec, envType = 'woa')
 #' }
-#'
+#' 
 
-#calc.woa.par <- function(pdt, ptt, dat = NULL, lat = NULL, lon = NULL, dateVec, ncores = parallel::detectCores()){
-calc.woa.par <- function(pdt, ptt, woa.data = NULL, dateVec, ncores = parallel::detectCores()){
+calc.woa.par <- function(pdt, ptt, woa.data = NULL, dateVec, focalDim = NULL, ncores = parallel::detectCores()){
   
   options(warn=-1)
   start.t <- Sys.time()
   
   if(is.null(woa.data)){
-      stop('Error: data must be specified')
-    }
+    stop('Error: data must be specified')
+  }
+  
+  if (is.null(focalDim)){
+    stop('Error: focalDim must be specified.')
+  }
+  
   depth <- c(0, seq(2.5, 97.5, by=5), seq(112.5, 487.5, by=25), seq(525, 1475, by=50))
 
   
@@ -116,16 +123,12 @@ ans = foreach(i = 1:T) %dopar%{
   
   sd.i = array(NA, dim = c(dim(dat.i)[1:2], length(depIdx)))
   
-  for (ii in 1:length(depIdx)) {
-    r = raster::flip(raster::raster(t(dat.i[, , ii])), 2)
-    f1 = raster::focal( r,
-      w = matrix(1, nrow = 3, ncol = 3),
-      fun = function(x)
-        stats::sd(x, na.rm = T)
-    )
+  for(ii in 1:length(depIdx)){
+    r = raster::flip(raster::raster(t(dat.i[,,depIdx[ii]])), 2)
+    f1 = raster::focal(r, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = T))
     f1 = t(raster::as.matrix(raster::flip(f1, 2)))
-    sd.i[, , ii] = f1
-  }
+    sd.i[,,ii] = f1
+  } 
   
 #parallel::stopCluster(cl)
 
@@ -142,10 +145,10 @@ didx = base::match(udates, dateVec)
   
   for (b in 1:length(depIdx)) {
     #calculate the likelihood for each depth level, b
-    lik.pdt[, , b] = likint3(dat.i[, , b], sd.i[, , b], df[b, 1], df[b, 2])
+    lik.pdt[,,b] = likint3(dat.i[,,depIdx[b]], sd.i[,,b], df[b, 1], df[b, 2])
   }
   # multiply likelihood across depth levels for each day
-  lik.pdt <- apply(lik.pdt, 1:2, prod, na.rm = F)
+  lik.pdt1 <- apply(lik.pdt, 1:2, prod, na.rm = F)
 }
 
 parallel::stopCluster(cl)

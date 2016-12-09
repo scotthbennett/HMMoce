@@ -17,7 +17,8 @@ Description: Improved analysis of marine animal movement data by implementing
     data.
 License: MIT + file LICENSE
 Depends:
-    R (>= 2.10)
+    R (>= 2.10),
+    foreach
 Imports: 
     dplyr,
     imager,
@@ -29,8 +30,7 @@ Imports:
     rworldmap,
     sp,
     parallel,
-    doParallel,
-    foreach
+    doParallel
 Suggests: 
     fields,
     knitr,

@@ -24,4 +24,16 @@ calculated track
 \code{calc.track} uses HMM output via \code{hmm.smoother} to calculate most
 probable track and behavior state
 }
+\examples{
+\dontrun{
+
+# RUN THE SMOOTHING STEP
+s = hmm.smoother(f, K1, K2, P.final)
+
+# GET AND PLOT THE MOST PROBABLE TRACK
+tr <- calc.track(s, g, dateVec)
+
+}
+
+}
 

@@ -49,4 +49,7 @@ L.light <- calc.gpe2(locs, iniloc = iniloc, locs.grid = locs.grid,
                      dateVec = dateVec, errEll = TRUE, gpeOnly = TRUE)
 }
 }
+\seealso{
+\code{\link{calc.srss}}
+}
 

@@ -59,4 +59,7 @@ L.prof.woa <- calc.profile(pdt, dat = woa, lat = lat, lon = lon,
 }
 
 }
+\seealso{
+\code{\link{calc.ohc}}
+}
 

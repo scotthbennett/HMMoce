@@ -12,6 +12,7 @@
 #' @return a raster brick of OHC likelihood
 #' @seealso \code{\link{calc.ohc}}
 #' @export
+#' @importFrom foreach "%dopar%"
 #'
 #' @examples
 #' # load workspace
@@ -34,8 +35,6 @@ calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE
   dvidx = dateVec <= max_ohc_date
   
   dateVec = dateVec[dvidx]
-  
-  require(lubridate)
   
   options(warn=1)
   
@@ -72,8 +71,8 @@ calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE
   print('processing in parallel... ')
   
   # ncores = detectCores()  # should be an input argument
-  cl = makeCluster(ncores)
-  registerDoParallel(cl, cores = ncores)
+  cl = parallel::makeCluster(ncores)
+  doParallel::registerDoParallel(cl, cores = ncores)
   
   ans = foreach(i = 1:T) %dopar%{
 
@@ -172,11 +171,11 @@ calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE
     # 
   }
   
-  stopCluster(cl)
+  parallel::stopCluster(cl)
   
   # make index of dates for filling in L.ohc
   
-  didx = match(udates, dateVec)
+  didx = base::match(udates, dateVec)
   
   
   # lapply 

@@ -21,6 +21,7 @@
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
 #' @export
 #' @return raster brick of likelihood
+#' @importFrom foreach "%dopar%"
 #' @seealso \code{\link{calc.ohc}}
 #' @examples 
 #' \dontrun{
@@ -39,7 +40,7 @@
 #' }
 #'
 
-calc.woa.par <- function(pdt, ptt, dat = NULL, lat = NULL, lon = NULL, dateVec, ncores = detectCores()){
+calc.woa.par <- function(pdt, ptt, dat = NULL, lat = NULL, lon = NULL, dateVec, ncores = parallel::detectCores()){
   
   options(warn=-1)
   start.t <- Sys.time()
@@ -61,8 +62,8 @@ calc.woa.par <- function(pdt, ptt, dat = NULL, lat = NULL, lon = NULL, dateVec, 
   print(paste0('Generating WOA likelihood for ', udates[1], ' through ', udates[length(udates)]))
   print('processing in parallel... ')
   
-  cl = makeCluster(ncores)
-  registerDoParallel(cl, cores = ncores)
+  cl = parallel::makeCluster(ncores)
+  doParallel::registerDoParallel(cl, cores = ncores)
   
   L.prof <- array(0, dim = c(dim(dat)[1:2], length(dateVec)))
   
@@ -137,11 +138,11 @@ ans = foreach(i = 1:T) %dopar%{
     lik.pdt <- apply(lik.pdt, 1:2, prod, na.rm = F)
   }
   
-stopCluster(cl)
+parallel::stopCluster(cl)
 
 # make index of dates for filling in lik.prof
 
-didx = match(udates, dateVec)
+didx = base::match(udates, dateVec)
 
 # 
 # # identify date index and add completed likelihood to L.pdt array    

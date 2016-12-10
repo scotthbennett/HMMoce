@@ -4,7 +4,7 @@
 \alias{calc.woa.par}
 \title{Calculate WOA profile in parallel}
 \usage{
-calc.woa.par(pdt, ptt, woa.data = NULL, dateVec,
+calc.woa.par(pdt, ptt, woa.data = NULL, dateVec, focalDim = NULL,
   ncores = parallel::detectCores())
 }
 \arguments{
@@ -16,6 +16,10 @@ over a programmed time interval}
 \item{woa.data}{is monthly global 1/4deg climatology data from WOA13}
 
 \item{dateVec}{is vector of dates from tag to pop-up in 1 day increments.}
+
+\item{focalDim}{is integer for dimensions of raster::focal used to calculate
+sd() of temperature grid cell. Recommend focalDim = 3 if woa.data = woa.one
+and 9 if using woa.quarter.}
 }
 \value{
 raster brick of likelihood
@@ -28,11 +32,11 @@ Calculate Depth-temperature profile based likelihood
 summarized depth-temperature profiles
 
 Tag-based depth-temperature profile summaries are compared to climatological 
-profiles from the World Ocean Atlas (WOA) "matched" to generate position likelihoods. This essentially
-attempts to estimate animal position based on the water mass it is in,
-particularly if extensive diving performs thorough sampling of the
-environment. However, remember the in situ data is being compared to
-climatological means or the results of an oceanographic model.
+profiles from the World Ocean Atlas (WOA) "matched" to generate position
+likelihoods. This essentially attempts to estimate animal position based on
+the water mass it is in, particularly if extensive diving performs thorough
+sampling of the environment. However, remember the in situ data is being
+compared to climatological means or the results of an oceanographic model.
 }
 \examples{
 \dontrun{

@@ -67,12 +67,17 @@ calc.woa.par <- function(pdt, ptt, woa.data = NULL, dateVec, focalDim = NULL, nc
   pdt$MidTemp <- (pdt$MaxTemp + pdt$MinTemp) / 2
   
   print(paste0('Generating WOA profile likelihood for ', udates[1], ' through ', udates[length(udates)]))
+  
+  L.prof <- array(0, dim = c(length(woa.data$lon), length(woa.data$lat), length(dateVec)))
+  
+  # BEGIN PARALLEL STUFF
+  
   print('processing in parallel... ')
   
+  # ncores <- detectCores() # as input argument
   cl = parallel::makeCluster(ncores)
   doParallel::registerDoParallel(cl, cores = ncores)
   
-  L.prof <- array(0, dim = c(length(woa.data$lon), length(woa.data$lat), length(dateVec)))
   
 ans = foreach(i = 1:T) %dopar%{
   
@@ -88,16 +93,15 @@ ans = foreach(i = 1:T) %dopar%{
   x <- pdt.i$MidTemp[!is.na(pdt.i$Depth)]
   
   # use the which.min
-  depIdx = apply(
-    as.data.frame(pdt.i$Depth),
-    1,
-    FUN = function(x)
-      which.min((x - depth) ^ 2)
-  )
+  depIdx = apply(as.data.frame(pdt.i$Depth), 1, FUN = function(x) which.min((x - depth) ^ 2))
   
   # make predictions based on the regression model earlier for the temperature at standard WOA depth levels for low and high temperature at that depth
+  suppressWarnings(
   fit.low <- locfit::locfit(pdt.i$MinTemp ~ pdt.i$Depth)
+  )
+  suppressWarnings(
   fit.high <- locfit::locfit(pdt.i$MaxTemp ~ pdt.i$Depth)
+  )
   
   n = length(depth[depIdx])
   
@@ -130,15 +134,8 @@ ans = foreach(i = 1:T) %dopar%{
     sd.i[,,ii] = f1
   } 
   
-#parallel::stopCluster(cl)
-
-# make index of dates for filling in lik.prof
-
-didx = base::match(udates, dateVec)
-  # }
-  
-  print(paste('Calculating likelihood for ', as.Date(time), '...', sep =
-                ''))
+  # make index of dates for filling in lik.prof
+  didx <- base::match(udates, dateVec)
   
   # setup the likelihood array for each day. Will have length (dim[3]) = n depths
   lik.pdt = array(NA, dim = c(dim(dat.i)[1], dim(dat.i)[2], length(depIdx)))
@@ -147,50 +144,36 @@ didx = base::match(udates, dateVec)
     #calculate the likelihood for each depth level, b
     lik.pdt[,,b] = likint3(dat.i[,,depIdx[b]], sd.i[,,b], df[b, 1], df[b, 2])
   }
+  
   # multiply likelihood across depth levels for each day
-  lik.pdt1 <- apply(lik.pdt, 1:2, prod, na.rm = F)
+  lik.pdt <- apply(lik.pdt, 1:2, prod, na.rm = F)
+  
 }
 
 parallel::stopCluster(cl)
 
 # make index of dates for filling in lik.prof
-didx = match(udates, dateVec)
+didx <- match(udates, dateVec)
 
 # lapply to normalize
-lik.pdt = lapply(ans, function(x)
-  (x / max(x, na.rm = T)))
+lik.pdt <- lapply(ans, function(x) (x / max(x, na.rm = T)))
 
 # Fill in the L.prof from the list output
 ii = 1
 for (i in didx) {
-  L.prof[, , i] = lik.pdt[[ii]]
+  L.prof[,,i] = lik.pdt[[ii]]
   ii = ii + 1
 }
 
 print(paste('Making final likelihood raster...'))
 
 crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
-L.ras <-
-  raster::brick(
-    L.prof,
-    xmn = min(woa.data$lon),
-    xmx = max(woa.data$lon),
-    ymn = min(woa.data$lat),
-    ymx = max(woa.data$lat),
-    transpose = T,
-    crs
-  )
+L.ras <- raster::brick(L.prof, xmn = min(woa.data$lon), xmx = max(woa.data$lon), ymn = min(woa.data$lat), ymx = max(woa.data$lat), transpose = T, crs)
 L.ras <- raster::flip(L.ras, direction = 'y')
 
 print(Sys.time() - start.t)
-
 options(warn = 2)
-L.ras
+
+return(L.ras)
   
 }
-
-# load('C:/Users/benjamin.galuardi/Documents/GitHub/CAM_DATA/woa.one.rda')
-# load('C:/Users/benjamin.galuardi/Documents/GitHub/CAM_DATA/blue259_forParallel.RData')
-# 
-# res = calc.woa.par(pdt, dat = woa.one, dateVec = dateVec)
-

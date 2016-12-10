@@ -75,20 +75,6 @@ calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE
   doParallel::registerDoParallel(cl, cores = ncores)
   
   ans = foreach(i = 1:T) %dopar%{
-
-  # function not being recognized i nnamespace.. 
-  # likint3 <- function(w, wsd, minT, maxT){
-  #   midT = (maxT + minT) / 2
-  #   Tsd = (maxT - minT) / 4
-  #   widx = w >= minT & w <= maxT & !is.na(w)
-  #   wdf = data.frame(w = as.vector(w[widx]), wsd = as.vector(wsd[widx]))
-  #   wdf$wsd[is.na(wdf$wsd)] = 0
-  #   # wint = apply(wdf, 1, function(x) pracma::integral(dnorm, minT, maxT, mean = x[1], sd = x[2]))
-  #   wint = apply(wdf, 1, function(x) stats::integrate(stats::dnorm, x[1]-x[2], x[1]+x[2], mean = midT, sd = Tsd * 2)$value) 
-  #   w = w * 0
-  #   w[widx] = wint
-  #   w
-  # }
     
     time <- as.Date(udates[i])
     pdt.i <- pdt[which(pdt$Date == time),]
@@ -179,7 +165,7 @@ calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE
   
   
   # lapply 
-  lik.ohc = lapply(ans, function(x) x/max(x, na.rm = T)-0.2)
+  lik.ohc = lapply(ans, function(x) x / max(x, na.rm = T))
   
   ii = 1
   for(i in didx){
@@ -190,7 +176,7 @@ calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE
   print(paste('Making final likelihood raster...'))
   
   crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
-  list.ohc <- list(x = lon-360, y = lat, z = L.ohc)
+  list.ohc <- list(x = lon - 360, y = lat, z = L.ohc)
   ex <- raster::extent(list.ohc)
   L.ohc <- raster::brick(list.ohc$z, xmn=ex[1], xmx=ex[2], ymn=ex[3], ymx=ex[4], transpose=T, crs)
   L.ohc <- raster::flip(L.ohc, direction = 'y')

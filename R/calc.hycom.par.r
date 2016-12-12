@@ -27,7 +27,7 @@
 #' }
 
 
-calc.hycom.par <- function(pdt, ptt, hycom.dir, focalDim = 9, dateVec, ncores = detectCores()){
+calc.hycom.par <- function(pdt, ptt, hycom.dir, focalDim = 9, dateVec, ncores = parallel::detectCores()){
   
   options(warn=-1)
   

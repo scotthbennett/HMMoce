@@ -97,6 +97,8 @@ calc.gpe2 <- function(locs, locDates, iniloc, locs.grid, dateVec, errEll = TRUE,
       
     } 
     
+    L.gpe2[,,t] = L.gpe2[,,t] / max(L.gpe2[,,t], na.rm=T) - 0.2
+    
   }
   
   print(paste('Making final likelihood raster...'))
@@ -108,6 +110,8 @@ calc.gpe2 <- function(locs, locDates, iniloc, locs.grid, dateVec, errEll = TRUE,
   L.gpe2 <- raster::brick(list.locs$z, xmn = ex[1], xmx = ex[2], ymn = ex[3], ymx = ex[4], transpose = T, crs)
   L.gpe2 <- raster::flip(L.gpe2, direction = 'y')
   
-  return(list(L.gpe2 = L.gpe2))
+  L.gpe2[L.gpe2 < 0] <- 0
+  
+  return(L.gpe2)
   
 }

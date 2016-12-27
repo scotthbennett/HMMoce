@@ -8,6 +8,7 @@
 #' 
 #' @param locs is -Locations file output from DAP/Tag Portal for WC tags and 
 #'   contains GPS, Argos, and GPE locations as applicable.
+#' @param locDates is vector of dates from locs dataframe
 #' @param iniloc is 2 x 5 dataframe containing day, month, year, lat, lon for 
 #'   both tag and pop locations
 #' @param locs.grid is list output from \code{setup.locs.grid}
@@ -34,7 +35,7 @@
 #'                      dateVec = dateVec, errEll = TRUE, gpeOnly = TRUE)
 #' }
 
-calc.gpe2 <- function(locs, iniloc, locs.grid, dateVec, errEll = TRUE, gpeOnly = TRUE){
+calc.gpe2 <- function(locs, locDates, iniloc, locs.grid, dateVec, errEll = TRUE, gpeOnly = TRUE){
   
   print(paste('Starting likelihood calculation...'))
   
@@ -84,11 +85,11 @@ calc.gpe2 <- function(locs, iniloc, locs.grid, dateVec, errEll = TRUE, gpeOnly =
           # use normally distributed error from position using fixed std dev
           L.light <- stats::dnorm(t(locs.grid$lon), locs$Longitude[idx], slon.sd)
           
-          L.locs[,,t] <- L.light
+          L.gpe2[,,t] <- L.light
           
         } else if(errEll == TRUE){
           
-          L.locs[,,t] <- calc.errEll(locs[idx,], locs.grid)
+          L.gpe2[,,t] <- calc.errEll(locs[idx,], locs.grid)
           
         }
         

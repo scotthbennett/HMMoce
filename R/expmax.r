@@ -44,7 +44,7 @@ expmax <- function(p.init, g, L, K1, K2, niter = 1000, threshold = .01){
   
   print(paste('Starting EM for state switching...'))
   
-  p.init <- matrix(c(p.init[1], 1 - p.init[1], 1 - p.init[2], p.init[2]), 2, 2, byrow = TRUE)
+  #p.init <- matrix(c(p.init[1], 1 - p.init[1], 1 - p.init[2], p.init[2]), 2, 2, byrow = TRUE)
   
   if (niter < 25){
     stop('Maximum number of iterations (niter) must be > 25.')
@@ -57,7 +57,7 @@ expmax <- function(p.init, g, L, K1, K2, niter = 1000, threshold = .01){
     
   }
 
-  save.p <- data.frame(matrix(NA, ncol=2, nrow=1000))
+  save.p <- data.frame(matrix(NA, ncol = 2, nrow = niter))
   save.p[,1] <- p.init[1,1]; save.p[,2] <- p.init[2,2]
 
   for (i in 1:niter){
@@ -91,7 +91,7 @@ expmax <- function(p.init, g, L, K1, K2, niter = 1000, threshold = .01){
     # of D below 1%" (Woillez 2016)
     
     save.p[i,] <- c(P[1,1], P[2,2])
-    
+
     if (i > 20){
       thr1 <- (save.p[i,1] - mean(save.p[i:(i-20),1])) / mean(save.p[i:(i-20),1])
       thr2 <- (save.p[i,2] - mean(save.p[i:(i-20),2])) / mean(save.p[i:(i-20),2])

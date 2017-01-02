@@ -26,15 +26,15 @@
 #' }
 
 
-calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE, ncores = detectCores()){
+calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE, ncores = parallel::detectCores()){
   
-  max_ohc_date = max(as.Date(substr(dir(ohc.dir), 8, 17)))
-  pdt_idx = as.Date(pdt$Date)<=max_ohc_date
-  pdt = pdt[pdt_idx, ]
+  #max_ohc_date = max(as.Date(substr(dir(ohc.dir), 8, 17)))
+  #pdt_idx = as.Date(pdt$Date)<=max_ohc_date
+  #pdt = pdt[pdt_idx, ]
   
-  dvidx = dateVec <= max_ohc_date
+  #dvidx = dateVec <= max_ohc_date
   
-  dateVec = dateVec[dvidx]
+  #dateVec = dateVec[dvidx]
   
   options(warn=1)
   
@@ -80,7 +80,7 @@ calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE
     pdt.i <- pdt[which(pdt$Date == time),]
     
     # open day's hycom data
-    nc <- RNetCDF::open.nc(paste(ohc.dir, ptt,'_', as.Date(time), '.nc', sep=''))
+    nc <- RNetCDF::open.nc(paste(ohc.dir,'_', as.Date(time), '.nc', sep=''))
     dat <- RNetCDF::var.get.nc(nc, 'water_temp') * RNetCDF::att.get.nc(nc, 'water_temp', attribute='scale_factor') + 
       RNetCDF::att.get.nc(nc, variable='water_temp', attribute='add_offset')
     

@@ -29,7 +29,7 @@ get.env <- function(uniqueDates = NULL, ptt = NULL, type = NULL, spatLim = NULL,
       repeat{
         get.oi.sst(spatLim, time, filename = paste(ptt, '_', time, '.nc', sep = ''), download.file = TRUE, dir = save.dir) # filenames based on dates from above
         tryCatch({
-          err <- try(RNetCDF::open.nc(paste(save.dir,'/', ptt, '_', time, '.nc', sep = '')), silent = T)
+          err <- try(RNetCDF::open.nc(paste(save.dir, ptt, '_', time, '.nc', sep = '')), silent = T)
         }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})
         if(class(err) != 'try-error') break
       }

@@ -45,7 +45,7 @@ resample.grid.par <- function(L.rasters, L.resol, ncores = parallel::detectCores
   # find mle raster
   resol <- rep(0, n)
   for (i in 1:n){
-    resol[i] <- res(L.rasters.old[[i]])[1]
+    resol[i] <- raster::res(L.rasters.old[[i]])[1]
   }
 
   L.mle.res <- L.rasters.old[which.max(resol)][[1]]

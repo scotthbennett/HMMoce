@@ -107,6 +107,10 @@ expmax <- function(p.init, g, L, K1, K2, niter = 1000, threshold = .01, save.p =
         stop(paste('Maximum iterations reached (', niter, ') without crossing percent change threshold...', sep=''))
       }
     }
+    
+    if (i == niter){
+      stop('Error: expmax did not converge below change threshold.')
+    }
   
   }
   

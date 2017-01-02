@@ -60,8 +60,15 @@ expmax <- function(p.init, g, L, K1, K2, niter = 1000, threshold = .01, save.p =
   save.p <- data.frame(matrix(NA, ncol = 2, nrow = niter))
   save.p[,1] <- p.init[1,1]; save.p[,2] <- p.init[2,2]
 
+  # create progress bar
+  pb <- txtProgressBar(min = 1, max = niter, style = 3)
+  
   for (i in 1:niter){
-
+    
+    # update progress bar
+    Sys.sleep(0.001)
+    setTxtProgressBar(pb, i)
+    
     if (i == 1){
       P <- p.init
     }

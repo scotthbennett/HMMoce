@@ -42,6 +42,7 @@ calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, ncores = parallel::dete
   tag.sst <- data.frame(dplyr::summarise(by_dte, min(by_dte$Temperature), max(by_dte$Temperature)))
   colnames(tag.sst) <- list('date', 'minT', 'maxT')
   tag.sst$date <- as.Date(tag.sst$date)
+  udates <- unique(tag.sst$date)
   
   T <- length(tag.sst[,1])
   

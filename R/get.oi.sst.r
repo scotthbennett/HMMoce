@@ -40,6 +40,8 @@
 
 get.oi.sst <- function(limits, time, filename='', download.file=TRUE, dir = getwd()) {
   
+  options(warn = -1)
+  
   dir.create(file.path(dir), recursive = TRUE, showWarnings = FALSE)
   setwd(dir)
   
@@ -89,6 +91,9 @@ get.oi.sst <- function(limits, time, filename='', download.file=TRUE, dir = getw
       system(sprintf('curl -o "%s" "%s"', filename, url))
     }
   }
+  
+  options(warn = 0)
+  
   return(url)
 }
 

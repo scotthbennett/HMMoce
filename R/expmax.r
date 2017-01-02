@@ -37,7 +37,7 @@
 #' 
 #' }
 
-expmax <- function(p.init, g, L, K1, K2, niter = 1000, threshold = .01){
+expmax <- function(p.init, g, L, K1, K2, niter = 1000, threshold = .01, save.p = F){
   
   t1 <- Sys.time()
   options(warn = -1)
@@ -111,7 +111,12 @@ expmax <- function(p.init, g, L, K1, K2, niter = 1000, threshold = .01){
   }
   
   options(warn = 0)
-  return(P)
+  
+  if (save.p){
+    return(list(P, save.p))
+  } else{
+    return(P)
+  }
   
 }
 

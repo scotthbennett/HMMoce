@@ -33,6 +33,7 @@
 
 calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, ncores = parallel::detectCores()){
   
+  options(warn = -1)
   start.t <- Sys.time()
   
   dts <- as.POSIXct(tag.sst$Date, format = findDateFormat(tag.sst$Date))
@@ -54,7 +55,8 @@ calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, ncores = parallel::dete
   
   # open day's sst data
   nc1 <- RNetCDF::open.nc(paste(sst.dir, ptt, '_', as.Date(time1), '.nc', sep='')) #add lat lon in filename '.nc', sep=''))
-  dat <- RNetCDF::var.get.nc(nc1, 'sst') # for OI SST
+  #dat <- RNetCDF::var.get.nc(nc1, 'sst') # for OI SST
+  dat <- RNetCDF::var.get.nc(nc1, 'analysed_sst') # for OI SST
   lon <- RNetCDF::var.get.nc(nc1, 'longitude')
   lat <- RNetCDF::var.get.nc(nc1, 'latitude')
   

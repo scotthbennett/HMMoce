@@ -39,7 +39,7 @@ calc.sst <- function(tag.sst, ptt, sst.dir, dateVec){
   tag.sst[,12] <- as.Date(dts)
   names(tag.sst)[12] <- 'dts'
   by_dte <- dplyr::group_by(tag.sst, as.factor(tag.sst$dts))  # group by unique DAILY time points
-  tag.sst <- data.frame(dplyr::summarise(by_dte, min(by_dte$Temperature), max(by_dte$Temperature)))
+  tag.sst <- data.frame(dplyr::summarise(by_dte, min(Temperature), max(Temperature)))
   colnames(tag.sst) <- list('date', 'minT', 'maxT')
   tag.sst$date <- as.Date(tag.sst$date)
   
@@ -54,6 +54,7 @@ calc.sst <- function(tag.sst, ptt, sst.dir, dateVec){
     
     # open day's sst data
     nc <- RNetCDF::open.nc(paste(sst.dir, ptt, '_', as.Date(time), '.nc', sep='')) #add lat lon in filename '.nc', sep=''))
+    #dat <- RNetCDF::var.get.nc(nc, 'analsed_sst') # for OI SST
     dat <- RNetCDF::var.get.nc(nc, 'sst') # for OI SST
     
     # calc sd of SST

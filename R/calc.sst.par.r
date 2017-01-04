@@ -40,7 +40,7 @@ calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, ncores = parallel::dete
   tag.sst[,12] <- as.Date(dts)
   names(tag.sst)[12] <- 'dts'
   by_dte <- dplyr::group_by(tag.sst, as.factor(tag.sst$dts))  # group by unique DAILY time points
-  tag.sst <- data.frame(dplyr::summarise(by_dte, min(by_dte$Temperature), max(by_dte$Temperature)))
+  tag.sst <- data.frame(dplyr::summarise(by_dte, min(Temperature), max(Temperature)))
   colnames(tag.sst) <- list('date', 'minT', 'maxT')
   tag.sst$date <- as.Date(tag.sst$date)
   udates <- unique(tag.sst$date)
@@ -55,8 +55,8 @@ calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, ncores = parallel::dete
   
   # open day's sst data
   nc1 <- RNetCDF::open.nc(paste(sst.dir, ptt, '_', as.Date(time1), '.nc', sep='')) #add lat lon in filename '.nc', sep=''))
-  #dat <- RNetCDF::var.get.nc(nc1, 'sst') # for OI SST
-  dat <- RNetCDF::var.get.nc(nc1, 'analysed_sst') # for OI SST
+  dat <- RNetCDF::var.get.nc(nc1, 'sst') # for OI SST
+  #dat <- RNetCDF::var.get.nc(nc1, 'analysed_sst') # for OI SST
   lon <- RNetCDF::var.get.nc(nc1, 'longitude')
   lat <- RNetCDF::var.get.nc(nc1, 'latitude')
   

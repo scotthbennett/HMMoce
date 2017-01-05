@@ -51,9 +51,11 @@ read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst'){
     data <- utils::read.table(paste(wd,'/', ptt, '-LightLoc.csv', sep=''), sep=',',header=T, blank.lines.skip=F,skip=2)
     data <- data[which(!is.na(data[,1])),]
     dts <- as.POSIXct(data$Day, format = findDateFormat(data$Day), tz = 'UTC')
-    #if(dts[1] > Sys.Date()){
-    #  stop('Error: dates not parsed correctly.')    
-    #  }
+    
+    if(dts[1] > Sys.Date() | dts[1] < '1990-01-01'){
+      stop('Error: dates not parsed correctly.')    
+    }
+    
     d1 <- as.POSIXct('1900-01-02') - as.POSIXct('1900-01-01')
     didx <- (dts > (tag + d1)) & (dts < (pop - d1))
     data <- data[didx,]

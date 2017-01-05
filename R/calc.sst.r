@@ -7,7 +7,8 @@
 #' @param ptt is unique tag identifier
 #' @param sst.dir local directory where remote sensing SST downloads are stored
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
-#' 
+#' @param sens.err is numeric indicating the percent sensor error in the tag sst sensor. Default is 1.
+#'
 #' @return likelihood is raster brick of likelihood surfaces representing matches
 #'   between tag-based sst and remotely sensed sst maps
 #' 
@@ -31,7 +32,7 @@
 #' 
 #' }
 
-calc.sst <- function(tag.sst, ptt, sst.dir, dateVec){
+calc.sst <- function(tag.sst, ptt, sst.dir, dateVec, sens.err = 1){
   
   start.t <- Sys.time()
   
@@ -50,7 +51,7 @@ calc.sst <- function(tag.sst, ptt, sst.dir, dateVec){
   for(i in 1:T){
     
     time <- tag.sst$date[i]
-    sst.i <- c(tag.sst$minT[i] * .95, tag.sst$maxT[i] * 1.05) # sensor error
+    sst.i <- c(tag.sst$minT[i] * (1 - sens.err / 100), tag.sst$maxT[i] * (1 + sens.err / 100)) # sensor error
     
     # open day's sst data
     nc <- RNetCDF::open.nc(paste(sst.dir, ptt, '_', as.Date(time), '.nc', sep='')) #add lat lon in filename '.nc', sep=''))

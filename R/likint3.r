@@ -11,8 +11,6 @@
 #' @export 
 
 likint3 <- function(w, wsd, minT, maxT){
-  midT = (maxT + minT) / 2
-  Tsd = (maxT - minT) / 4
   widx = w >= minT & w <= maxT & !is.na(w)
   wdf = data.frame(w = as.vector(w[widx]), wsd = as.vector(wsd[widx]))
   wdf$wsd[is.na(wdf$wsd)] = 0

@@ -33,7 +33,6 @@
 
 calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, ncores = parallel::detectCores()){
   
-  options(warn = -1)
   start.t <- Sys.time()
   
   dts <- as.POSIXct(tag.sst$Date, format = findDateFormat(tag.sst$Date))
@@ -55,8 +54,12 @@ calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, ncores = parallel::dete
   
   # open day's sst data
   nc1 <- RNetCDF::open.nc(paste(sst.dir, ptt, '_', as.Date(time1), '.nc', sep='')) #add lat lon in filename '.nc', sep=''))
-  #dat <- RNetCDF::var.get.nc(nc1, 'sst') # for OI SST
-  dat <- RNetCDF::var.get.nc(nc1, 'analysed_sst') # for OI SST
+  
+  # get correct name in sst data
+  ncnames = NULL
+  for(i in 0:4) ncnames[i+1] = RNetCDF::var.inq.nc(nc1, i)$name
+  nameidx = grep('sst', ncnames)-1
+  dat <- RNetCDF::var.get.nc(nc1, nameidx)
   lon <- RNetCDF::var.get.nc(nc1, 'longitude')
   lat <- RNetCDF::var.get.nc(nc1, 'latitude')
   
@@ -88,8 +91,7 @@ calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, ncores = parallel::dete
     
     # open day's sst data
     nc <- RNetCDF::open.nc(paste(sst.dir, ptt, '_', as.Date(time), '.nc', sep='')) #add lat lon in filename '.nc', sep=''))
-    #dat <- RNetCDF::var.get.nc(nc, 'sst') # for OI SST
-    dat <- RNetCDF::var.get.nc(nc, 'analysed_sst') # for OI SST
+    dat <- RNetCDF::var.get.nc(nc, nameidx) # for OI SST
     
     # calc sd of SST
     # focal calc on mean temp and write to sd var

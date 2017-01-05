@@ -54,8 +54,15 @@ calc.sst <- function(tag.sst, ptt, sst.dir, dateVec){
     
     # open day's sst data
     nc <- RNetCDF::open.nc(paste(sst.dir, ptt, '_', as.Date(time), '.nc', sep='')) #add lat lon in filename '.nc', sep=''))
-    #dat <- RNetCDF::var.get.nc(nc, 'analsed_sst') # for OI SST
-    dat <- RNetCDF::var.get.nc(nc, 'sst') # for OI SST
+    
+    if (i == 1){
+      # get correct name in sst data
+      ncnames = NULL
+      for(i in 0:4) ncnames[i + 1] <- RNetCDF::var.inq.nc(nc, i)$name
+      nameidx <- grep('sst', ncnames) - 1
+    }
+    
+    dat <- RNetCDF::var.get.nc(nc, nameidx) # for OI SST
     
     # calc sd of SST
     # focal calc on mean temp and write to sd var

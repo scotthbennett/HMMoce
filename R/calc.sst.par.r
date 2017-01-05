@@ -118,7 +118,7 @@ calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, ncores = parallel::dete
   
   ii = 1
   for (i in didx){
-    L.sst[,,i] <- lik.sst[[ii]]
+    L.sst[,,i] <- lik.sst[[ii]] - 0.2
     ii <- ii + 1
   }
   

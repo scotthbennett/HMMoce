@@ -58,7 +58,7 @@ calc.sst <- function(tag.sst, ptt, sst.dir, dateVec){
     if (i == 1){
       # get correct name in sst data
       ncnames = NULL
-      for(i in 0:4) ncnames[i + 1] <- RNetCDF::var.inq.nc(nc, i)$name
+      for(ii in 0:4) ncnames[ii + 1] <- RNetCDF::var.inq.nc(nc, ii)$name
       nameidx <- grep('sst', ncnames) - 1
     }
     

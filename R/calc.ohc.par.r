@@ -80,7 +80,7 @@ calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE
     pdt.i <- pdt[which(pdt$Date == time),]
     
     # open day's hycom data
-    nc <- RNetCDF::open.nc(paste(ohc.dir,'_', as.Date(time), '.nc', sep=''))
+    nc <- RNetCDF::open.nc(paste(ohc.dir, ptt, '_', as.Date(time), '.nc', sep=''))
     dat <- RNetCDF::var.get.nc(nc, 'water_temp') * RNetCDF::att.get.nc(nc, 'water_temp', attribute='scale_factor') + 
       RNetCDF::att.get.nc(nc, variable='water_temp', attribute='add_offset')
     
@@ -145,7 +145,7 @@ calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE
     sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
     
     # compare hycom to that day's tag-based ohc
-    lik.ohc <- HMMoce::likint3(ohc, sdx, minT.ohc, maxT.ohc)
+    lik.ohc <- likint3(ohc, sdx, minT.ohc, maxT.ohc)
     
     # if(i == 1){
     #   # result will be array of likelihood surfaces

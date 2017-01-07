@@ -74,7 +74,7 @@ calc.hycom.par <- function(pdt, ptt, hycom.dir, focalDim = 9, dateVec, ncores = 
     pdt.i <- pdt[which(pdt$Date == time),]
     
     # open day's hycom data
-    nc <- RNetCDF::open.nc(paste(hycom.dir,'_', as.Date(time), '.nc', sep=''))
+    nc <- RNetCDF::open.nc(paste(hycom.dir, ptt, '_', as.Date(time), '.nc', sep=''))
     dat <- RNetCDF::var.get.nc(nc, 'water_temp') * RNetCDF::att.get.nc(nc, 'water_temp', attribute='scale_factor') + 
       RNetCDF::att.get.nc(nc, variable='water_temp', attribute='add_offset')
     

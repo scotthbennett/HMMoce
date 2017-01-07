@@ -9,6 +9,7 @@
 #'   sd() of temperature grid cell. Recommend focalDim = 3 if woa.data = woa.one
 #'   and 9 if using woa.quarter.
 #' @param dateVec vector of complete dates for data range. This should be in 'Date' format
+#' @param use.se is logical indicating whether or not to use SE when using regression to predict temperature at specific depth levels.
 #' @param ncores specify number of cores, or leave blank and use whatever you have!
 #'
 #' @return a raster brick of Hycom profile likelihood
@@ -27,7 +28,7 @@
 #' }
 
 
-calc.hycom.par <- function(pdt, ptt, hycom.dir, focalDim = 9, dateVec, ncores = parallel::detectCores()){
+calc.hycom.par <- function(pdt, ptt, hycom.dir, focalDim = 9, dateVec, use.se = TRUE, ncores = parallel::detectCores()){
   
   options(warn=-1)
   
@@ -103,10 +104,17 @@ calc.hycom.par <- function(pdt, ptt, hycom.dir, focalDim = 9, dateVec, ncores = 
     #suppressWarnings(
     pred.high = stats::predict(fit.high, newdata = hycomDep, se = T, get.data = T)
     
-    # data frame for next step
-    df = data.frame(low = pred.low$fit - pred.low$se.fit * sqrt(n),
-                    high = pred.high$fit + pred.high$se.fit * sqrt(n),
-                    depth = hycomDep)
+    if (use.se){
+      # data frame for next step
+      df = data.frame(low = pred.low$fit - pred.low$se.fit * sqrt(n),
+                      high = pred.high$fit + pred.high$se.fit * sqrt(n),
+                      depth = hycomDep)
+    } else{
+      # data frame for next step
+      df = data.frame(low = pred.low$fit,# - pred.low$se.fit * sqrt(n),
+                      high = pred.high$fit,# + pred.high$se.fit * sqrt(n),
+                      depth = hycomDep)
+    }
     
     # calculate sd using Le Bris neighbor method and focal()
     sd.i = array(NA, dim = c(dim(dat)[1:2], length(depIdx)))

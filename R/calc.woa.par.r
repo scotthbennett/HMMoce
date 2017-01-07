@@ -20,6 +20,8 @@
 #'   sd() of temperature grid cell. Recommend focalDim = 3 if woa.data = woa.one
 #'   and 9 if using woa.quarter.
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
+#' @param use.se is logical indicating whether or not to use SE when using regression to predict temperature at specific depth levels.
+#'
 #' @export
 #' @return raster brick of likelihood
 #' @importFrom foreach "%dopar%"
@@ -42,7 +44,7 @@
 #' }
 #' 
 
-calc.woa.par <- function(pdt, ptt, woa.data = NULL, dateVec, focalDim = NULL, ncores = parallel::detectCores()){
+calc.woa.par <- function(pdt, ptt, woa.data = NULL, dateVec, focalDim = NULL, use.se = TRUE, ncores = parallel::detectCores()){
   
   options(warn=-1)
   start.t <- Sys.time()
@@ -108,12 +110,17 @@ ans = foreach(i = 1:T) %dopar%{
   pred.low <- stats::predict(fit.low, newdata = depth[depIdx], se = T, get.data = T)
   pred.high <- stats::predict(fit.high, newdata = depth[depIdx], se = T, get.data = T)
   
-  # data frame for next step
-  df = data.frame(
-    low = pred.low$fit - pred.low$se.fit * sqrt(n),
-    high = pred.high$fit + pred.high$se.fit * sqrt(n),
-    depth = depth[depIdx]
-  )
+  if (use.se){
+    # data frame for next step
+    df = data.frame(low = pred.low$fit - pred.low$se.fit * sqrt(n),
+                    high = pred.high$fit + pred.high$se.fit * sqrt(n),
+                    depth = depth[depIdx])
+  } else{
+    # data frame for next step
+    df = data.frame(low = pred.low$fit,# - pred.low$se.fit * sqrt(n),
+                    high = pred.high$fit,# + pred.high$se.fit * sqrt(n),
+                    depth = depth[depIdx])
+  }
   
   pdtMonth <-
     as.numeric(format(as.Date(pdt.i$Date), format = '%m'))[1]

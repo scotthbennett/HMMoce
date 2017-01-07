@@ -58,8 +58,9 @@ calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, sens.err = 1, ncores = 
   
   # get correct name in sst data
   ncnames = NULL
-  for(i in 0:4) ncnames[i+1] = RNetCDF::var.inq.nc(nc1, i)$name
-  nameidx = grep('sst', ncnames)-1
+  nmax <- RNetCDF::file.inq.nc(nc1)$nvars - 1
+  for(ii in 0:nmax) ncnames[ii + 1] <- RNetCDF::var.inq.nc(nc1, ii)$name
+  nameidx <- grep('sst', ncnames) - 1
   dat <- RNetCDF::var.get.nc(nc1, nameidx)
   lon <- RNetCDF::var.get.nc(nc1, 'longitude')
   lat <- RNetCDF::var.get.nc(nc1, 'latitude')

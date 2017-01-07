@@ -7,6 +7,7 @@
 #' @param ohc.dir directory of downloaded hycom (or other)data
 #' @param dateVec vector of complete dates for data range. This should be in 'Date' format
 #' @param bathy should the land be flagged out? defaults to TRUE
+#' @param use.se is logical indicating whether or not to use SE when using regression to predict temperature at specific depth levels.
 #' @param ncores specify number of cores, or leave blank and use whatever you have!
 #'
 #' @return a raster brick of OHC likelihood
@@ -26,7 +27,7 @@
 #' }
 
 
-calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE, ncores = parallel::detectCores()){
+calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE, use.se = TRUE, ncores = parallel::detectCores()){
   
   #max_ohc_date = max(as.Date(substr(dir(ohc.dir), 8, 17)))
   #pdt_idx = as.Date(pdt$Date)<=max_ohc_date
@@ -118,12 +119,18 @@ calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE
     #suppressWarnings(
     pred.high = stats::predict(fit.high, newdata = hycomDep, se = T, get.data = T)
     
-    
-    # data frame for next step
-    df = data.frame(low = pred.low$fit - pred.low$se.fit * sqrt(n),
-                    high = pred.high$fit + pred.high$se.fit * sqrt(n),
-                    depth = hycomDep)
-    
+    if (use.se){
+      # data frame for next step
+      df = data.frame(low = pred.low$fit - pred.low$se.fit * sqrt(n),
+                      high = pred.high$fit + pred.high$se.fit * sqrt(n),
+                      depth = hycomDep)
+    } else{
+      # data frame for next step
+      df = data.frame(low = pred.low$fit,# - pred.low$se.fit * sqrt(n),
+                      high = pred.high$fit,# + pred.high$se.fit * sqrt(n),
+                      depth = hycomDep)
+    }
+
     # isotherm is minimum temperature recorded for that time point
     if(iso.def == FALSE) isotherm <- min(df$low, na.rm = T)
     
@@ -132,7 +139,7 @@ calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE
     maxT.ohc <- cp * rho * sum(df$high - isotherm, na.rm = T) / 10000
     
     # Perform hycom integration
-    dat[dat<isotherm] <- NA
+    dat[dat < isotherm] <- NA
     dat <- dat - isotherm
     ohc <- cp * rho * apply(dat[,,depIdx], 1:2, sum, na.rm = T) / 10000 
     ohc[ohc == 0] <- NA

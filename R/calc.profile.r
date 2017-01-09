@@ -22,6 +22,7 @@
 #' @param envType is character indicating whether to compare tag-based profile
 #'   to World Ocean Atlas ('woa') or HYCOM ('hycom').
 #' @param hycom.dir is path to stored HYCOM model outputs if envType = 'hycom'
+#' @param use.se is logical indicating whether or not to use SE when using regression to predict temperature at specific depth levels.
 #' @export
 #' @return raster of likelihoods for depth-temp profile matching between tag
 #'  data and oceanographic profiles
@@ -41,7 +42,7 @@
 #' }
 #'
 
-calc.profile <- function(pdt, ptt, dat = NULL, lat = NULL, lon = NULL, dateVec, envType = 'woa', hycom.dir = NULL){
+calc.profile <- function(pdt, ptt, dat = NULL, lat = NULL, lon = NULL, dateVec, envType = 'woa', hycom.dir = NULL, use.se = TRUE){
   
   options(warn=-1)
   start.t <- Sys.time()
@@ -92,10 +93,17 @@ calc.profile <- function(pdt, ptt, dat = NULL, lat = NULL, lon = NULL, dateVec, 
     pred.low <- stats::predict(fit.low, newdata = depth[depIdx], se = T, get.data = T)
     pred.high <- stats::predict(fit.high, newdata = depth[depIdx], se = T, get.data = T)
     
-    # data frame for next step
-    df = data.frame(low = pred.low$fit - pred.low$se.fit * sqrt(n),
-                    high = pred.high$fit + pred.high$se.fit * sqrt(n),
-                    depth = depth[depIdx])
+    if (use.se){
+      # data frame for next step
+      df = data.frame(low = pred.low$fit - pred.low$se.fit * sqrt(n),
+                      high = pred.high$fit + pred.high$se.fit * sqrt(n),
+                      depth = depth[depIdx])
+    } else{
+      # data frame for next step
+      df = data.frame(low = pred.low$fit,# - pred.low$se.fit * sqrt(n),
+                      high = pred.high$fit,# + pred.high$se.fit * sqrt(n),
+                      depth = depth[depIdx])
+    }
     
     if (envType == 'woa'){
       

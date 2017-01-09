@@ -13,7 +13,7 @@
 likint3 <- function(w, wsd, minT, maxT){
   widx = w >= minT & w <= maxT & !is.na(w)
   wdf = data.frame(w = as.vector(w[widx]), wsd = as.vector(wsd[widx]))
-  wdf$wsd[is.na(wdf$wsd)] = 0
+  wdf$wsd[is.na(wdf$wsd)] = 1e-3
   # wint = apply(wdf, 1, function(x) pracma::integral(dnorm, minT, maxT, mean = x[1], sd = x[2]))
   wint = apply(wdf, 1, function(x) stats::integrate(stats::dnorm, minT, maxT, mean = x[1], sd = x[2] * 2)$value) 
   w = w * 0

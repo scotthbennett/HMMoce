@@ -13,7 +13,7 @@
 #' @param dateVec is vector of dates from tag to pop-up date by day. Only required if known.locs is not NULL.
 #' @param locs.grid is output grid from \code{setup.locs.grid}. Only required if known.locs is not NULL.
 #' @param iniloc is matrix of tag and pop locations. Default is NULL because this should be taken care of elsewhere.
-#' @param ncores specify number of cores, or leave blank and use whatever you have!
+
 #' @return a list containing: L, the overall likelihood array and L.mle, a more 
 #'   coarse version of L used later for parameter estimation
 #' @export
@@ -21,10 +21,8 @@
 #'   data sources. This will be expanded in the future based on user needs.
 #'   
 
-make.L.par <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateVec = NULL, locs.grid = NULL, iniloc = NULL, ncores = parallel::detectCores()){
+make.L.add <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateVec = NULL, locs.grid = NULL, iniloc = NULL){
 
-  stop('Error: this function is not yet working.')
-  
   if(!is.null(known.locs)){
     print('Input known locations are being used...')
     # convert input date, lat, lon to likelihood surfaces with dim(L1)
@@ -142,16 +140,16 @@ make.L.par <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, d
     }
     
     for(ii in idx3){
-      L[[ii]] = L1[[ii]] * L2[[ii]] * L3[[ii]] # when all have data
+      L[[ii]] = (L1[[ii]] + L2[[ii]] + L3[[ii]]) / 3 # when all have data
     }
     
     for(ii in idx2){
       if(naL1idx[ii] & naL2idx[ii]){
-        L[[ii]] <- L1[[ii]] * L2[[ii]]
+        L[[ii]] <- (L1[[ii]] + L2[[ii]]) / 2
       } else if(naL1idx[ii] & naL3idx[ii]){
-        L[[ii]] <- L1[[ii]] * L3[[ii]]
+        L[[ii]] <- (L1[[ii]] + L3[[ii]]) / 2
       } else if(naL2idx[ii] & naL3idx[ii]){
-        L[[ii]] <- L2[[ii]] * L3[[ii]]
+        L[[ii]] <- (L2[[ii]] + L3[[ii]]) / 2
       }
     }
     

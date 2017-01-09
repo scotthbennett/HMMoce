@@ -49,25 +49,27 @@ calc.gpe2 <- function(locs, locDates, iniloc, locs.grid, dateVec, errEll = TRUE,
     stop('Error: Currently gpeOnly must be set to TRUE otherwise duplicate dates are handled improperly.')
   }
   
-  if(any(duplicated(locDates))){
+  #if(any(duplicated(locDates))){
     # run a simplify function
-    locList <- simplifyLocs(locs, locDates)
-    locs <- locList$locs; locDates <- locList$locDates
-  }
+  #  locList <- simplifyLocs(locs, locDates)
+  #  locs <- locList$locs; locDates <- locList$locDates
+  #}
   
   # set up results array
   row <- dim(locs.grid$lon)[1]
   col <- dim(locs.grid$lon)[2]
+  lat <- locs.grid$lat[,1]
+  lon <- locs.grid$lon[1,]
   L.gpe2 <- array(0, dim = c(col, row, length(dateVec)))
   
   # add tag/pop locations as known
-  ilo <- which.min(abs(locs.grid$lon[1,] - iniloc$lon[1]))
-  ila <- which.min(abs(locs.grid$lat[,1] - iniloc$lat[1]))
-  L.gpe2[ilo, ila, 1] <- 1   # Initial location is known
+  #ilo <- which.min(abs(locs.grid$lon[1,] - iniloc$lon[1]))
+  #ila <- which.min(abs(locs.grid$lat[,1] - iniloc$lat[1]))
+  #L.gpe2[ilo, ila, 1] <- 1   # Initial location is known
   
-  elo <- which.min(abs(locs.grid$lon[1,] - iniloc$lon[2]))
-  ela <- which.min(abs(locs.grid$lat[,1] - iniloc$lat[2]))
-  L.gpe2[elo, ela, length(dateVec)] <- 1  # End location is known
+  #elo <- which.min(abs(locs.grid$lon[1,] - iniloc$lon[2]))
+  #ela <- which.min(abs(locs.grid$lat[,1] - iniloc$lat[2]))
+  #L.gpe2[elo, ela, length(dateVec)] <- 1  # End location is known
   
   print(paste('Starting iterations through deployment period...'))
   
@@ -77,23 +79,54 @@ calc.gpe2 <- function(locs, locDates, iniloc, locs.grid, dateVec, errEll = TRUE,
       # set index to identify position in locs file
       idx <- which(locDates == dateVec[t])
       
-      if(locs$Type[idx] == 'GPE'){ #locs includes GPE
+      if (nrow(locs[idx,]) > 1){
         
-        if(errEll == FALSE){
-          # create longitude likelihood based on GPE data
-          slon.sd <- locs$Error.Semi.minor.axis[idx] / 1000 / 111 #semi minor axis
-          # use normally distributed error from position using fixed std dev
-          L.light <- stats::dnorm(t(locs.grid$lon), locs$Longitude[idx], slon.sd)
+        L.gpe.try <- array(0, dim = c(col, row, nrow(locs[idx,])))
+        
+        for (ii in 1:nrow(locs[idx,])){
+          idx.ii <- idx[ii]
+          locs.ii <- locs[idx.ii,]
           
-          L.gpe2[,,t] <- L.light
-          
-        } else if(errEll == TRUE){
-          
-          L.gpe2[,,t] <- calc.errEll(locs[idx,], locs.grid)
+          if(locs.ii$Type == 'GPE'){ #locs includes GPE
+            if(errEll == FALSE){
+              if (locs.ii$Error.Semi.minor.axis < 100000) locs.ii$Error.Semi.minor.axis <- 100000
+              # create longitude likelihood based on GPE data
+              slon.sd <- locs.ii$Error.Semi.minor.axis / 1000 / 111 #semi minor axis
+              # use normally distributed error from position using fixed std dev
+              L.gpe.try[,,ii] <- stats::dnorm(t(locs.grid$lon), locs.ii$Longitude, slon.sd)
+              
+            } else if(errEll == TRUE){
+              if (locs.ii$Error.Semi.minor.axis < 100000) locs.ii$Error.Semi.minor.axis <- 100000
+              L.gpe.try[,,ii] <- calc.errEll(locs.ii, locs.grid)
+              
+            }
+            
+          } 
           
         }
         
-      } 
+        L.gpe2[,,t] <- apply(L.gpe.try, 1:2, sum, na.rm = T)
+        
+      } else{
+        if(locs$Type[idx] == 'GPE'){ #locs includes GPE
+          
+          if(errEll == FALSE){
+            if (locs$Error.Semi.minor.axis[idx] < 100000) locs$Error.Semi.minor.axis[idx] <- 100000
+            # create longitude likelihood based on GPE data
+            slon.sd <- locs$Error.Semi.minor.axis[idx] / 1000 / 111 #semi minor axis
+            # use normally distributed error from position using fixed std dev
+            L.light <- stats::dnorm(t(locs.grid$lon), locs$Longitude[idx], slon.sd)
+            
+            L.gpe2[,,t] <- L.light
+            
+          } else if(errEll == TRUE){
+            if (locs$Error.Semi.minor.axis[idx] < 100000) locs$Error.Semi.minor.axis[idx] <- 100000
+            L.gpe2[,,t] <- calc.errEll(locs[idx,], locs.grid)
+            
+          }
+          
+        }  
+      }
       
     } 
     

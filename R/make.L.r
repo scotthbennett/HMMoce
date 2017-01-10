@@ -141,17 +141,49 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
     
     for(ii in idx3){
       L[[ii]] = L1[[ii]] * L2[[ii]] * L3[[ii]] # when all have data
+      
+      if (raster::cellStats(L[[ii]], sum, na.rm=T) == 0 & naL1idx[ii] & naL2idx[ii]){
+        # revert to idx2 and need to figure out which to use
+        L[[ii]] <- L1[[ii]] * L2[[ii]]
+      }
+      
+      if(raster::cellStats(L[[ii]], sum, na.rm=T) == 0 & naL1idx[ii] & naL3idx[ii]){
+        L[[ii]] <- L1[[ii]] * L3[[ii]]
+      }
+      
+      if(raster::cellStats(L[[ii]], sum, na.rm=T) == 0 & naL2idx[ii] & naL3idx[ii]){
+        L[[ii]] <- L2[[ii]] * L3[[ii]]
+      }
+      
+      if (raster::cellStats(L[[ii]], sum, na.rm=T) == 0){
+        # revert to idx1 if the 2 likelihoods we are using do not overlap and result in all 0's
+        L[[ii]] = L1[[ii]] + L2[[ii]] + L3[[ii]]# when only 1 has data
+      }
+      
     }
     
     for(ii in idx2){
-      if(naL1idx[ii] & naL2idx[ii]){
+      if(raster::cellStats(L[[ii]], sum, na.rm=T) == 0 & naL1idx[ii] & naL2idx[ii]){
         L[[ii]] <- L1[[ii]] * L2[[ii]]
-      } else if(naL1idx[ii] & naL3idx[ii]){
+      } 
+      
+      if(raster::cellStats(L[[ii]], sum, na.rm=T) == 0 & naL1idx[ii] & naL3idx[ii]){
         L[[ii]] <- L1[[ii]] * L3[[ii]]
-      } else if(naL2idx[ii] & naL3idx[ii]){
+      }
+      
+      if(raster::cellStats(L[[ii]], sum, na.rm=T) == 0 & naL2idx[ii] & naL3idx[ii]){
         L[[ii]] <- L2[[ii]] * L3[[ii]]
       }
+      
+      if (raster::cellStats(L[[ii]], sum, na.rm=T) == 0){
+        # revert to idx1 if the 2 likelihoods we are using do not overlap and result in all 0's
+        L[[ii]] = L1[[ii]] + L2[[ii]] + L3[[ii]]# when only 1 has data
+        
+      }
+      
     }
+    
+    
     
   }
   
@@ -196,6 +228,12 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
       L[[bb]] <- L.locs[[bb]]
     }
   }
+  
+  sumIdx <- which(raster::cellStats(L, sum, na.rm = T) != 0)
+  for (i in sumIdx){
+    L[[i]] <- L[[i]] / raster::cellStats(L[[i]], max, na.rm = T)
+  }
+  #L[[sumIdx]] <- L[[sumIdx]] / raster::cellStats(L[[sumIdx]], max, na.rm = T)
   
   # CREATE A MORE COARSE RASTER FOR PARAMETER ESTIMATION LATER
   L.mle <- raster::resample(L, L.mle.res)

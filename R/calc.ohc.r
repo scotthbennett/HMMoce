@@ -29,7 +29,7 @@
 #'                   isotherm = '')
 #' }
 
-calc.ohc <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE, use.se = TRUE, verbose = FALSE){
+calc.ohc <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE, use.se = TRUE){
 
   options(warn=1)
   
@@ -55,10 +55,6 @@ calc.ohc <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE, us
     time <- udates[i]
     pdt.i <- pdt[which(pdt$Date == time),]
 
-    if (verbose){
-      print(paste('Starting ', time,'...',sep=''))
-    }
-    
     # open day's hycom data
     nc <- RNetCDF::open.nc(paste(ohc.dir, ptt,'_', as.Date(time), '.nc', sep=''))
     dat <- RNetCDF::var.get.nc(nc, 'water_temp') * RNetCDF::att.get.nc(nc, 'water_temp', attribute='scale_factor') + 

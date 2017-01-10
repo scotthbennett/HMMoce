@@ -206,7 +206,7 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1){
     }
     
     if(raster::cellStats(L.light[[t]], 'max', na.rm=T) != 0){
-      L.light[[t]] <- (L.light[[t]] / raster::cellStats(L.light[[t]], 'max')) - 0.2
+      L.light[[t]] <- L.light[[t]] / raster::cellStats(L.light[[t]], 'max')
     }
     
   } # end for loop

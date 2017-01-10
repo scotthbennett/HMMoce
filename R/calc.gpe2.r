@@ -130,7 +130,7 @@ calc.gpe2 <- function(locs, locDates, iniloc, locs.grid, dateVec, errEll = TRUE,
       
     } 
     
-    L.gpe2[,,t] = L.gpe2[,,t] / max(L.gpe2[,,t], na.rm=T) - 0.2
+    L.gpe2[,,t] = L.gpe2[,,t] / max(L.gpe2[,,t], na.rm=T)
     
   }
   

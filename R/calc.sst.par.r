@@ -121,7 +121,7 @@ calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, sens.err = 1, ncores = 
   
   ii = 1
   for (i in didx){
-    L.sst[,,i] <- lik.sst[[ii]] - 0.2
+    L.sst[,,i] <- lik.sst[[ii]]
     ii <- ii + 1
   }
   

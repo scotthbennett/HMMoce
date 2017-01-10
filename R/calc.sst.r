@@ -83,7 +83,7 @@ calc.sst <- function(tag.sst, ptt, sst.dir, dateVec, sens.err = 1){
     }
     
     idx <- which(dateVec == as.Date(time))
-    L.sst[,,idx] = (lik.sst / max(lik.sst, na.rm=T)) - 0.2
+    L.sst[,,idx] = lik.sst / max(lik.sst, na.rm=T)
     
   }
     

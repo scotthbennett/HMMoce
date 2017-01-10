@@ -29,7 +29,7 @@
 #'                   isotherm = '')
 #' }
 
-calc.ohc <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE, use.se = TRUE){
+calc.ohc <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE, use.se = TRUE, verbose = FALSE){
 
   options(warn=1)
   
@@ -55,6 +55,10 @@ calc.ohc <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE, us
     time <- udates[i]
     pdt.i <- pdt[which(pdt$Date == time),]
 
+    if (verbose){
+      print(paste('Starting ', time,'...',sep=''))
+    }
+    
     # open day's hycom data
     nc <- RNetCDF::open.nc(paste(ohc.dir, ptt,'_', as.Date(time), '.nc', sep=''))
     dat <- RNetCDF::var.get.nc(nc, 'water_temp') * RNetCDF::att.get.nc(nc, 'water_temp', attribute='scale_factor') + 
@@ -134,14 +138,15 @@ calc.ohc <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE, us
 
     # compare hycom to that day's tag-based ohc
     lik.ohc <- likint3(ohc, sdx, minT.ohc, maxT.ohc)
-
+    lik.ohc <- lik.ohc / max(lik.ohc, na.rm = T)
+    
     if(i == 1){
       # result will be array of likelihood surfaces
       L.ohc <- array(0, dim = c(dim(lik.ohc), length(dateVec)))
     }
     
     idx <- which(dateVec == as.Date(time))
-    L.ohc[,,idx] = (lik.ohc / max(lik.ohc, na.rm=T)) - 0.2
+    L.ohc[,,idx] = lik.ohc
 
   }
 

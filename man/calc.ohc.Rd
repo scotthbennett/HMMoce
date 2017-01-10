@@ -4,7 +4,8 @@
 \alias{calc.ohc}
 \title{Calculate Ocean Heat Content (OHC) probability surface}
 \usage{
-calc.ohc(pdt, ptt, isotherm = "", ohc.dir, dateVec, bathy = TRUE)
+calc.ohc(pdt, ptt, isotherm = "", ohc.dir, dateVec, bathy = TRUE,
+  use.se = TRUE)
 }
 \arguments{
 \item{pdt}{is variable containing tag-collected PDT data}
@@ -21,6 +22,8 @@ on daily tag data. Otherwise, numeric isotherm constraint can be specified
 
 \item{bathy}{is logical indicating whether or not a bathymetric mask should
 be applied}
+
+\item{use.se}{is logical indicating whether or not to use SE when using regression to predict temperature at specific depth levels.}
 }
 \value{
 likelihood is raster brick of likelihood surfaces representing 

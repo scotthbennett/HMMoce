@@ -8,6 +8,7 @@
 #' @param sst.dir local directory where remote sensing SST downloads are stored
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
 #' @param sens.err is numeric indicating the percent sensor error in the tag sst sensor. Default is 1.
+#' @param ncores is integer indicating number of cores used in this parallel computation. Defaults to using a detection function that chooses cores for you.
 #' 
 #' @return likelihood is raster brick of likelihood surfaces representing matches
 #'   between tag-based sst and remotely sensed sst maps
@@ -84,7 +85,7 @@ calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, sens.err = 1, ncores = 
   cl = parallel::makeCluster(ncores)
   doParallel::registerDoParallel(cl, cores = ncores)
   
-  ans = foreach(i = 1:T) %dopar%{
+  ans = foreach::foreach(i = 1:T) %dopar%{
     
   #for(i in 1:T){
     

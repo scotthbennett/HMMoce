@@ -4,7 +4,7 @@
 \alias{calc.hycom.par}
 \title{Hycom Profile LIkelihood in Parallel}
 \usage{
-calc.hycom.par(pdt, ptt, hycom.dir, focalDim = 9, dateVec,
+calc.hycom.par(pdt, ptt, hycom.dir, focalDim = 9, dateVec, use.se = TRUE,
   ncores = parallel::detectCores())
 }
 \arguments{
@@ -19,6 +19,8 @@ sd() of temperature grid cell. Recommend focalDim = 3 if woa.data = woa.one
 and 9 if using woa.quarter.}
 
 \item{dateVec}{vector of complete dates for data range. This should be in 'Date' format}
+
+\item{use.se}{is logical indicating whether or not to use SE when using regression to predict temperature at specific depth levels.}
 
 \item{ncores}{specify number of cores, or leave blank and use whatever you have!}
 }

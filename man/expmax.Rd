@@ -4,7 +4,7 @@
 \alias{expmax}
 \title{Expectation-maximization framework for state-switching}
 \usage{
-expmax(p.init, g, L, K1, K2, niter = 1000, threshold = 0.01)
+expmax(p.init, g, L, K1, K2, niter = 1000, threshold = 0.01, save = F)
 }
 \arguments{
 \item{p.init}{a vector of length 2. The first is the probability of staying 
@@ -23,6 +23,10 @@ state 2.}
 
 \item{threshold}{is threshold of percent change that we consider satisfactory
 for convergence. Default is 1\%.}
+
+\item{save}{is logical indicating whether the function should save and return
+a 2 col dataframe of the iterations it went through before crossing the
+convergence threshold. Defaults to not saving.}
 }
 \value{
 a 2x2 matrix of state switching probabilities. See P.init input for 
@@ -51,8 +55,8 @@ P.final <- expmax(p.init, g = g, L = L, K1, K2)
 }
 }
 \references{
-Woillez M, Fablet R, Ngo TT, et al. (2016) A HMM-based model to
-  geolocate pelagic fish from high-resolution individual temperature and
+Woillez M, Fablet R, Ngo TT, et al. (2016) A HMM-based model to 
+  geolocate pelagic fish from high-resolution individual temperature and 
   depth histories: European sea bass as a case study. Ecol Modell 321:10-22.
 }
 

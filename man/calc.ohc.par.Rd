@@ -6,7 +6,7 @@
 Calculate Ocean Heat Content (OHC) probability surface in parallel}
 \usage{
 calc.ohc.par(pdt, ptt, isotherm = "", ohc.dir, dateVec, bathy = TRUE,
-  ncores = detectCores())
+  use.se = TRUE, ncores = parallel::detectCores())
 }
 \arguments{
 \item{pdt}{input PAT data see \code{\link{extract.pdt}}}
@@ -20,6 +20,8 @@ calc.ohc.par(pdt, ptt, isotherm = "", ohc.dir, dateVec, bathy = TRUE,
 \item{dateVec}{vector of complete dates for data range. This should be in 'Date' format}
 
 \item{bathy}{should the land be flagged out? defaults to TRUE}
+
+\item{use.se}{is logical indicating whether or not to use SE when using regression to predict temperature at specific depth levels.}
 
 \item{ncores}{specify number of cores, or leave blank and use whatever you have!}
 }

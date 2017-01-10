@@ -34,8 +34,7 @@ Imports:
 Suggests: 
     fields,
     knitr,
-    rmarkdown,
-    rworldmap
+    rmarkdown
 RoxygenNote: 5.0.1
 URL: http://www.camrinbraun.com/HMMoce/
 BugReports: https://github.com/camrinbraun/HMMoce/issues

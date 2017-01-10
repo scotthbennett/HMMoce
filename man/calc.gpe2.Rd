@@ -4,11 +4,14 @@
 \alias{calc.gpe2}
 \title{Calculate Light Likelihood from GPE2 Output}
 \usage{
-calc.gpe2(locs, iniloc, locs.grid, dateVec, errEll = TRUE, gpeOnly = TRUE)
+calc.gpe2(locs, locDates, iniloc, locs.grid, dateVec, errEll = TRUE,
+  gpeOnly = TRUE)
 }
 \arguments{
 \item{locs}{is -Locations file output from DAP/Tag Portal for WC tags and 
 contains GPS, Argos, and GPE locations as applicable.}
+
+\item{locDates}{is vector of dates from locs dataframe}
 
 \item{iniloc}{is 2 x 5 dataframe containing day, month, year, lat, lon for 
 both tag and pop locations}

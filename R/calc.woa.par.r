@@ -21,6 +21,7 @@
 #'   and 9 if using woa.quarter.
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
 #' @param use.se is logical indicating whether or not to use SE when using regression to predict temperature at specific depth levels.
+#' @param ncores is integer indicating number of cores used in this parallel computation. Defaults to using a detection function that chooses cores for you.
 #'
 #' @export
 #' @return raster brick of likelihood
@@ -81,7 +82,7 @@ calc.woa.par <- function(pdt, ptt, woa.data = NULL, dateVec, focalDim = NULL, us
   doParallel::registerDoParallel(cl, cores = ncores)
   
   
-ans = foreach(i = 1:T) %dopar%{
+ans = foreach::foreach(i = 1:T) %dopar%{
   
   # define time based on tag data
   time <- as.Date(udates[i])

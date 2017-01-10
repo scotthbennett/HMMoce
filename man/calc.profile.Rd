@@ -5,7 +5,7 @@
 \title{Calculate Depth-temperature profile based likelihood}
 \usage{
 calc.profile(pdt, ptt, dat = NULL, lat = NULL, lon = NULL, dateVec,
-  envType = "woa", hycom.dir = NULL)
+  envType = "woa", hycom.dir = NULL, use.se = TRUE)
 }
 \arguments{
 \item{pdt}{is -PDT data from WC psat tag summarizing depth/temperature data 
@@ -26,6 +26,8 @@ envType = 'hycom'.}
 to World Ocean Atlas ('woa') or HYCOM ('hycom').}
 
 \item{hycom.dir}{is path to stored HYCOM model outputs if envType = 'hycom'}
+
+\item{use.se}{is logical indicating whether or not to use SE when using regression to predict temperature at specific depth levels.}
 }
 \value{
 raster of likelihoods for depth-temp profile matching between tag

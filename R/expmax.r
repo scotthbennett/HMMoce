@@ -15,12 +15,15 @@
 #' @param niter is integer that determines number of iterations to perform
 #' @param threshold is threshold of percent change that we consider satisfactory
 #'   for convergence. Default is 1\%.
+#' @param save is logical indicating whether the function should save and return
+#'   a 2 col dataframe of the iterations it went through before crossing the
+#'   convergence threshold. Defaults to not saving.
 #'   
 #' @return a 2x2 matrix of state switching probabilities. See P.init input for 
 #'   more information.
 #' @export
-#' @references Woillez M, Fablet R, Ngo TT, et al. (2016) A HMM-based model to
-#'   geolocate pelagic fish from high-resolution individual temperature and
+#' @references Woillez M, Fablet R, Ngo TT, et al. (2016) A HMM-based model to 
+#'   geolocate pelagic fish from high-resolution individual temperature and 
 #'   depth histories: European sea bass as a case study. Ecol Modell 321:10-22.
 #' @examples 
 #' \dontrun{
@@ -61,13 +64,13 @@ expmax <- function(p.init, g, L, K1, K2, niter = 1000, threshold = .01, save = F
   save.p[,1] <- p.init[1,1]; save.p[,2] <- p.init[2,2]
 
   # create progress bar
-  pb <- txtProgressBar(min = 1, max = niter, style = 3)
+  pb <- utils::txtProgressBar(min = 1, max = niter, style = 3)
   
   for (i in 1:niter){
     
     # update progress bar
     Sys.sleep(0.001)
-    setTxtProgressBar(pb, i)
+    utils::setTxtProgressBar(pb, i)
     
     if (i == 1){
       P <- p.init

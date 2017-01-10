@@ -5,7 +5,7 @@
 \title{Calculate WOA profile in parallel}
 \usage{
 calc.woa.par(pdt, ptt, woa.data = NULL, dateVec, focalDim = NULL,
-  ncores = parallel::detectCores())
+  use.se = TRUE, ncores = parallel::detectCores())
 }
 \arguments{
 \item{pdt}{is PDT data from WC psat tag summarizing depth/temperature data 
@@ -20,6 +20,10 @@ over a programmed time interval}
 \item{focalDim}{is integer for dimensions of raster::focal used to calculate
 sd() of temperature grid cell. Recommend focalDim = 3 if woa.data = woa.one
 and 9 if using woa.quarter.}
+
+\item{use.se}{is logical indicating whether or not to use SE when using regression to predict temperature at specific depth levels.}
+
+\item{ncores}{is integer indicating number of cores used in this parallel computation. Defaults to using a detection function that chooses cores for you.}
 }
 \value{
 raster brick of likelihood

@@ -1,10 +1,16 @@
 #' Calculates movement parameters used for behavior kernels
 #' 
-#' \code{calc.param}
+#' \code{calc.param} calculates movement parameters used to generate kernels
 #' 
-#' @param migr.spd is numeric indicating movement speed of animal (in m/s) while in migratory behavior state.
-#' @param resid.spd is numeric indicating movement speed of animal (in m/s) while in resident behavior state. If not specified, default is 10% of migratory speed. 
+#' Movement parameters for each of two behavioral modes are generated using an input grid
+#' and user-input speed (m s) for at least the migratory state.
+#' 
+#' @param migr.spd is numeric indicating movement speed of animal (in m s) while in migratory behavior state.
+#' @param resid.spd is numeric indicating movement speed of animal (in m s) while in resident behavior state. If not specified, default is 10 percent of migratory speed. 
 #' @param g is grid from \code{setup.grid}
+#' 
+#' @export
+#' @return a list of movement parameters
 
 calc.param <- function(migr.spd, resid.spd = NULL, g){
   

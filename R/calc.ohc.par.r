@@ -75,7 +75,7 @@ calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE
   cl = parallel::makeCluster(ncores)
   doParallel::registerDoParallel(cl, cores = ncores)
   
-  ans = foreach(i = 1:T) %dopar%{
+  ans = foreach::foreach(i = 1:T) %dopar%{
     
     time <- as.Date(udates[i])
     pdt.i <- pdt[which(pdt$Date == time),]

@@ -140,16 +140,16 @@ make.L.add <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, d
     }
     
     for(ii in idx3){
-      L[[ii]] = (L1[[ii]] + L2[[ii]] + L3[[ii]]) / 3 # when all have data
+      L[[ii]] = (L1[[ii]] + L2[[ii]] + L3[[ii]]) # when all have data
     }
     
     for(ii in idx2){
       if(naL1idx[ii] & naL2idx[ii]){
-        L[[ii]] <- (L1[[ii]] + L2[[ii]]) / 2
+        L[[ii]] <- (L1[[ii]] + L2[[ii]])
       } else if(naL1idx[ii] & naL3idx[ii]){
-        L[[ii]] <- (L1[[ii]] + L3[[ii]]) / 2
+        L[[ii]] <- (L1[[ii]] + L3[[ii]])
       } else if(naL2idx[ii] & naL3idx[ii]){
-        L[[ii]] <- (L2[[ii]] + L3[[ii]]) / 2
+        L[[ii]] <- (L2[[ii]] + L3[[ii]])
       }
     }
     

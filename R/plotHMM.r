@@ -12,6 +12,7 @@
 #'   track collected by SPOT or GPS, for example. Default is NULL.
 #' @param resid is logical indicating whether you want to include a residual plot. This is not yet functional.
 #' @param save.plot is logical indicating whether you want the plot written to disk using \code{pdf}.
+#' @importFrom fields "world"
 #' 
 #' @return NULL. A plot is rendered on screen or written to disk.
 #' @export

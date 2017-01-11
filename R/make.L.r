@@ -90,23 +90,20 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
     #       naLidx==2, both have data
     idx1 = which(naLidx == 1)
     idx2 = which(naLidx == 2)
-
     
     # INPUTS GET ADDED/MULTIP TOGETHER FOR FINAL L
-    # THESE DONT WORK
-    #L[[idx1]] <- L1[[idx1]] + L2[[idx1]] 
-    #L[[idx1]] <- overlay(L1[[idx1]], L2[[idx1]], fun=function(a,b){a + b})
-    
-    # BUT THIS DOES
     for(ii in idx1){
       L[[ii]] = L1[[ii]] + L2[[ii]] # when only 1 has data
     }
     
     for(ii in idx2){
       L[[ii]] = L1[[ii]] * L2[[ii]] # when both have data
-    }
+      
+      if (raster::cellStats(L[[ii]], sum, na.rm=T) == 0){
+        L[[ii]] = L2[[ii]] # when only 1 has data
+      }
 
-    
+    }
 
   } else if(!is.null(L2) & !is.null(L3)){
     print('Three likelihood rasters have been specified...')

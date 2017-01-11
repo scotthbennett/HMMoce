@@ -18,7 +18,7 @@
 #'   HYCOM
 #'   
 #' @export
-#' @seealso \code{\link{calc.profile}}
+#' @seealso \code{\link{calc.woa}}
 #' @examples
 #' \dontrun{
 #' # depth-temp profile data

@@ -21,6 +21,7 @@ Depends:
     foreach
 Imports: 
     dplyr,
+    fields,
     imager,
     locfit,
     lubridate,
@@ -32,7 +33,6 @@ Imports:
     parallel,
     doParallel
 Suggests: 
-    fields,
     knitr,
     rmarkdown
 RoxygenNote: 5.0.1

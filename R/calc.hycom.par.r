@@ -134,7 +134,26 @@ calc.hycom.par <- function(pdt, ptt, hycom.dir, focalDim = 9, dateVec, use.se = 
     
     for (b in 1:length(depIdx)) {
       #calculate the likelihood for each depth level, b
-      lik.pdt[,,b] = likint3(dat[,,depIdx[b]], sd.i[,,b], df[b, 1], df[b, 2])
+      lik.try <- try(likint3(dat.i[,,depIdx[b]], sd.i[,,b], df[b, 1], df[b, 2]), TRUE)
+      
+      if(class(lik.try) == 'try-error' & use.se == FALSE){
+        df[b,1] <- pred.low$fit[b] - pred.low$se.fit[b] * sqrt(n)
+        df[b,2] <- pred.high$fit[b] - pred.high$se.fit[b] * sqrt(n)
+        
+        lik.try <- try(likint3(dat.i[,,depIdx[b]], sd.i[,,b], df[b, 1], df[b, 2]), TRUE)
+        
+        if (class(lik.try) == 'try-error'){
+          lik.try <- dat.i[,,depIdx[b]] * 0
+          warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral for ', time, '...', sep=''))
+        }
+        
+      } else if (class(lik.try) == 'try-error' & use.se == TRUE){
+        lik.try <- dat.i[,,depIdx[b]] * 0
+        warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral for ', time, '...', sep=''))
+      }
+      
+      lik.pdt[,,b] <- lik.try
+      
     }
     
     # multiply likelihood across depth levels for each day

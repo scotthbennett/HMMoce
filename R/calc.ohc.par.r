@@ -152,7 +152,33 @@ calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE
     sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
     
     # compare hycom to that day's tag-based ohc
-    lik.ohc <- likint3(ohc, sdx, minT.ohc, maxT.ohc)
+    #lik.ohc <- likint3(ohc, sdx, minT.ohc, maxT.ohc)
+    
+    lik.try <- try(likint3(ohc, sdx, minT.ohc, maxT.ohc), TRUE)
+    
+    if(class(lik.try) == 'try-error' & use.se == FALSE){
+      
+      # try ohc again with use.se = T
+      df = data.frame(low = pred.low$fit - pred.low$se.fit * sqrt(n),
+                      high = pred.high$fit + pred.high$se.fit * sqrt(n),
+                      depth = hycomDep)
+      
+      minT.ohc <- cp * rho * sum(df$low - isotherm, na.rm = T) / 10000
+      maxT.ohc <- cp * rho * sum(df$high - isotherm, na.rm = T) / 10000
+      
+      lik.try <- try(likint3(ohc, sdx, minT.ohc, maxT.ohc), TRUE)
+      
+      if (class(lik.try) == 'try-error'){
+        lik.try <- ohc * 0
+        warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral for ', time, '...', sep=''))
+      }
+      
+    } else if (class(lik.try) == 'try-error' & use.se == TRUE){
+      lik.try <- ohc * 0
+      warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral for ', time, '...', sep=''))
+    }
+    
+    lik.ohc <- lik.try
     
     # if(i == 1){
     #   # result will be array of likelihood surfaces

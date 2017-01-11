@@ -150,12 +150,31 @@ calc.woa <- function(pdt, ptt, woa.data = NULL, dateVec, focalDim = NULL, use.se
   
   for (b in 1:length(depIdx)) {
     #calculate the likelihood for each depth level, b
-    lik.pdt[,,b] = likint3(dat.i[,,depIdx[b]], sd.i[,,b], df[b, 1], df[b, 2])
+    lik.try <- try(likint3(dat.i[,,depIdx[b]], sd.i[,,b], df[b, 1], df[b, 2]), TRUE)
+    
+    if(class(lik.try) == 'try-error' & use.se == FALSE){
+      df[b,1] <- pred.low$fit[b] - pred.low$se.fit[b] * sqrt(n)
+      df[b,2] <- pred.high$fit[b] - pred.high$se.fit[b] * sqrt(n)
+      
+      lik.try <- try(likint3(dat.i[,,depIdx[b]], sd.i[,,b], df[b, 1], df[b, 2]), TRUE)
+      
+      if (class(lik.try) == 'try-error'){
+        lik.try <- dat.i[,,depIdx[b]] * 0
+        warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral for ', time, '...', sep=''))
+      }
+      
+    } else if (class(lik.try) == 'try-error' & use.se == TRUE){
+      lik.try <- dat.i[,,depIdx[b]] * 0
+      warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral for ', time, '...', sep=''))
+    }
+    
+    lik.pdt[,,b] <- lik.try
+    
   }
   
   # multiply likelihood across depth levels for each day
-  lik.pdt <- apply(lik.pdt, 1:2, prod, na.rm = F)
-  
+  lik.pdt <- apply(lik.pdt, 1:2, prod, na.rm = T)
+
   # identify date index and add completed likelihood to L.pdt array    
   idx <- which(dateVec == as.Date(time))
   L.prof[,,idx] = (lik.pdt / max(lik.pdt, na.rm=T)) - 0.2

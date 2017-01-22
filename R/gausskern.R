@@ -24,6 +24,7 @@
 #'   translated to R by Benjamin Galuardi
 
 gausskern <- function(siz, sigma, muadv = 0){
+  if(round(siz) < 1) siz = 1
   x = 1:round(siz)
   mu = c(mean(x), mean(x)) + muadv
   #fx = (matrix(exp((-0.5 * (x - mu[1]) / sigma) ^ 2)) / (sqrt(2 * pi) * sigma))

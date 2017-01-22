@@ -193,6 +193,11 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
      }
   }
   
+  sumIdx <- which(raster::cellStats(L, sum, na.rm = T) != 0)
+  for (i in sumIdx){
+    L[[i]] <- L[[i]] / raster::cellStats(L[[i]], max, na.rm = T)
+  }
+  
   if(!is.null(iniloc)){
     
     if(!exists('L.locs')){
@@ -225,12 +230,6 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
       L[[bb]] <- L.locs[[bb]]
     }
   }
-  
-  sumIdx <- which(raster::cellStats(L, sum, na.rm = T) != 0)
-  for (i in sumIdx){
-    L[[i]] <- L[[i]] / raster::cellStats(L[[i]], max, na.rm = T)
-  }
-  #L[[sumIdx]] <- L[[sumIdx]] / raster::cellStats(L[[sumIdx]], max, na.rm = T)
   
   # CREATE A MORE COARSE RASTER FOR PARAMETER ESTIMATION LATER
   L.mle <- raster::resample(L, L.mle.res)

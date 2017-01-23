@@ -58,7 +58,7 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
   if(is.null(L2) & is.null(L3)){
     print('One likelihood raster has been specified...')
     
-    L <- L1
+    L <- L1 * 0
     
     # GET RID OF NA VALUES
     L[is.na(L)] <- 0
@@ -200,6 +200,8 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
   
   if(!is.null(iniloc)){
     
+    #print('Entering iniloc loop...')
+    
     if(!exists('L.locs')){
       L.locs <- L1 * 0
       idx <- c(1, length(dateVec))
@@ -217,6 +219,7 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
 
     # assign the known location for this day, i, as 1 in likelihood raster
     L.locs[[1]][raster::cellFromXY(L.locs[[1]], iniloc[1,c(5,4)])] <- 1e20
+    #print(raster::cellStats(L.locs[[1]], max))
     
     # pop up location
     x = which.min((iniloc$lon[2] - lon) ^ 2)
@@ -225,6 +228,8 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
     # assign the known location for this day, i, as 1 in likelihood raster
     L.locs[[length(dateVec)]][raster::cellFromXY(L.locs[[length(dateVec)]], iniloc[2,c(5,4)])] <- 1e20
     
+    #print(raster::cellStats(L.locs[[108]], max))
+    #print(idx)
     # add known to L
     for(bb in idx){
       L[[bb]] <- L.locs[[bb]]

@@ -50,9 +50,11 @@ read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst'){
     # READ IN LIGHT DATA FROM WC FILES
     data <- utils::read.table(paste(wd,'/', ptt, '-LightLoc.csv', sep=''), sep=',',header=T, blank.lines.skip=F,skip=2)
     data <- data[which(!is.na(data[,1])),]
-    dts <- as.POSIXct(data$Day, format = findDateFormat(data$Day), tz = 'UTC')
     
-    if(dts[1] > Sys.Date() | dts[1] < '1990-01-01'){
+    #dts <- as.POSIXct(data$Day, format = findDateFormat(data$Day), tz = 'UTC')
+    dts <- as.POSIXct(data$Day, format = '%d-%b-%y', tz = 'UTC')
+    
+    if(as.Date(dts[1]) > as.Date(Sys.Date()) | as.Date(dts[1]) < '1990-01-01'){
       stop('Error: dates not parsed correctly.')    
     }
     

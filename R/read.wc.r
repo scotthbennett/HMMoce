@@ -27,7 +27,7 @@ read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst'){
     # READ IN PDT DATA FROM WC FILES
     data <- utils::read.table(paste(wd, ptt,'-PDTs.csv', sep=''), sep=',',header=T,blank.lines.skip=F, skip = 0)
     data <- extract.pdt(data)
-    dts <- as.POSIXct(data$Date, format = findDateFormat(data$Date))
+    dts <- as.POSIXct(data$Date, format = HMMoce:::findDateFormat(data$Date))
     d1 <- as.POSIXct('1900-01-02') - as.POSIXct('1900-01-01')
     didx <- dts >= (tag + d1) & dts <= (pop - d1)
     data <- data[didx,]
@@ -36,14 +36,14 @@ read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst'){
   } else if(type == 'sst'){
     # READ IN TAG SST FROM WC FILES
     data <- utils::read.table(paste(wd, ptt, '-SST.csv', sep=''), sep=',',header=T, blank.lines.skip=F)
-    dts <- as.POSIXct(data$Date, format = findDateFormat(data$Date))
+    dts <- as.POSIXct(data$Date, format = HMMoce:::findDateFormat(data$Date))
     d1 <- as.POSIXct('1900-01-02') - as.POSIXct('1900-01-01')
     didx <- dts >= (tag + d1) & dts <= (pop - d1)
     data <- data[didx,]
     if (length(data[,1]) <= 1){
       stop('Something wrong with reading and formatting of tags SST data. Check date format.')
     }
-    dts <- as.POSIXct(data$Date, format = findDateFormat(data$Date))
+    dts <- as.POSIXct(data$Date, format = HMMoce:::findDateFormat(data$Date))
     udates <- unique(as.Date(dts))
     
   } else if(type == 'light'){

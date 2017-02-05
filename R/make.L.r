@@ -243,9 +243,9 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
   # MAKE ALL NA'S VERY TINY FOR THE CONVOLUTION
   # the previous steps may have taken care of this...
   #----------------------------------------------------------------------------------#
-  L[L == 0] <- 1e-15
+  L[L <= 1e-15] <- 1e-15
   L[is.na(L)] <- 1e-15
-  L.mle[L.mle == 0] <- 1e-15
+  L.mle[L.mle <= 1e-15] <- 1e-15
   L.mle[is.na(L.mle)] <- 1e-15
   
   # MAKE BOTH RASTERS (COARSE AND FINE RES L's) INTO AN ARRAY

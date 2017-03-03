@@ -41,19 +41,12 @@ hmm.filter <- function(g, L, K1, K2, P){
   
   # Start filter iterations
   for(t in 2:T){
-    
+   
     # convolve previous day's likelihood with movement kernels
+    #**problem here in which by setting day1, behav1 to all 1e-15, the convolution with migr kernel doesnt allow fish to move away from tagging location
     p1 = imager::as.cimg(t(phi[1, t-1,,]))
     p2 = imager::as.cimg(t(phi[2, t-1,,]))
-    
-    #**problem here in which by setting day1, behav1 to all 1e-15, the convolution with migr kernel doesnt allow fish to move away from tagging location
-    # solved with if statement
-    if(t == 2){
-      q1 = imager::convolve(p2, K1)
-    } else{
-      q1 = imager::convolve(p1, K1)
-    }
-    
+    q1 = imager::convolve(p2, K1)
     q2 = imager::convolve(p2, K2)
     q1 = t(as.matrix(q1))
     q2 = t(as.matrix(q2))
@@ -76,10 +69,8 @@ hmm.filter <- function(g, L, K1, K2, P){
       
       #post1 <- pred[1,t,,] * L[t,,]
       #post2 <- pred[2,t,,] * L[t,,]
-      post1 <- pr1 * L[t,,] + pr1
-      post1 <- post1 / max(post1) * max1
-      post2 <- pr2 * L[t,,] + pr2
-      post2 <- post2 / max(post2) * max2
+      post1 <- pr1 * L[t,,] * max1
+      post2 <- pr2 * L[t,,] * max2
       
     }else{
       post1 <- pred[1,t,,]
@@ -101,6 +92,6 @@ hmm.filter <- function(g, L, K1, K2, P){
   #pred[2,T,,] <- L[T,,] # last position is known
   
   list(phi = phi, pred = pred, psi = psi)
-  
+
 }
 

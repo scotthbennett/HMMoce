@@ -48,8 +48,8 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
       x = which.min((known.locs.i$lon - lon) ^ 2)
       y = which.min((known.locs.i$lat - lat) ^ 2)
 
-      # assign the known location for this day, i, as 1e20 (known) in likelihood raster
-      L.locs[[i]][raster::cellFromXY(L.locs[[idx]], known.locs.i[,c(3,2)])] <- 1e20
+      # assign the known location for this day, i, as 1 (known) in likelihood raster
+      L.locs[[i]][raster::cellFromXY(L.locs[[idx]], known.locs.i[,c(3,2)])] <- 1
       
     }
     
@@ -218,7 +218,7 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
     y = which.min((iniloc$lat[1] - lat) ^ 2)
 
     # assign the known location for this day, i, as 1 in likelihood raster
-    L.locs[[1]][raster::cellFromXY(L.locs[[1]], iniloc[1,c(5,4)])] <- 1e20
+    L.locs[[1]][raster::cellFromXY(L.locs[[1]], iniloc[1,c(5,4)])] <- 1
     #print(raster::cellStats(L.locs[[1]], max))
     
     # pop up location
@@ -226,7 +226,7 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
     y = which.min((iniloc$lat[2] - lat) ^ 2)
 
     # assign the known location for this day, i, as 1 in likelihood raster
-    L.locs[[length(dateVec)]][raster::cellFromXY(L.locs[[length(dateVec)]], iniloc[2,c(5,4)])] <- 1e20
+    L.locs[[length(dateVec)]][raster::cellFromXY(L.locs[[length(dateVec)]], iniloc[2,c(5,4)])] <- 1
     
     #print(raster::cellStats(L.locs[[108]], max))
     #print(idx)

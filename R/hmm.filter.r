@@ -87,4 +87,3 @@ hmm.filter <- function(g, L, K1, K2, P){
   list(phi = phi, pred = pred, psi = psi)
   
 }
-

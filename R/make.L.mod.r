@@ -21,8 +21,11 @@
 #'   data sources. This will be expanded in the future based on user needs.
 #'   
 
-make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateVec = NULL, locs.grid = NULL, iniloc = NULL){
+make.L.mod <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateVec = NULL,
+                       locs.grid = NULL, iniloc = NULL, bathy=NULL, maxDep=NULL){
 
+  if(!is.null(bathy) & is.null(maxDep)) stop('Error: if bathy is not NULL then a maxDep vector must be supplied.')
+  
   if(!is.null(known.locs)){
     print('Input known locations are being used...')
     # convert input date, lat, lon to likelihood surfaces with dim(L1)
@@ -248,6 +251,23 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
   L[is.na(L)] <- 1e-15
   L.mle[L.mle <= 1e-15] <- 1e-15
   L.mle[is.na(L.mle)] <- 1e-15
+  
+  #========
+  # Bathymetry mask
+  #========
+  if(!is.null(bathy)){
+    maxDep[which(is.na(maxDep[,2])),2] <- 1
+    idx <- which(!is.na(maxDep[,2]))
+    bathy <- raster::resample(bathy, L)
+    
+    for (i in idx){
+      b.i <- bathy1
+      b.i[b.i <= -maxDep[i,2]] <- 1
+      b.i[b.i != 1] <- NA
+      L[[i]] <- L[[i]] * b.i
+      #plot(L[[i]] * b.i); world(add=T)
+    }
+  }
   
   # MAKE BOTH RASTERS (COARSE AND FINE RES L's) INTO AN ARRAY
   L <- aperm(raster::as.array(raster::flip(L, direction = 'y')), c(3, 2, 1))

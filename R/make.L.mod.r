@@ -22,9 +22,9 @@
 #'   
 
 make.L.mod <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateVec = NULL,
-                       locs.grid = NULL, iniloc = NULL, bathy=NULL, maxDep=NULL){
+                       locs.grid = NULL, iniloc = NULL, bathy=NULL, pdt=NULL){
 
-  if(!is.null(bathy) & is.null(maxDep)) stop('Error: if bathy is not NULL then a maxDep vector must be supplied.')
+  if(!is.null(bathy) & is.null(pdt)) stop('Error: if bathy is not NULL then a maxDep vector must be supplied.')
   
   if(!is.null(known.locs)){
     print('Input known locations are being used...')
@@ -39,8 +39,8 @@ make.L.mod <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, d
     lon <- locs.grid$lon[1,]
     lat <- locs.grid$lat[,1]
     
-    idx <- which(dateVec %in% known.locs$date)
-    for(i in idx){
+    kn.idx <- which(dateVec %in% known.locs$date)
+    for(i in kn.idx){
       known.locs.i <- known.locs[which(known.locs$date %in% dateVec[i]),]
       
       if(length(known.locs.i[,1]) > 1){
@@ -52,7 +52,7 @@ make.L.mod <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, d
       y = which.min((known.locs.i$lat - lat) ^ 2)
 
       # assign the known location for this day, i, as 1 (known) in likelihood raster
-      L.locs[[i]][raster::cellFromXY(L.locs[[idx]], known.locs.i[,c(3,2)])] <- 1
+      L.locs[[i]][raster::cellFromXY(L.locs[[kn.idx]], known.locs.i[,c(3,2)])] <- 1
       
     }
     
@@ -196,7 +196,7 @@ make.L.mod <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, d
      }
   }
   
-  # normalize and subtract some to keep 
+  # normalize
   sumIdx <- which(raster::cellStats(L, sum, na.rm = T) != 0)
   for (i in sumIdx){
     L[[i]] <- L[[i]] / (raster::cellStats(L[[i]], max, na.rm = T) * 1.25)
@@ -208,9 +208,9 @@ make.L.mod <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, d
     
     if(!exists('L.locs')){
       L.locs <- L1 * 0
-      idx <- c(1, length(dateVec))
+      kn.idx <- c(1, length(dateVec))
     } else{
-      idx <- c(1, idx, length(dateVec))
+      kn.idx <- c(1, kn.idx, length(dateVec))
     }
     
     # need lat/lon vectors from locs.grid
@@ -235,8 +235,31 @@ make.L.mod <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, d
     #print(raster::cellStats(L.locs[[108]], max))
     #print(idx)
     # add known to L
-    for(bb in idx){
+    for(bb in kn.idx){
       L[[bb]] <- L.locs[[bb]]
+    }
+  }
+  
+  #========
+  # Bathymetry mask
+  #========
+  if(!is.null(bathy)){
+    
+    maxDep <- data.frame(dplyr::summarise(dplyr::group_by(pdt, Date), max(Depth)))
+    maxDep$Date <- as.Date(maxDep$Date)
+    maxDep.df <- data.frame(Date = dateVec)
+    maxDep.df <- merge(maxDep.df, maxDep, by = 'Date', all.x=T)
+    maxDep.df[which(maxDep.df[,2] <= 0), 2] <- 1
+    maxDep.df[which(is.na(maxDep.df[,2])), 2] <- 1
+    b.idx <- which(!is.na(maxDep.df[,2]))
+    bathy <- raster::resample(bathy, L)
+    
+    for (i in b.idx){
+      b.i <- bathy
+      b.i[b.i <= -maxDep[i,2]] <- 1
+      b.i[b.i != 1] <- NA
+      L[[i]] <- L[[i]] * b.i
+      #plot(L[[i]] * b.i); world(add=T)
     }
   }
   
@@ -251,23 +274,6 @@ make.L.mod <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, d
   L[is.na(L)] <- 1e-15
   L.mle[L.mle <= 1e-15] <- 1e-15
   L.mle[is.na(L.mle)] <- 1e-15
-  
-  #========
-  # Bathymetry mask
-  #========
-  if(!is.null(bathy)){
-    maxDep[which(is.na(maxDep[,2])),2] <- 1
-    idx <- which(!is.na(maxDep[,2]))
-    bathy <- raster::resample(bathy, L)
-    
-    for (i in idx){
-      b.i <- bathy1
-      b.i[b.i <= -maxDep[i,2]] <- 1
-      b.i[b.i != 1] <- NA
-      L[[i]] <- L[[i]] * b.i
-      #plot(L[[i]] * b.i); world(add=T)
-    }
-  }
   
   # MAKE BOTH RASTERS (COARSE AND FINE RES L's) INTO AN ARRAY
   L <- aperm(raster::as.array(raster::flip(L, direction = 'y')), c(3, 2, 1))

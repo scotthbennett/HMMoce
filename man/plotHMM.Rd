@@ -5,7 +5,7 @@
 \title{Plot track results of HMMoce}
 \usage{
 plotHMM(distr, track, dateVec, ptt, known = NULL, resid = FALSE,
-  save.plot = FALSE)
+  behav.pts = F, save.plot = FALSE)
 }
 \arguments{
 \item{distr}{is output array from \code{hmm.smoother}}
@@ -20,15 +20,20 @@ plotHMM(distr, track, dateVec, ptt, known = NULL, resid = FALSE,
 movement track. This is only useful for comparing HMMoce results to known 
 track collected by SPOT or GPS, for example. Default is NULL.}
 
-\item{resid}{is logical indicating whether you want to include a residual plot. This is not yet functional.}
+\item{resid}{is logical indicating whether you want to include a residual
+plot. This is not yet functional.}
 
-\item{save.plot}{is logical indicating whether you want the plot written to disk using \code{pdf}.}
+\item{behav.pts}{is logical indicating whether to plot points in the
+resulting map colored by behav state.}
+
+\item{save.plot}{is logical indicating whether you want the plot written to
+disk using \code{pdf}.}
 }
 \value{
 NULL. A plot is rendered on screen or written to disk.
 }
 \description{
-\code{plotHMM} uses HMM output via \code{calc.track} to make simple plots of
+\code{plotHMM} uses HMM output via \code{calc.track} to make simple plots of 
 calculated track and behavior state
 }
 

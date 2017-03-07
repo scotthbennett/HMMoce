@@ -1,19 +1,23 @@
 #' Plot track results of HMMoce
-#'
-#' \code{plotHMM} uses HMM output via \code{calc.track} to make simple plots of
+#' 
+#' \code{plotHMM} uses HMM output via \code{calc.track} to make simple plots of 
 #' calculated track and behavior state
-#'
+#' 
 #' @param distr is output array from \code{hmm.smoother}
 #' @param track is output dataframe from \code{calc.track}
 #' @param dateVec is vector of dates from tag to pop-up location by day.
 #' @param ptt is unique ID for individual tag dataset
-#' @param known is 3 column data frame containing date, lat, lon of known
-#'   movement track. This is only useful for comparing HMMoce results to known
+#' @param known is 3 column data frame containing date, lat, lon of known 
+#'   movement track. This is only useful for comparing HMMoce results to known 
 #'   track collected by SPOT or GPS, for example. Default is NULL.
-#' @param resid is logical indicating whether you want to include a residual plot. This is not yet functional.
-#' @param save.plot is logical indicating whether you want the plot written to disk using \code{pdf}.
+#' @param resid is logical indicating whether you want to include a residual
+#'   plot. This is not yet functional.
+#' @param behav.pts is logical indicating whether to plot points in the
+#'   resulting map colored by behav state.
+#' @param save.plot is logical indicating whether you want the plot written to
+#'   disk using \code{pdf}.
 #' @importFrom fields "world"
-#'
+#'   
 #' @return NULL. A plot is rendered on screen or written to disk.
 #' @export
 

@@ -13,6 +13,8 @@
 #' @param dateVec is vector of dates from tag to pop-up date by day. Only required if known.locs is not NULL.
 #' @param locs.grid is output grid from \code{setup.locs.grid}. Only required if known.locs is not NULL.
 #' @param iniloc is matrix of tag and pop locations. Default is NULL because this should be taken care of elsewhere.
+#' @param bathy is bathymetry raster (likely from ETOPO1) as acquired by \code{get.bath.data}
+#' @param pdt is data frame output from read.wc(type='pdt')
 
 #' @return a list containing: L, the overall likelihood array and L.mle, a more 
 #'   coarse version of L used later for parameter estimation

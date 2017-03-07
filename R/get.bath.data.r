@@ -42,7 +42,7 @@ get.bath.data <- function(lonlow, lonhigh, latlow, lathigh, folder = tempdir(), 
   opt <- sub("LONLOW", lonlow, opt)
   opt <- sub("LONHIGH", lonhigh, opt)
   
-  download.file(opt, fname)
+  utils::download.file(opt, fname)
   
   nc <- RNetCDF::open.nc(fname)
   lon <- as.numeric(RNetCDF::var.get.nc(nc, variable = "longitude"))

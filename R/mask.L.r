@@ -42,7 +42,7 @@ mask.L <- function(pred.t, L.t, lon, lat, bound.thr = .05){
   new.ex <- as(ex, 'SpatialPolygons')  
   
   p.mask <- raster::mask(r, new.ex, updatevalue=1, inverse=T)
-  p.mask[p.mask < 1] <- NA
+  p.mask[p.mask < 1] <- 1e-15
   #r.mask <- p.mask * r
   #plot(r.mask)
   #plot(p1, add=T, col='green')

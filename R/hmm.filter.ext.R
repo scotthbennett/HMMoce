@@ -66,21 +66,13 @@ hmm.filter.ext <- function(g, L, K1, K2, P, maskL = T){
     if(sumL > 1e-6){
       
       if(maskL){
-        post1 <- mask.L(pred.t = pred[1,t,,], L.t = L[t,,])
-        post2 <- mask.L(pred.t = pred[2,t,,], L.t = L[t,,])
-        
+        post1 <- mask.L(pred.t = pred[1,t,,], L.t = L[t,,], lon = g$lon[1,], lat = g$lat[,1], bound.thr = .1)
+        post2 <- mask.L(pred.t = pred[2,t,,], L.t = L[t,,], lon = g$lon[1,], lat = g$lat[,1], bound.thr = .1)
+      } else{
+        post1 <- pred[1,t,,] * L[t,,]
+        post2 <- pred[2,t,,] * L[t,,]
       }
       
-      
-      #post1.old <- pred[1,t,,] * L[t,,]
-      #post1.r <- pred.r * L[t,,]
-      #post2.old <- pred[2,t,,] * L[t,,]
-      
-      #par(mfrow=c(2,2))
-      #image.plot(lon,lat,post1); title('post1')
-      #image.plot(lon,lat,post1.old)
-      #image.plot(lon,lat,post2); title('post2')
-      #image.plot(lon,lat,post2.old)
     }else{
       post1 <- pred[1,t,,]
       post2 <- pred[2,t,,]
@@ -92,12 +84,6 @@ hmm.filter.ext <- function(g, L, K1, K2, P, maskL = T){
     phi[2,t,,] <- post2 / (psi[t-1] + 1e-15)
     
   }
-  
-  # End in resident state at the known final location
-  #phi[1,T,,]  <- L[T,,] # last position is known
-  #phi[2,T,,]  <- L[T,,] # last position is known
-  #pred[1,T,,] <- L[T,,] # last position is known
-  #pred[2,T,,] <- L[T,,] # last position is known
   
   list(phi = phi, pred = pred, psi = psi)
   

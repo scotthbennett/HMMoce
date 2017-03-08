@@ -4,7 +4,8 @@
 #' 
 #' @param dateVec a character vector representing dates
 #' @return dateformat is character string used as input to strptime(format = dateformat)
-#'
+#' @export
+#' 
 #' @examples
 #' \dontrun{
 #' dte <- '2015-01-01 05:30:17'

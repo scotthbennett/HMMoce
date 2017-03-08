@@ -22,8 +22,9 @@
 #' }
 #' 
 
-hmm.filter.ext <- function(g, L, K1, K2, P, maskL = T){
+hmm.filter.ext <- function(g, L, K1, K2, P, maskL = T, par0 = NULL, bound.thr=0.1, minBounds=10){
   
+  if(maskL & is.null(par0)) stop('Error: if maskL is TRUE then par0 needs to be provided to the filter function.')
   ## Filter data to estimate locations and behaviour
   
   T <- dim(L)[1] # dimension of time 
@@ -65,8 +66,8 @@ hmm.filter.ext <- function(g, L, K1, K2, P, maskL = T){
     if(sumL > 1e-6){
       
       if(maskL){
-        post1 <- mask.L(pred.t = pred[1,t,,], L.t = L[t,,], lon = g$lon[1,], lat = g$lat[,1], bound.thr = .1)
-        post2 <- mask.L(pred.t = pred[2,t,,], L.t = L[t,,], lon = g$lon[1,], lat = g$lat[,1], bound.thr = .1)
+        post1 <- mask.L(pred.t = pred[1,t,,], L.t = L[t,,], lon = g$lon[1,], lat = g$lat[,1], par0 = par0, bound.thr = bound.thr, minBounds=minBounds)
+        post2 <- mask.L(pred.t = pred[2,t,,], L.t = L[t,,], lon = g$lon[1,], lat = g$lat[,1], par0 = par0, bound.thr = bound.thr, minBounds=minBounds)
       } else{
         post1 <- pred[1,t,,] * L[t,,]
         post2 <- pred[2,t,,] * L[t,,]

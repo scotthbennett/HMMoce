@@ -246,6 +246,7 @@ make.L.mod <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, d
   # Bathymetry mask
   #========
   if(!is.null(bathy)){
+    print('Starting bathymetry mask...')
     
     maxDep <- data.frame(dplyr::summarise(dplyr::group_by(pdt, Date), max(Depth)))
     maxDep$Date <- as.Date(maxDep$Date)
@@ -257,8 +258,9 @@ make.L.mod <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, d
     bathy <- raster::resample(bathy, L)
     
     for (i in b.idx){
+      print(paste('iteration ',i,' of ', length(b.idx)))
       b.i <- bathy
-      b.i[b.i <= -maxDep[i,2]] <- 1
+      b.i[b.i <= -maxDep.df[i,2]] <- 1
       b.i[b.i != 1] <- NA
       L[[i]] <- L[[i]] * b.i
       #plot(L[[i]] * b.i); world(add=T)
@@ -266,6 +268,7 @@ make.L.mod <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, d
   }
   
   # CREATE A MORE COARSE RASTER FOR PARAMETER ESTIMATION LATER
+  print('Starting raster resample...')
   L.mle <- raster::resample(L, L.mle.res)
   
   #----------------------------------------------------------------------------------#

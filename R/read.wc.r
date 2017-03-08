@@ -43,8 +43,9 @@ read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst'){
     if (length(data[,1]) <= 1){
       stop('Something wrong with reading and formatting of tags SST data. Check date format.')
     }
-    dts <- as.POSIXct(data$Date, format = findDateFormat(data$Date))
-    udates <- unique(as.Date(dts))
+    dts <- as.Date(as.POSIXct(data$Date, format = findDateFormat(data$Date)))
+    udates <- unique(dts)
+    data <- data[,c(1:11)]
     
   } else if(type == 'light'){
     # READ IN LIGHT DATA FROM WC FILES
@@ -61,6 +62,7 @@ read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst'){
     d1 <- as.POSIXct('1900-01-02') - as.POSIXct('1900-01-01')
     didx <- (dts > (tag + d1)) & (dts < (pop - d1))
     data <- data[didx,]
+    data$dts <- as.Date(dts[didx])
     udates <- unique(as.Date(dts))
     
   }

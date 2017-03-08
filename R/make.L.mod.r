@@ -254,10 +254,11 @@ make.L.mod <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, d
     maxDep.df <- merge(maxDep.df, maxDep, by = 'Date', all.x=T)
     maxDep.df[which(maxDep.df[,2] <= 0), 2] <- 1
     maxDep.df[which(is.na(maxDep.df[,2])), 2] <- 1
-    b.idx <- which(!is.na(maxDep.df[,2]))
+    #b.idx <- which(!is.na(maxDep.df[,2]))
     bathy <- raster::resample(bathy, L)
+    naLidx = which(raster::cellStats(L, sum, na.rm=T) != 0)
     
-    for (i in b.idx){
+    for (i in naLidx){
       print(paste('iteration ',i,' of ', length(b.idx)))
       b.i <- bathy
       b.i[b.i <= -maxDep.df[i,2]] <- 1

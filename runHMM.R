@@ -18,11 +18,15 @@
 #' @param dataDir is same as envDir except for input tag data. Function looks in
 #'   dataDir/ptt/ for the tag data files.
 
-#dataDir <- '/home/rstudio/HMMoce_run/data/'
-dataDir <- '~/Documents/WHOI/RCode/HMMoce_run_data/data/'
-envDir <- '~/Documents/WHOI/RCode/HMMoce_run_data/env_data/'
+dataDir <- '/home/rstudio/HMMoce_run/data/'
+#dataDir <- '~/Documents/WHOI/RCode/HMMoce_run_data/data/'
+#envDir <- '~/Documents/WHOI/RCode/HMMoce_run_data/env_data/'
+envDir <- '/home/rstudio/HMMoce_run/env_data/'
+source('/home/rstudio/HMMoce/formatTracks.r')
+source('/home/rstudio/HMMoce/compareTracks.r')
 parVec <- c(1, 2, 4)
 pttList <- c(141259, 141257, 141256, 141254)
+gpeNo <- c(4,1,1,5)
 bndVec <- c(5, 10)
 
 # TAG/POPUP DATES AND LOCATIONS (dd, mm, YYYY, lat, lon)
@@ -38,16 +42,13 @@ for (i in 1:4){
   names(inilocList[[i]]) <- list('day','month','year','lat','lon')
 }
 
-gpeNo <- c(5,1,1,4,1)
-
-
 sp.limList <- list(list(lonmin = -82, lonmax = -25, latmin = 15, latmax = 50),
                    list(lonmin = -85, lonmax = -50, latmin = 20, latmax = 50),
                    list(lonmin = -95, lonmax = -52, latmin = 10, latmax = 55),
                    list(lonmin = -85, lonmax = -45, latmin = 30, latmax = 50))
 
 
-runHMM <- function(likVec, inilocList, pttList, sp.limList, bndVec, parVec){
+runHMM <- function(likVec=c(1,1,1,1,1), inilocList, pttList, sp.limList, bndVec, parVec){
   
   for (ii in 1:length(pttList)){
     #--------------------------------
@@ -96,13 +97,15 @@ runHMM <- function(likVec, inilocList, pttList, sp.limList, bndVec, parVec){
     
     # IF YOU NEED TO DOWNLOAD SST DATA
     sst.dir <- paste(envDir, ptt, '/sst/', sep='')
-    get.sst.dates <- sst.udates[!which(sst.udates %in% as.Date(substr(list.files(sst.dir), 8, 17)))]
+    dir.create(file.path(sst.dir), recursive = TRUE, showWarnings = FALSE)
+    get.sst.dates <- sst.udates[!(sst.udates %in% as.Date(substr(list.files(sst.dir), 8, 17)))]
     if (length(get.sst.dates) > 0) get.env(get.sst.dates, ptt = ptt, type = 'sst', spatLim = sp.lim, save.dir = sst.dir)
     
     # HYCOM DATA
     hycom.dir <- paste(envDir, ptt, '/hycom/', sep='')
-    get.pdt.dates <- pdt.udates[!which(pdt.udates %in% as.Date(substr(list.files(hycom.dir), 8, 17)))]
-    if (length(get.hycom.dates) > 0) get.env(get.pdt.dates, type = 'hycom', spatLim = sp.lim, save.dir = hycom.dir)
+    dir.create(file.path(hycom.dir), recursive = TRUE, showWarnings = FALSE)
+    get.pdt.dates <- pdt.udates[!(pdt.udates %in% as.Date(substr(list.files(hycom.dir), 8, 17)))]
+    if (length(get.pdt.dates) > 0) get.env(get.pdt.dates, ptt=ptt, type = 'hycom', spatLim = sp.lim, save.dir = hycom.dir)
     
     # AND/OR WOA DATA
     woa.dir <- envDir
@@ -119,35 +122,35 @@ runHMM <- function(likVec, inilocList, pttList, sp.limList, bndVec, parVec){
     #----------------------------------------------------------------------------------#
     if (likVec[1] == 1){
       t0 <- Sys.time()
-      L.light <- calc.srss(light, locs.grid = locs.grid, dateVec = dateVec)
+      L.1 <- calc.srss(light, locs.grid = locs.grid, dateVec = dateVec, res=0.25)
       t1 <- Sys.time()
       print(paste('Light calculations took ', round(as.numeric(difftime(t1, t0, units='mins')), 2), 'minutes...'))
     }
     
     if (likVec[2] == 1){
       t0 <- Sys.time()
-      L.sst <- calc.sst.par(tag.sst, ptt, sst.dir = sst.dir, dateVec = dateVec, sens.err = 2.5)
+      L.2 <- calc.sst.par(tag.sst, ptt, sst.dir = sst.dir, dateVec = dateVec, sens.err = 2.5)
       t1 <- Sys.time()
       print(paste('SST calculations took ', round(as.numeric(difftime(t1, t0, units='mins')), 2), 'minutes...'))
     }
     
     if (likVec[3] == 1){
       t0 <- Sys.time()
-      L.ohc <- calc.ohc.par(pdt, ptt, ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = FALSE)
+      L.3 <- calc.ohc.par(pdt, ptt, ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = FALSE)
       t1 <- Sys.time()
       print(paste('OHC calculations took ', round(as.numeric(difftime(t1, t0, units='mins')), 2), 'minutes...'))
     }
     
     if (likVec[4] == 1){
       t0 <- Sys.time()
-      L.woa <- calc.woa.par(pdt, ptt, woa.data = woa.quarter, focalDim = 9, dateVec = dateVec, use.se = F)
+      L.4 <- calc.woa.par(pdt, ptt, woa.data = woa.quarter, focalDim = 9, dateVec = dateVec, use.se = F)
       t1 <- Sys.time()
       print(paste('WOA calculations took ', round(as.numeric(difftime(t1, t0, units='mins')), 2), 'minutes...'))
     }
     
     if (likVec[5] == 1){
       t0 <- Sys.time()
-      L.hycom <- calc.hycom.par(pdt, ptt, hycom.dir, focalDim = 9, dateVec = dateVec, use.se = F)
+      L.5 <- calc.hycom.par(pdt, ptt, hycom.dir, focalDim = 9, dateVec = dateVec, use.se = F)
       t1 <- Sys.time()
       print(paste('HYCOM calculations took ', round(as.numeric(difftime(t1, t0, units='mins')), 2), 'minutes...'))
     }
@@ -158,7 +161,7 @@ runHMM <- function(likVec, inilocList, pttList, sp.limList, bndVec, parVec){
     
     L.rasters <- mget(ls(pattern = 'L\\.'))
     resamp.idx <- which.max(lapply(L.rasters, FUN=function(x) raster::res(x)[1]))
-    L.res <- resample.grid.par(L.rasters, L.rasters[[resamp.idx]])
+    L.res <- resample.grid(L.rasters, L.rasters[[resamp.idx]])
     save.image(paste(myDir, ptt, '_likelihoods.RData', sep=''))
     
     # Figure out appropriate L combinations
@@ -174,7 +177,7 @@ runHMM <- function(likVec, inilocList, pttList, sp.limList, bndVec, parVec){
       #----------------------------------------------------------------------------------#
       # COMBINE LIKELIHOOD MATRICES
       #----------------------------------------------------------------------------------#
-      L <- make.L.mod(L1 = L.res[[1]],
+      L <- make.L.mod(L1 = L.res[[1]][L.idx[[tt]]],
                       L.mle.res = L.res$L.mle.res, dateVec = dateVec,
                       locs.grid = locs.grid, iniloc = iniloc, bathy=bathy,
                       pdt = pdt)
@@ -219,9 +222,9 @@ runHMM <- function(likVec, inilocList, pttList, sp.limList, bndVec, parVec){
           outVec <- matrix(c(ptt=ptt, minBounds = bnd, migr.spd = i, rmseLon=res$rmse.lon, rmseLat=res$rmse.lat,
                       gcdMean=res[[4]], gcdSD=res[[5]], paste(L.idx[[tt]],collapse='')), ncol=28)
           write.table(outVec,paste(dataDir, 'outVec_results.csv', sep=''), sep=',', col.names=F, append=T)
-        }
-      }
-    }
+        } # parVec loop
+      } # bndVec loop
+    } # L.idx loop
   }
   
 

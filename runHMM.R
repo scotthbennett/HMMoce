@@ -1,12 +1,53 @@
 #' TITLE
 #' 
-#' @param likVec is vector of length 5 and acts as 'switch' to determine which likelihoods are calculated. Default is likVec=rep(1, length.out=5) but change any of the 1s to something else to turn off that likelihood. The vector at position 1 to 5 corresponds to likehoods for light, sst, ohc, woa, hycom respectively.
+#' @param likVec is vector of length 5 and acts as 'switch' to determine which 
+#'   likelihoods are calculated. Default is likVec=rep(1, length.out=5) but 
+#'   change any of the 1s to something else to turn off that likelihood. The 
+#'   vector at position 1 to 5 corresponds to likehoods for light, sst, ohc, 
+#'   woa, hycom respectively.
+#' @param parVec is vector of possible movement values as input to 
+#'   \code{calc.param}
+#' @param bndVec is vector of possible minBounds values as input to \code{}
+#' @param inilocList is a list in which elements contain individual iniloc 
+#'   variables (see \code{make.L.mod}).
+#' @param pttList is a list in which elements are ptt IDs that correspond to the
+#'   iniloc values in inilocList.
+#' @param envDir is path to directory that contains a folder for each ptt value.
+#'   The function will look in envDir/ptt/sst for SST data and envDir/ptt/hycom 
+#'   for Hycom data.
+#' @param dataDir is same as envDir except for input tag data. Function looks in
+#'   dataDir/ptt/ for the tag data files.
 
-runHMM <- function(){
-  
-  parVec <- c(1, 2, 4)
-  inilocList <- list()
-  pttList <- list()
+#dataDir <- '/home/rstudio/HMMoce_run/data/'
+dataDir <- '~/Documents/WHOI/RCode/HMMoce_run_data/data/'
+envDir <- '~/Documents/WHOI/RCode/HMMoce_run_data/env_data/'
+parVec <- c(1, 2, 4)
+pttList <- c(141259, 141257, 141256, 141254)
+bndVec <- c(5, 10)
+
+# TAG/POPUP DATES AND LOCATIONS (dd, mm, YYYY, lat, lon)
+inilocList <- list(data.frame(matrix(c(13, 10, 2015, 41.3, -69.27, 
+                                       10, 4, 2016, 40.251, -36.061), nrow = 2, ncol = 5, byrow = T)),
+                   data.frame(matrix(c(15, 10, 2015, 41.637, -69.706, 
+                                       12, 4, 2016, 37.751, -71.649), nrow = 2, ncol = 5, byrow = T)),
+                   data.frame(matrix(c(13, 10, 2015, 41.575, -69.423, 
+                                       24, 2, 2016, 26.6798, -69.0147), nrow = 2, ncol = 5, byrow = T)),
+                   data.frame(matrix(c(21, 10, 2015, 41.597,	-69.445, 
+                                       5, 2, 2016, 38.589, -54.874), nrow = 2, ncol = 5, byrow = T)))
+for (i in 1:4){
+  names(inilocList[[i]]) <- list('day','month','year','lat','lon')
+}
+
+gpeNo <- c(5,1,1,4,1)
+
+
+sp.limList <- list(list(lonmin = -82, lonmax = -25, latmin = 15, latmax = 50),
+                   list(lonmin = -85, lonmax = -50, latmin = 20, latmax = 50),
+                   list(lonmin = -95, lonmax = -52, latmin = 10, latmax = 55),
+                   list(lonmin = -85, lonmax = -45, latmin = 30, latmax = 50))
+
+
+runHMM <- function(likVec, inilocList, pttList, sp.limList, bndVec, parVec){
   
   for (ii in 1:length(pttList)){
     #--------------------------------
@@ -15,7 +56,7 @@ runHMM <- function(){
     # READ IN TAG DATA
     # TAG/POPUP DATES AND LOCATIONS (dd, mm, YYYY, lat, lon)
     ptt <- pttList[ii]
-    iniloc <- inilocList[ii]
+    iniloc <- inilocList[[ii]]
     tag <- as.POSIXct(paste(iniloc[1,1], '/', iniloc[1,2], '/', iniloc[1,3], sep=''), format = '%d/%m/%Y', tz='UTC')
     pop <- as.POSIXct(paste(iniloc[2,1], '/', iniloc[2,2], '/', iniloc[2,3], sep=''), format = '%d/%m/%Y', tz='UTC')
     
@@ -23,7 +64,7 @@ runHMM <- function(){
     dateVec <- as.Date(seq(tag, pop, by = 'day')) 
     
     # READ IN DATA FROM WC FILES
-    myDir <- paste('/home/rstudio/HMMoce_run/data/', ptt, '/', sep='')
+    myDir <- paste(dataDir, ptt, '/', sep='')
     
     # sst data
     tag.sst <- read.wc(ptt, wd = myDir, type = 'sst', tag=tag, pop=pop); 
@@ -43,7 +84,7 @@ runHMM <- function(){
     #----------------------------------------------------------------------------------#
     
     # SET SPATIAL LIMITS, IF DESIRED
-    sp.lim <- list(lonmin = -95, lonmax = -52, latmin = 10, latmax = 55)
+    sp.lim <- sp.limList[[ii]]
     
     if (exists('sp.lim')){
       locs.grid <- setup.locs.grid(sp.lim)
@@ -54,17 +95,17 @@ runHMM <- function(){
     }
     
     # IF YOU NEED TO DOWNLOAD SST DATA
-    sst.dir <- paste('~/HMMoce_run/env_data/', ptt, '/sst/', sep='')
+    sst.dir <- paste(envDir, ptt, '/sst/', sep='')
     get.sst.dates <- sst.udates[!which(sst.udates %in% as.Date(substr(list.files(sst.dir), 8, 17)))]
     if (length(get.sst.dates) > 0) get.env(get.sst.dates, ptt = ptt, type = 'sst', spatLim = sp.lim, save.dir = sst.dir)
     
     # HYCOM DATA
-    hycom.dir <- paste('~/HMMoce_run/env_data/', ptt, '/hycom/', sep='')
+    hycom.dir <- paste(envDir, ptt, '/hycom/', sep='')
     get.pdt.dates <- pdt.udates[!which(pdt.udates %in% as.Date(substr(list.files(hycom.dir), 8, 17)))]
     if (length(get.hycom.dates) > 0) get.env(get.pdt.dates, type = 'hycom', spatLim = sp.lim, save.dir = hycom.dir)
     
     # AND/OR WOA DATA
-    woa.dir <- '~/HMMoce_run/env_data/'
+    woa.dir <- envDir
     if(!any(list.files(woa.dir) == 'woa.quarter.rda')){
       download.file('https://raw.githubusercontent.com/camrinbraun/camrinbraun.github.io/master/woa.quarter.rda', 'woa.quarter.rda')
     }
@@ -92,7 +133,7 @@ runHMM <- function(){
     
     if (likVec[3] == 1){
       t0 <- Sys.time()
-      L.ohc.par <- calc.ohc.par(pdt, ptt, ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = FALSE)
+      L.ohc <- calc.ohc.par(pdt, ptt, ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = FALSE)
       t1 <- Sys.time()
       print(paste('OHC calculations took ', round(as.numeric(difftime(t1, t0, units='mins')), 2), 'minutes...'))
     }
@@ -115,13 +156,37 @@ runHMM <- function(){
     # LIST, RESAMPLE, SAVE
     #----------------------------------------------------------------------------------#
     
-    L.rasters <- mget(ls(pattern = 'L.'))
-    resamp.idx <- which.min(lapply(L.rasters, FUN=function(x) raster::res(x)[1]))
-    L.res <- resample.grid.par(L.rasters, L.rasters[resamp.idx])
-    save.image(paste(ptt, '_likelihoods.RData', sep=''))
+    L.rasters <- mget(ls(pattern = 'L\\.'))
+    resamp.idx <- which.max(lapply(L.rasters, FUN=function(x) raster::res(x)[1]))
+    L.res <- resample.grid.par(L.rasters, L.rasters[[resamp.idx]])
+    save.image(paste(myDir, ptt, '_likelihoods.RData', sep=''))
     
-    for (t in xxx){
-      for (b in bndVec){
+    # Figure out appropriate L combinations
+    likVec <- which(likVec == 1)
+    if (length(likVec) > 2){
+      L.idx <- c(combn(likVec, 2, simplify=F), combn(likVec, 3, simplify=F))
+    } else{
+      L.idx <- combn(likVec, 2, simplify=F)
+    }
+    
+    for (tt in 1:length(L.idx)){
+
+      #----------------------------------------------------------------------------------#
+      # COMBINE LIKELIHOOD MATRICES
+      #----------------------------------------------------------------------------------#
+      L <- make.L.mod(L1 = L.res[[1]],
+                      L.mle.res = L.res$L.mle.res, dateVec = dateVec,
+                      locs.grid = locs.grid, iniloc = iniloc, bathy=bathy,
+                      pdt = pdt)
+      
+      L.mle <- L$L.mle
+      L <- L$L
+      g <- L.res$g
+      lon <- g$lon[1,]
+      lat <- g$lat[,1]
+      g.mle <- L.res$g.mle
+      
+      for (bnd in bndVec){
         for (i in parVec){
           
           # GET MOVEMENT KERNELS AND SWITCH PROB FOR COARSE GRID
@@ -141,13 +206,19 @@ runHMM <- function(){
           
           # GET THE MOST PROBABLE TRACK
           tr <- calc.track(s, g, dateVec)
-          
+
           # COMPARE HMM, GPE3, SPOT
-          
+          setwd(myDir)
+          write.table(tr, file=paste(ptt, '_HMM_track.csv', sep=''), sep = ',', col.names = T)
+          df <- formatTracks(trackDir = myDir, ptt = ptt, gpeNo = gpeNo[ii])
+          res <- compareTracks(df)
+          res[[4]] <- apply(res$gcd, 2, FUN=function(x) mean(x, na.rm=T))
+          res[[5]] <- apply(res$gcd, 2, FUN=function(x) sd(x, na.rm=T))
           
           # WRITE OUT RESULTS
-          outVec <- c(ptt, minBounds = minBounds, migr.spd = i, fitHMM, fitGPE, names(L.in))
-          write.table('outVec_results.csv', sep=',', col.names=F, append=T)
+          outVec <- matrix(c(ptt=ptt, minBounds = bnd, migr.spd = i, rmseLon=res$rmse.lon, rmseLat=res$rmse.lat,
+                      gcdMean=res[[4]], gcdSD=res[[5]], paste(L.idx[[tt]],collapse='')), ncol=28)
+          write.table(outVec,paste(dataDir, 'outVec_results.csv', sep=''), sep=',', col.names=F, append=T)
         }
       }
     }

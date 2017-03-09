@@ -26,6 +26,14 @@
 make.L.mod <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateVec = NULL,
                        locs.grid = NULL, iniloc = NULL, bathy=NULL, pdt=NULL){
 
+  if(class(L1) == 'list'){
+    if(length(L1) == 3){
+      L3 <- L1[[3]]; L2 <- L1[[2]]; L1 <- L1[[1]]
+    } else if (length(L1) == 2){
+      L2 <- L1[[2]]; L1 <- L1[[1]]
+    }
+  }
+    
   if(!is.null(bathy) & is.null(pdt)) stop('Error: if bathy is not NULL then a maxDep vector must be supplied.')
   
   if(!is.null(known.locs)){
@@ -259,7 +267,7 @@ make.L.mod <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, d
     naLidx = which(raster::cellStats(L, sum, na.rm=T) != 0)
     
     for (i in naLidx){
-      print(paste('iteration ',i,' of ', length(b.idx)))
+      #print(paste('iteration ',i,' of ', length(b.idx)))
       b.i <- bathy
       b.i[b.i <= -maxDep.df[i,2]] <- 1
       b.i[b.i != 1] <- NA

@@ -22,8 +22,8 @@ dataDir <- '/home/rstudio/HMMoce_run/data/'
 #dataDir <- '~/Documents/WHOI/RCode/HMMoce_run_data/data/'
 #envDir <- '~/Documents/WHOI/RCode/HMMoce_run_data/env_data/'
 envDir <- '/home/rstudio/HMMoce_run/env_data/'
-source('/home/rstudio/HMMoce/formatTracks.r')
-source('/home/rstudio/HMMoce/compareTracks.r')
+source('/home/rstudio/HMMoce_run/formatTracks.r')
+source('/home/rstudio/HMMoce_run/compareTracks.r')
 parVec <- c(1, 2, 4)
 pttList <- c(141259, 141257, 141256, 141254)
 gpeNo <- c(4,1,1,5)
@@ -222,6 +222,11 @@ runHMM <- function(likVec=c(1,1,1,1,1), inilocList, pttList, sp.limList, bndVec,
           outVec <- matrix(c(ptt=ptt, minBounds = bnd, migr.spd = i, rmseLon=res$rmse.lon, rmseLat=res$rmse.lat,
                       gcdMean=res[[4]], gcdSD=res[[5]], paste(L.idx[[tt]],collapse='')), ncol=28)
           write.table(outVec,paste(dataDir, 'outVec_results.csv', sep=''), sep=',', col.names=F, append=T)
+          #names(out) <- list('rownum','ptt', 'minBnd','migr.spd','rmselon.ti','rmselon.tib','rmselon.kf','rmselon.kfb','rmselon.gpe','rmselon.hmm',
+          #                   'rmselat.ti','rmselat.tib','rmselat.kf','rmselat.kfb','rmselat.gpe','rmselat.hmm',
+          #                   'gcdm.ti','gcdm.tib','gcdm.kf','gcdm.kfb','gcdm.gpe','gcdm.hmm',
+          #                   'gcdsd.ti','gcdsd.tib','gcdsd.kf','gcdsd.kfb','gcdsd.gpe','gcdsd.hmm', 'L.idx')
+          
         } # parVec loop
       } # bndVec loop
     } # L.idx loop

@@ -182,20 +182,26 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1){
         
         if(any(srlik[] != 0) & any(sslik[] != 0)){
           r <- srlik * sslik
-          max.lat <- raster::xyFromCell(r, raster::which.max(r))[2]
-          cds <- rbind(c(min(lon), max.lat), c(max(lon), max.lat))#, c(40,5), c(15,-45), c(-10,-25))
-          lines <- sp::SpatialLines(list(sp::Lines(list(sp::Line(cds)), "1")))
-          r[] <- c(unlist(raster::extract(r, lines)))
+          if(any(r[] != 0)){
+            max.lat <- raster::xyFromCell(r, raster::which.max(r))[2]
+            cds <- rbind(c(min(lon), max.lat), c(max(lon), max.lat))#, c(40,5), c(15,-45), c(-10,-25))
+            lines <- sp::SpatialLines(list(sp::Lines(list(sp::Line(cds)), "1")))
+            r[] <- c(unlist(raster::extract(r, lines)))
+          } else if(any(srlik[] != 0)){
+            #just srlik
+            r <- srlik
+          } else if(any(sslik[] != 0)){
+            #just sslik
+            r <- sslik
+          }
           
         } else{
           if(any(srlik[] != 0)){
             #just srlik
-            L.light[[t]] <- srlik
-
+            r <- srlik
           } else{
             #just sslik
-            L.light[[t]] <- sslik
-
+            r <- sslik
           }
         }
         

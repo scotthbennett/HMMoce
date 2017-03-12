@@ -16,7 +16,7 @@
 #' @export
 #' 
 
-hmm.smoother.fix <- function(f, K1, K2, P){
+hmm.smoother.fix <- function(f, K1, K2, L, P){
   ## Smoothing the filtered estimates
   ## The equations for smoothing are presented in Pedersen et al. 2011, Oikos, Appendix
   T <- dim(f$phi)[2]
@@ -28,9 +28,7 @@ hmm.smoother.fix <- function(f, K1, K2, P){
   K2 <- imager::as.cimg(K2)
   
   smooth <- array(0, dim = dim(f$phi))
-  #smooth[,T,,] <- f$phi[,T,,]
-  smooth[1,T,,] <- L[T,,]
-  smooth[2,T,,] <- L[T,,]
+  smooth[,T,,] <- f$phi[,T,,]
   
   #smooth <- f$phi  #default; fill in as the prediction step.
 
@@ -49,8 +47,8 @@ hmm.smoother.fix <- function(f, K1, K2, P){
     post2 <- matrix(P[2,1] * Rp1 + P[2,2] * Rp2, row, col)
     
     if(T == t){
-      post1 <- f$phi[1,t,,]
-      post2 <- f$phi[2,t,,]
+      post1 <- f$phi[1,t,,] * 0
+      post2 <- L[t,,]
       fac <- sum(as.vector(post1)) + sum(as.vector(post2))
       smooth[1,t,,] <- post1 / fac
       smooth[2,t,,] <- post2 / fac 

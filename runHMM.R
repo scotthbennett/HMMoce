@@ -79,6 +79,10 @@ runHMM <- function(likVec=c(1,1,1,1,1), inilocList, pttList, sp.limList, bndVec,
     light <- read.wc(ptt, wd = myDir, type = 'light', tag=tag, pop=pop); 
     light.udates <- light$udates; light <- light$data
     
+    # OPTIONAL: light data as output from GPE2, different filtering algorithm seems to work better for light likelihood generation
+    locs <- read.table(paste('141268-Locations_FAKE.csv', sep = ''), sep = ',', header = T, blank.lines.skip = F)
+    locDates <- as.Date(as.POSIXct(locs$Date, format=findDateFormat(locs$Date)))
+    
     #----------------------------------------------------------------------------------#
     # FURTHER PREPARATION
     # Set spatial limits and download env data
@@ -122,10 +126,12 @@ runHMM <- function(likVec=c(1,1,1,1,1), inilocList, pttList, sp.limList, bndVec,
     #----------------------------------------------------------------------------------#
     if (likVec[1] == 1){
       t0 <- Sys.time()
-      L.1 <- calc.srss(light, locs.grid = locs.grid, dateVec = dateVec, res=0.25)
+      #L.1 <- calc.srss(light, locs.grid = locs.grid, dateVec = dateVec, res=0.25)
       t1 <- Sys.time()
       print(paste('Light calculations took ', round(as.numeric(difftime(t1, t0, units='mins')), 2), 'minutes...'))
     }
+    
+   # L.locs <- calc.gpe2(locs, locDates, iniloc = iniloc, locs.grid = locs.grid, dateVec = dateVec, errEll = FALSE, gpeOnly = TRUE)
     
     if (likVec[2] == 1){
       t0 <- Sys.time()
@@ -162,7 +168,7 @@ runHMM <- function(likVec=c(1,1,1,1,1), inilocList, pttList, sp.limList, bndVec,
     L.rasters <- mget(ls(pattern = 'L\\.'))
     resamp.idx <- which.max(lapply(L.rasters, FUN=function(x) raster::res(x)[1]))
     L.res <- resample.grid(L.rasters, L.rasters[[resamp.idx]])
-    save.image(paste(myDir, ptt, '_likelihoods.RData', sep=''))
+    #save.image(paste(myDir, ptt, '_likelihoods.RData', sep=''))
     
     # Figure out appropriate L combinations
     likVec <- which(likVec == 1)
@@ -205,14 +211,15 @@ runHMM <- function(likVec=c(1,1,1,1,1), inilocList, pttList, sp.limList, bndVec,
           f <- hmm.filter.ext(g, L, K1, K2, maskL=T, P.final, minBounds = bnd)
           
           # RUN THE SMOOTHING STEP
-          s = hmm.smoother(f, K1, K2, P.final)
+          s = hmm.smoother.fix(f, K1, K2, L, P.final)
           
           # GET THE MOST PROBABLE TRACK
           tr <- calc.track(s, g, dateVec)
-
+          plotHMM(s, tr, dateVec, ptt, save.plot = F)
+          
           # COMPARE HMM, GPE3, SPOT
           setwd(myDir)
-          write.table(tr, file=paste(ptt, '_HMM_track.csv', sep=''), sep = ',', col.names = T)
+          write.table(tr, file=paste(ptt, '_HMM_track.csv', sep=''), sep = ',', col.names = TRUE)
           df <- formatTracks(trackDir = myDir, ptt = ptt, gpeNo = gpeNo[ii])
           res <- compareTracks(df)
           res[[4]] <- apply(res$gcd, 2, FUN=function(x) mean(x, na.rm=T))

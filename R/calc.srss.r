@@ -1,17 +1,27 @@
 #' Calculate Position-based Likelihood
 #' 
-#' \code{calc.srss} calculates likelihood estimates for each day's estimated dawn dusk times from the tag
+#' \code{calc.srss} calculates likelihood estimates for each day's estimated
+#' dawn dusk times from the tag
 #' 
-#' Tag-measured sunrise/sunset (SRSS) times are first filtered according to the min/max times possible. possible values are computed based on spatial limits included in locs.grid input. after filtering, each yearday has a grid of georeferenced SRSS times that the tag-measured times are compared to in order to generate a likelihood.
+#' Tag-measured sunrise/sunset (SRSS) times are first filtered according to the
+#' min/max times possible. possible values are computed based on spatial limits
+#' included in locs.grid input. after filtering, each yearday has a grid of
+#' georeferenced SRSS times that the tag-measured times are compared to in order
+#' to generate a likelihood.
 #' 
 #' @param light is -LightLoc file output from DAP/Tag Portal for WC tags and 
 #'   contains tag-measured dawn/dusk times.
 #' @param locs.grid is list output from \code{setup.locs.grid}
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
-#' @param res is resolution of light grid in degrees. default is 1 deg. higher resolution (e.g. res = .25 for 1/4 deg) takes considerably longer to compute
+#' @param res is resolution of light grid in degrees. default is 1 deg. higher
+#'   resolution (e.g. res = .25 for 1/4 deg) takes considerably longer to
+#'   compute
+#' @param focalDim is integer for dimensions of raster::focal used to calculate 
+#'   sd() of SRSS grid cell. Recommend focalDim = 3 if res=1 and focalDim = 9 if
+#'   res=0.25.
 #' @export
-#' @return L is a raster of dim(lon x lat x dateVec) containing likelihood surfaces for each
-#'   time point
+#' @return L is a raster of dim(lon x lat x dateVec) containing likelihood
+#'   surfaces for each time point
 #' @seealso \code{\link{calc.gpe2}}
 #' @examples
 #' \dontrun{
@@ -25,7 +35,7 @@
 #' L.light <- calc.srss(light, locs.grid = locs.grid, dateVec = dateVec)
 #' }
 
-calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1){
+calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){
   options(warn=2)
   start.t <- Sys.time()
   
@@ -112,7 +122,7 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1){
         
         # now for likelihood
         # get the SD for this day, T
-        srf <- raster::focal(sr.ras[[didx]], w = matrix(1, nrow = 3, ncol = 3), fun = function(x) stats::sd(x, na.rm = T))
+        srf <- raster::focal(sr.ras[[didx]], w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = T))
         # the SR likelihood
         srlik <- liksrss(sr, srss = sr.ras[[didx]], srsd = srf)
         
@@ -130,7 +140,7 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1){
         light[which(lightDates %in% dateVec[t] & light$Type == 'Dusk'), 6] <- ss
         
         # and sunset
-        ssf <- raster::focal(ss.ras[[didx]], w = matrix(1, nrow = 3, ncol = 3), fun = function(x) stats::sd(x, na.rm = T))
+        ssf <- raster::focal(ss.ras[[didx]], w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = T))
         sslik <- liksrss(ss, srss = ss.ras[[didx]], srsd = ssf)
         
         L.light[[t]] <- sslik
@@ -172,12 +182,12 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1){
         
         # now for likelihood
         # get the SD for this day, T
-        srf <- raster::focal(sr.ras[[didx]], w = matrix(1, nrow = 3, ncol = 3), fun = function(x) stats::sd(x, na.rm = T))
+        srf <- raster::focal(sr.ras[[didx]], w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = T))
         # the SR likelihood
         srlik <- liksrss(sr, srss = sr.ras[[didx]], srsd = srf)
         
         # and sunset
-        ssf <- raster::focal(ss.ras[[didx]], w = matrix(1, nrow = 3, ncol = 3), fun = function(x) stats::sd(x, na.rm = T))
+        ssf <- raster::focal(ss.ras[[didx]], w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = T))
         sslik <- liksrss(ss, srss = ss.ras[[didx]], srsd = ssf)
         
         if(any(srlik[] != 0) & any(sslik[] != 0)){

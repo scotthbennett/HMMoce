@@ -126,7 +126,7 @@ runHMM <- function(likVec=c(1,1,1,1,1), inilocList, pttList, sp.limList, bndVec,
     #----------------------------------------------------------------------------------#
     if (likVec[1] == 1){
       t0 <- Sys.time()
-      #L.1 <- calc.srss(light, locs.grid = locs.grid, dateVec = dateVec, res=0.25)
+      L.1 <- calc.srss(light, locs.grid = locs.grid, dateVec = dateVec, res=0.25, focalDim = 12)
       t1 <- Sys.time()
       print(paste('Light calculations took ', round(as.numeric(difftime(t1, t0, units='mins')), 2), 'minutes...'))
     }

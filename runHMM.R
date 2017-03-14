@@ -27,7 +27,7 @@ source('/home/rstudio/HMMoce_run/compareTracks.r')
 parVec <- c(1, 2, 4)
 pttList <- c(141259, 141257, 141256, 141254)
 gpeNo <- c(4,1,1,5)
-bndVec <- c(5, 10)
+bndVec <- c(NA, 5, 10)
 
 # TAG/POPUP DATES AND LOCATIONS (dd, mm, YYYY, lat, lon)
 inilocList <- list(data.frame(matrix(c(13, 10, 2015, 41.3, -69.27, 
@@ -80,7 +80,7 @@ runHMM <- function(likVec=c(1,2,3,4,5), inilocList, pttList, sp.limList, bndVec,
     light.udates <- light$udates; light <- light$data
     
     # OPTIONAL: light data as output from GPE2, different filtering algorithm seems to work better for light likelihood generation
-    locs <- read.table(paste('141256-Locations-GPE2.csv', sep = ''), sep = ',', header = T, blank.lines.skip = F)
+    locs <- read.table(paste(myDir, ptt, '-Locations-GPE2.csv', sep = ''), sep = ',', header = T, blank.lines.skip = F)
     locs <- locs[which(locs$Longitude > -75),]
     locDates <- as.Date(as.POSIXct(locs$Date, format=HMMoce:::findDateFormat(locs$Date)))
     
@@ -118,16 +118,17 @@ runHMM <- function(likVec=c(1,2,3,4,5), inilocList, pttList, sp.limList, bndVec,
       #download.file('https://raw.githubusercontent.com/camrinbraun/camrinbraun.github.io/master/woa.quarter.rda', 'woa.quarter.rda')
       download.file('https://www.dropbox.com/s/a1pte87a172ezdh/woa.quarter.rda?dl=1', 'woa.quarter.rda')
     }
-    load(paste(woa.dir,'woa.quarter.rda',sep=''))
-    bbox=list(lonmin=-100,lonmax=-20,latmin=5,latmax=60)
-    xmin = which.min((bbox[[1]] - woa.quarter$lon) ^ 2)
-    xmax = which.min((bbox[[2]] - woa.quarter$lon) ^ 2)
-    ymin = which.min((bbox[[3]] - woa.quarter$lat) ^ 2) 
-    ymax = which.min((bbox[[4]] - woa.quarter$lat) ^ 2)
-    woa.quarter$watertemp <- woa.quarter$watertemp[xmin:xmax, ymin:ymax,,]
-    woa.quarter$lon <- woa.quarter$lon[xmin:xmax]
-    woa.quarter$lat <- woa.quarter$lat[ymin:ymax]
-    save(woa.quarter, file='~/HMMoce_run/env_data/woa.quarter.atl.rda', compress='xz')
+    load(paste(woa.dir,'woa.quarter.atl.rda',sep=''))
+    #bbox=list(lonmin=-100,lonmax=-20,latmin=5,latmax=60)
+    #xmin = which.min((bbox[[1]] - woa.quarter$lon) ^ 2)
+    #xmax = which.min((bbox[[2]] - woa.quarter$lon) ^ 2)
+    #ymin = which.min((bbox[[3]] - woa.quarter$lat) ^ 2) 
+    #ymax = which.min((bbox[[4]] - woa.quarter$lat) ^ 2)
+    #woa.quarter$watertemp <- woa.quarter$watertemp[xmin:xmax, ymin:ymax,,]
+    #woa.quarter$lon <- woa.quarter$lon[xmin:xmax]
+    #woa.quarter$lat <- woa.quarter$lat[ymin:ymax]
+    #save(woa.quarter, file='~/HMMoce_run/env_data/woa.quarter.atl.rda', compress='xz')
+    
     # GET BATHYMETRY
     bathy <- get.bath.data(sp.lim$lonmin, sp.lim$lonmax, sp.lim$latmin, sp.lim$latmax, res = c(.5))
     
@@ -180,7 +181,6 @@ runHMM <- function(likVec=c(1,2,3,4,5), inilocList, pttList, sp.limList, bndVec,
     #save.image(paste(myDir, ptt, '_likelihoods.RData', sep=''))
     
     # Figure out appropriate L combinations
-    likVec <- which(likVec == 1)
     if (length(likVec) > 2){
       L.idx <- c(utils::combn(likVec, 2, simplify=F), utils::combn(likVec, 3, simplify=F))
     } else{

@@ -24,7 +24,7 @@ dataDir <- '/home/rstudio/HMMoce_run/data/'
 envDir <- '/home/rstudio/HMMoce_run/env_data/'
 source('/home/rstudio/HMMoce_run/formatTracks.r')
 source('/home/rstudio/HMMoce_run/compareTracks.r')
-parVec <- c(1, 2, 4)
+parVec <- c(2, 4)
 pttList <- c(141259, 141257, 141256, 141254)
 gpeNo <- c(4,1,1,5)
 bndVec <- c(NA, 5, 10)
@@ -186,9 +186,10 @@ runHMM <- function(likVec=c(1,2,3,4,5), inilocList, pttList, sp.limList, bndVec,
     } else{
       L.idx <- utils::combn(likVec, 2, simplify=F)
     }
-    
-    for (tt in 1:length(L.idx)){
-
+    run.idx <- c(1:4, 11:16)
+    #for (tt in 1:length(L.idx)){
+    for (tt in run.idx){
+        
       #----------------------------------------------------------------------------------#
       # COMBINE LIKELIHOOD MATRICES
       #----------------------------------------------------------------------------------#
@@ -204,7 +205,8 @@ runHMM <- function(likVec=c(1,2,3,4,5), inilocList, pttList, sp.limList, bndVec,
       lon <- g$lon[1,]
       lat <- g$lat[,1]
       
-      for (bnd in bndVec){
+      bnd <- 10
+      #for (bnd in bndVec){
         for (i in parVec){
           
           # GET MOVEMENT KERNELS AND SWITCH PROB FOR COARSE GRID
@@ -215,15 +217,15 @@ runHMM <- function(likVec=c(1,2,3,4,5), inilocList, pttList, sp.limList, bndVec,
           # GET MOVEMENT KERNELS AND SWITCH PROB FOR FINER GRID
           par0 <- makePar(migr.spd=i, grid=g, L.arr=L, p.guess=c(.9,.9), calcP=F)
           K1 <- par0$K1; K2 <- par0$K2; P.final <- par0$P.final
-          #K1r <- plotrix::rescale(K1, c(0.1,1))
-          #K2r <- plotrix::rescale(K2, c(0.1,1))
+          K1 <- plotrix::rescale(K1, c(0.1,1))
+          K2 <- plotrix::rescale(K2, c(0.1,1))
           
           # RUN THE FILTER STEP
-          if(!is.na(bnd)){
+          #if(!is.na(bnd)){
             f <- hmm.filter.ext(g, L, K1, K2, maskL=T, P.final, minBounds = bnd)
-          } else{
-            f <- hmm.filter(g, L, K1, K2, P.final)
-          }
+          #} else{
+          #  f <- hmm.filter(g, L, K1, K2, P.final)
+          #}
           
           # RUN THE SMOOTHING STEP
           s <- hmm.smoother(f, K1, K2, L, P.final)
@@ -250,7 +252,7 @@ runHMM <- function(likVec=c(1,2,3,4,5), inilocList, pttList, sp.limList, bndVec,
           #                  'gcdsd.ti','gcdsd.tib','gcdsd.kf','gcdsd.kfb','gcdsd.gpe','gcdsd.hmm', 'L.idx')
           
         } # parVec loop
-      } # bndVec loop
+      #} # bndVec loop
     } # L.idx loop
   }
   

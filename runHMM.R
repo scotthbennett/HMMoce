@@ -48,7 +48,7 @@ sp.limList <- list(list(lonmin = -82, lonmax = -25, latmin = 15, latmax = 50),
                    list(lonmin = -85, lonmax = -45, latmin = 30, latmax = 50))
 
 
-runHMM <- function(likVec=c(1,1,1,1,1), inilocList, pttList, sp.limList, bndVec, parVec){
+runHMM <- function(likVec=c(1,2,3,4,5), inilocList, pttList, sp.limList, bndVec, parVec){
   
   for (ii in 1:length(pttList)){
     #--------------------------------
@@ -80,8 +80,9 @@ runHMM <- function(likVec=c(1,1,1,1,1), inilocList, pttList, sp.limList, bndVec,
     light.udates <- light$udates; light <- light$data
     
     # OPTIONAL: light data as output from GPE2, different filtering algorithm seems to work better for light likelihood generation
-    locs <- read.table(paste('141268-Locations_FAKE.csv', sep = ''), sep = ',', header = T, blank.lines.skip = F)
-    locDates <- as.Date(as.POSIXct(locs$Date, format=findDateFormat(locs$Date)))
+    locs <- read.table(paste('141256-Locations-GPE2.csv', sep = ''), sep = ',', header = T, blank.lines.skip = F)
+    locs <- locs[which(locs$Longitude > -75),]
+    locDates <- as.Date(as.POSIXct(locs$Date, format=HMMoce:::findDateFormat(locs$Date)))
     
     #----------------------------------------------------------------------------------#
     # FURTHER PREPARATION
@@ -117,44 +118,51 @@ runHMM <- function(likVec=c(1,1,1,1,1), inilocList, pttList, sp.limList, bndVec,
       download.file('https://raw.githubusercontent.com/camrinbraun/camrinbraun.github.io/master/woa.quarter.rda', 'woa.quarter.rda')
     }
     load(paste(woa.dir,'woa.quarter.rda',sep=''))
-    
+    bbox=list(lonmin=-100,lonmax=-20,latmin=5,latmax=60)
+    xmin = which.min((bbox[[1]] - woa.quarter$lon) ^ 2)
+    xmax = which.min((bbox[[2]] - woa.quarter$lon) ^ 2)
+    ymin = which.min((bbox[[3]] - woa.quarter$lat) ^ 2) 
+    ymax = which.min((bbox[[4]] - woa.quarter$lat) ^ 2)
+    woa.quarter$watertemp <- woa.quarter$watertemp[xmin:xmax, ymin:ymax,,]
+    woa.quarter$lon <- woa.quarter$lon[xmin:xmax]
+    woa.quarter$lat <- woa.quarter$lat[ymin:ymax]
+    save(woa.quarter, file='~/HMMoce_run/env_data/woa.quarter.atl.rda', compress='xz')
     # GET BATHYMETRY
     bathy <- get.bath.data(sp.lim$lonmin, sp.lim$lonmax, sp.lim$latmin, sp.lim$latmax, res = c(.5))
     
     #----------------------------------------------------------------------------------#
     # CALCULATE ALL LIKELIHOODS
     #----------------------------------------------------------------------------------#
-    if (likVec[1] == 1){
+    if (any(likVec == 1)){
       t0 <- Sys.time()
-      L.1 <- calc.srss(light, locs.grid = locs.grid, dateVec = dateVec, res=0.25, focalDim = 12)
+      #L.1 <- calc.srss(light, locs.grid = locs.grid, dateVec = dateVec, res=0.25)
+      L.1 <- calc.gpe2(locs, locDates, iniloc = iniloc, locs.grid = locs.grid, dateVec = dateVec, errEll = FALSE, gpeOnly = TRUE)
       t1 <- Sys.time()
       print(paste('Light calculations took ', round(as.numeric(difftime(t1, t0, units='mins')), 2), 'minutes...'))
     }
     
-   # L.locs <- calc.gpe2(locs, locDates, iniloc = iniloc, locs.grid = locs.grid, dateVec = dateVec, errEll = FALSE, gpeOnly = TRUE)
-    
-    if (likVec[2] == 1){
+    if (any(likVec == 2)){
       t0 <- Sys.time()
-      L.2 <- calc.sst.par(tag.sst, ptt, sst.dir = sst.dir, dateVec = dateVec, sens.err = 2.5)
+      L.2 <- calc.sst.par(tag.sst, ptt, sst.dir = sst.dir, dateVec = dateVec, sens.err = 1)
       t1 <- Sys.time()
       print(paste('SST calculations took ', round(as.numeric(difftime(t1, t0, units='mins')), 2), 'minutes...'))
     }
     
-    if (likVec[3] == 1){
+    if (any(likVec == 3)){
       t0 <- Sys.time()
       L.3 <- calc.ohc.par(pdt, ptt, ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = FALSE)
       t1 <- Sys.time()
       print(paste('OHC calculations took ', round(as.numeric(difftime(t1, t0, units='mins')), 2), 'minutes...'))
     }
     
-    if (likVec[4] == 1){
+    if (any(likVec == 4)){
       t0 <- Sys.time()
       L.4 <- calc.woa.par(pdt, ptt, woa.data = woa.quarter, focalDim = 9, dateVec = dateVec, use.se = F)
       t1 <- Sys.time()
       print(paste('WOA calculations took ', round(as.numeric(difftime(t1, t0, units='mins')), 2), 'minutes...'))
     }
     
-    if (likVec[5] == 1){
+    if (any(likVec == 5)){
       t0 <- Sys.time()
       L.5 <- calc.hycom.par(pdt, ptt, hycom.dir, focalDim = 9, dateVec = dateVec, use.se = F)
       t1 <- Sys.time()
@@ -173,9 +181,9 @@ runHMM <- function(likVec=c(1,1,1,1,1), inilocList, pttList, sp.limList, bndVec,
     # Figure out appropriate L combinations
     likVec <- which(likVec == 1)
     if (length(likVec) > 2){
-      L.idx <- c(combn(likVec, 2, simplify=F), combn(likVec, 3, simplify=F))
+      L.idx <- c(utils::combn(likVec, 2, simplify=F), utils::combn(likVec, 3, simplify=F))
     } else{
-      L.idx <- combn(likVec, 2, simplify=F)
+      L.idx <- utils::combn(likVec, 2, simplify=F)
     }
     
     for (tt in 1:length(L.idx)){
@@ -183,17 +191,17 @@ runHMM <- function(likVec=c(1,1,1,1,1), inilocList, pttList, sp.limList, bndVec,
       #----------------------------------------------------------------------------------#
       # COMBINE LIKELIHOOD MATRICES
       #----------------------------------------------------------------------------------#
-      L <- make.L.mod(L1 = L.res[[1]][L.idx[[tt]]],
+      L <- make.L(L1 = L.res[[1]][L.idx[[tt]]],
                       L.mle.res = L.res$L.mle.res, dateVec = dateVec,
-                      locs.grid = locs.grid, iniloc = iniloc, bathy=bathy,
+                      locs.grid = locs.grid, iniloc = iniloc, bathy = bathy,
                       pdt = pdt)
       
       L.mle <- L$L.mle
       L <- L$L
       g <- L.res$g
+      g.mle <- L.res$g.mle
       lon <- g$lon[1,]
       lat <- g$lat[,1]
-      g.mle <- L.res$g.mle
       
       for (bnd in bndVec){
         for (i in parVec){
@@ -206,12 +214,22 @@ runHMM <- function(likVec=c(1,1,1,1,1), inilocList, pttList, sp.limList, bndVec,
           # GET MOVEMENT KERNELS AND SWITCH PROB FOR FINER GRID
           par0 <- makePar(migr.spd=i, grid=g, L.arr=L)
           K1 <- par0$K1; K2 <- par0$K2#; P.final <- par0$P.final
+          K1r <- plotrix::rescale(K1, c(0.1,1))
+          K2r <- plotrix::rescale(K2, c(0.1,1))
           
           # RUN THE FILTER STEP
-          f <- hmm.filter.ext(g, L, K1, K2, maskL=T, P.final, minBounds = bnd)
+          f.r <- hmm.filter.ext(g, L, K1r, K2r, maskL=T, P.final, minBounds = bnd)
+          
+          pdf('try_rescale.pdf', height=12,width=6)
+          par(mfrow=c(2,1))
+          for(i in 1:length(dateVec)){
+            image.plot(f$phi[1,i,,]); points(spot$lon[i], spot$lat[i])
+            image.plot(f.r$phi[1,i,,]); points(spot$lon[i], spot$lat[i])
+          }
+          dev.off()
           
           # RUN THE SMOOTHING STEP
-          s = hmm.smoother.fix(f, K1, K2, L, P.final)
+          s = hmm.smoother(f, K1, K2, L, P.final)
           
           # GET THE MOST PROBABLE TRACK
           tr <- calc.track(s, g, dateVec)
@@ -227,12 +245,12 @@ runHMM <- function(likVec=c(1,1,1,1,1), inilocList, pttList, sp.limList, bndVec,
           
           # WRITE OUT RESULTS
           outVec <- matrix(c(ptt=ptt, minBounds = bnd, migr.spd = i, rmseLon=res$rmse.lon, rmseLat=res$rmse.lat,
-                      gcdMean=res[[4]], gcdSD=res[[5]], paste(L.idx[[tt]],collapse='')), ncol=28)
+                      gcdMean=res[[4]], gcdSD=res[[5]], paste(L.idx[[tt]],collapse=''), P1 = P.final[1,1], P2 = P.final[2,2]), ncol=30)
           write.table(outVec,paste(dataDir, 'outVec_results.csv', sep=''), sep=',', col.names=F, append=T)
-          #names(out) <- list('rownum','ptt', 'minBnd','migr.spd','rmselon.ti','rmselon.tib','rmselon.kf','rmselon.kfb','rmselon.gpe','rmselon.hmm',
+          #colnames(outVec) <- list('ptt', 'minBnd','migr.spd','rmselon.ti','rmselon.tib','rmselon.kf','rmselon.kfb','rmselon.gpe','rmselon.hmm',
           #                   'rmselat.ti','rmselat.tib','rmselat.kf','rmselat.kfb','rmselat.gpe','rmselat.hmm',
           #                   'gcdm.ti','gcdm.tib','gcdm.kf','gcdm.kfb','gcdm.gpe','gcdm.hmm',
-          #                   'gcdsd.ti','gcdsd.tib','gcdsd.kf','gcdsd.kfb','gcdsd.gpe','gcdsd.hmm', 'L.idx')
+          #                  'gcdsd.ti','gcdsd.tib','gcdsd.kf','gcdsd.kfb','gcdsd.gpe','gcdsd.hmm', 'L.idx')
           
         } # parVec loop
       } # bndVec loop

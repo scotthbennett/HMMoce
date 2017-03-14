@@ -15,7 +15,7 @@
 #' @export
 #' @return a list of movement parameters
 
-calc.param2 <- function(migr.spd, resid.frac = 0.1, g){
+calc.param <- function(migr.spd, resid.frac = 0.1, g){
   
   migr.spd <- migr.spd / 1000 * 3600 * 24 / 111
   dims <- migr.spd / g$dla

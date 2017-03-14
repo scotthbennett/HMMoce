@@ -10,7 +10,7 @@
 
 makePar <- function(migr.spd, grid, L.arr, p.guess = c(0.7, 0.8), calcP=FALSE){
   # PROVIDE FIXED KERNEL PARAMETERS
-  par0 <- calc.param2(migr.spd = migr.spd, g = grid)
+  par0 <- calc.param(migr.spd = migr.spd, g = grid)
   D1 <- unlist(par0[1:2]) # parameters for kernel 1. this is migratory behavior mode
   D2 <- unlist(par0[3:4]) # parameters for kernel 2. resident behavior mode
   

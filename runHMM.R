@@ -115,7 +115,8 @@ runHMM <- function(likVec=c(1,2,3,4,5), inilocList, pttList, sp.limList, bndVec,
     # AND/OR WOA DATA
     woa.dir <- envDir
     if(!any(list.files(woa.dir) == 'woa.quarter.rda')){
-      download.file('https://raw.githubusercontent.com/camrinbraun/camrinbraun.github.io/master/woa.quarter.rda', 'woa.quarter.rda')
+      #download.file('https://raw.githubusercontent.com/camrinbraun/camrinbraun.github.io/master/woa.quarter.rda', 'woa.quarter.rda')
+      download.file('https://www.dropbox.com/s/a1pte87a172ezdh/woa.quarter.rda?dl=1', 'woa.quarter.rda')
     }
     load(paste(woa.dir,'woa.quarter.rda',sep=''))
     bbox=list(lonmin=-100,lonmax=-20,latmin=5,latmax=60)
@@ -207,33 +208,29 @@ runHMM <- function(likVec=c(1,2,3,4,5), inilocList, pttList, sp.limList, bndVec,
         for (i in parVec){
           
           # GET MOVEMENT KERNELS AND SWITCH PROB FOR COARSE GRID
-          par0 <- makePar(migr.spd=i, grid=g.mle, L.arr=L.mle, calcP=TRUE)
+          #par0 <- makePar(migr.spd=i, grid=g.mle, L.arr=L.mle, p.guess=c(.9,.9), calcP=F)
           #K1 <- par0$K1; K2 <- par0$K2; 
-          P.final <- par0$P.final
+          #P.final <- par0$P.final
           
           # GET MOVEMENT KERNELS AND SWITCH PROB FOR FINER GRID
-          par0 <- makePar(migr.spd=i, grid=g, L.arr=L)
-          K1 <- par0$K1; K2 <- par0$K2#; P.final <- par0$P.final
-          K1r <- plotrix::rescale(K1, c(0.1,1))
-          K2r <- plotrix::rescale(K2, c(0.1,1))
+          par0 <- makePar(migr.spd=i, grid=g, L.arr=L, p.guess=c(.9,.9), calcP=F)
+          K1 <- par0$K1; K2 <- par0$K2; P.final <- par0$P.final
+          #K1r <- plotrix::rescale(K1, c(0.1,1))
+          #K2r <- plotrix::rescale(K2, c(0.1,1))
           
           # RUN THE FILTER STEP
-          f.r <- hmm.filter.ext(g, L, K1r, K2r, maskL=T, P.final, minBounds = bnd)
-          
-          pdf('try_rescale.pdf', height=12,width=6)
-          par(mfrow=c(2,1))
-          for(i in 1:length(dateVec)){
-            image.plot(f$phi[1,i,,]); points(spot$lon[i], spot$lat[i])
-            image.plot(f.r$phi[1,i,,]); points(spot$lon[i], spot$lat[i])
+          if(!is.na(bnd)){
+            f <- hmm.filter.ext(g, L, K1, K2, maskL=T, P.final, minBounds = bnd)
+          } else{
+            f <- hmm.filter(g, L, K1, K2, P.final)
           }
-          dev.off()
           
           # RUN THE SMOOTHING STEP
-          s = hmm.smoother(f, K1, K2, L, P.final)
+          s <- hmm.smoother(f, K1, K2, L, P.final)
           
           # GET THE MOST PROBABLE TRACK
           tr <- calc.track(s, g, dateVec)
-          plotHMM(s, tr, dateVec, ptt, save.plot = F)
+          #plotHMM(s, tr, dateVec, ptt, save.plot = F)
           
           # COMPARE HMM, GPE3, SPOT
           setwd(myDir)

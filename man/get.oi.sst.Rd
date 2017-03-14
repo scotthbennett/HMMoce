@@ -51,11 +51,10 @@ image.plot(sst)
 }
   
 }
+\references{
+\url{https://www.ncdc.noaa.gov/oisst}
+}
 \author{
 Function originally written for R by Ben Jones (WHOI) and modified 
   by Camrin Braun and Ben Galuardi.
 }
-\references{
-\url{https://www.ncdc.noaa.gov/oisst}
-}
-

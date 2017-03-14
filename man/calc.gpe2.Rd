@@ -55,4 +55,3 @@ L.light <- calc.gpe2(locs, iniloc = iniloc, locs.grid = locs.grid,
 \seealso{
 \code{\link{calc.srss}}
 }
-

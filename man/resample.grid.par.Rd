@@ -21,4 +21,3 @@ a list of all resampled likelihood rasters and g, the common grid
 \description{
 Resample likelihood rasters to common resolution/extent
 }
-

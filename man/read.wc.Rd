@@ -27,4 +27,3 @@ a list containing: the data read as a data.frame and a date vector of
 \code{read.wc} reads and formats tag data output from Wildlife Computers Data
 Portal
 }
-

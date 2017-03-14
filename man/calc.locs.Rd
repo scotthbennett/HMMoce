@@ -31,4 +31,3 @@ data.
 GPS and Argos positions are given a "likelihood" using this function but are
 currently both considered to be "known" positions without error.
 }
-

@@ -4,7 +4,7 @@
 \alias{calc.srss}
 \title{Calculate Position-based Likelihood}
 \usage{
-calc.srss(light = NULL, locs.grid, dateVec, res = 1)
+calc.srss(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3)
 }
 \arguments{
 \item{light}{is -LightLoc file output from DAP/Tag Portal for WC tags and 
@@ -14,17 +14,28 @@ contains tag-measured dawn/dusk times.}
 
 \item{dateVec}{is vector of dates from tag to pop-up in 1 day increments.}
 
-\item{res}{is resolution of light grid in degrees. default is 1 deg. higher resolution (e.g. res = .25 for 1/4 deg) takes considerably longer to compute}
+\item{res}{is resolution of light grid in degrees. default is 1 deg. higher
+resolution (e.g. res = .25 for 1/4 deg) takes considerably longer to
+compute}
+
+\item{focalDim}{is integer for dimensions of raster::focal used to calculate 
+sd() of SRSS grid cell. Recommend focalDim = 3 if res=1 and focalDim = 9 if
+res=0.25.}
 }
 \value{
-L is a raster of dim(lon x lat x dateVec) containing likelihood surfaces for each
-  time point
+L is a raster of dim(lon x lat x dateVec) containing likelihood
+  surfaces for each time point
 }
 \description{
-\code{calc.srss} calculates likelihood estimates for each day's estimated dawn dusk times from the tag
+\code{calc.srss} calculates likelihood estimates for each day's estimated
+dawn dusk times from the tag
 }
 \details{
-Tag-measured sunrise/sunset (SRSS) times are first filtered according to the min/max times possible. possible values are computed based on spatial limits included in locs.grid input. after filtering, each yearday has a grid of georeferenced SRSS times that the tag-measured times are compared to in order to generate a likelihood.
+Tag-measured sunrise/sunset (SRSS) times are first filtered according to the
+min/max times possible. possible values are computed based on spatial limits
+included in locs.grid input. after filtering, each yearday has a grid of
+georeferenced SRSS times that the tag-measured times are compared to in order
+to generate a likelihood.
 }
 \examples{
 \dontrun{
@@ -41,4 +52,3 @@ L.light <- calc.srss(light, locs.grid = locs.grid, dateVec = dateVec)
 \seealso{
 \code{\link{calc.gpe2}}
 }
-

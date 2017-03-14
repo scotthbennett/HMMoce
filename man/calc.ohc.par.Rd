@@ -45,4 +45,3 @@ res = calc.ohc.par(pdt, ptt, isotherm = '', ohc.dir = ohc.dir, dateVec = dateVec
 \seealso{
 \code{\link{calc.ohc}}
 }
-

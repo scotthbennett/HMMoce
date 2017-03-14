@@ -44,4 +44,3 @@ the previous days prediction kernel. If that kernel is smaller than the
 migratory kernel being used, the migratory kernel size is defaulted to. User 
 can also specify a minimum bound size.
 }
-

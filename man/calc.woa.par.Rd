@@ -63,4 +63,3 @@ L.prof.woa <- calc.woa.par(pdt, dat = woa, lat = lat, lon = lon,
 \seealso{
 \code{\link{calc.ohc}}
 }
-

@@ -62,11 +62,10 @@ image.plot(hycom[,,1])
 }
   
 }
+\references{
+\url{https://hycom.org/}
+}
 \author{
 Function originally written for R by Ben Jones (WHOI) and modified
   by Camrin Braun and Ben Galuardi.
 }
-\references{
-\url{https://hycom.org/}
-}
-

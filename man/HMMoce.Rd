@@ -4,6 +4,7 @@
 \name{HMMoce}
 \alias{HMMoce}
 \alias{HMMoce-package}
+\alias{HMMoce-package}
 \title{HMMoce: an R package for improved analysis of marine animal movement data 
 using hidden Markov models}
 \description{
@@ -35,4 +36,20 @@ hidden Markov framework originally developed by Pedersen et al. 2008.
   Modell 321:10-22.
  }
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{http://www.camrinbraun.com/HMMoce/}
+  \item Report bugs at \url{https://github.com/camrinbraun/HMMoce/issues}
+}
 
+}
+\author{
+\strong{Maintainer}: Camrin Braun \email{camrin.braun@gmail.com}
+
+Authors:
+\itemize{
+  \item Benjamin Galuardi \email{drdrumfish@gmail.com}
+}
+
+}

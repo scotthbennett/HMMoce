@@ -47,4 +47,3 @@ L.sst <- calc.sst(tag.sst, sst.dir = sst.dir, dateVec = dateVec)
 \seealso{
 \code{\link{calc.ohc}}
 }
-

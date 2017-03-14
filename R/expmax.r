@@ -47,7 +47,7 @@ expmax <- function(p.init, g, L, K1, K2, niter = 1000, threshold = .01, save = F
   
   print(paste('Starting EM for state switching...'))
   
-  #p.init <- matrix(c(p.init[1], 1 - p.init[1], 1 - p.init[2], p.init[2]), 2, 2, byrow = TRUE)
+  p.init <- matrix(c(p.init[1], 1 - p.init[1], 1 - p.init[2], p.init[2]), 2, 2, byrow = TRUE)
   
   if (niter < 25){
     stop('Maximum number of iterations (niter) must be > 25.')
@@ -77,10 +77,10 @@ expmax <- function(p.init, g, L, K1, K2, niter = 1000, threshold = .01, save = F
     }
     
     # RUN THE FILTER STEP
-    f <- hmm.filter(g, L, K1, K2, P)
+    f <- hmm.filter(g, L, K1, K2, P=p.init)
     
     # RUN THE SMOOTHING STEP
-    s <- hmm.smoother(f, K1, K2, P)
+    s <- hmm.smoother(f, K1, K2, L=L, P=p.init)
     
     #------------------------#
     # UPDATE P

@@ -293,6 +293,8 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
   L <- aperm(raster::as.array(raster::flip(L, direction = 'y')), c(3, 2, 1))
   L.mle <- aperm(raster::as.array(raster::flip(L.mle, direction = 'y')), c(3, 2, 1))
   
+  print('Finishing make.L...', sep='')
+  
   return(list(L = L, L.mle = L.mle))
 }
 

@@ -7,6 +7,10 @@
 #' @param L.arr is the likelihood array used for state switch probability calculation (see \code{expmax}). This is typically the L.mle array returned from \code{make.L} because it's typically more coarse (and thus faster) than the higher-resolution L array.
 #' @param p.guess is vector of length 2 indicating probability of staying in states 1 and 2, respectively
 #' @param calcP is logical indicating whether to use \code{expmax} to calculate state-switching probabilities
+#' 
+#' @return list of parameters including movement kernels (K1, K2) and switch probability (P.final)
+#' @export
+#' 
 
 makePar <- function(migr.spd, grid, L.arr, p.guess = c(0.7, 0.8), calcP=FALSE){
   # PROVIDE FIXED KERNEL PARAMETERS
@@ -19,13 +23,13 @@ makePar <- function(migr.spd, grid, L.arr, p.guess = c(0.7, 0.8), calcP=FALSE){
   K2 <- gausskern(D2[1], D2[2], muadv = 0)
   
   # RUN EXPECTATION-MAXIMIZATION ROUTINE FOR MATRIX, P (STATE SWITCH PROBABILITY)
-  P.init <- matrix(c(p.guess[1], 1 - p.guess[1], 1 - p.guess[2], p.guess[2]), 2, 2, byrow = TRUE)
   
   if(calcP){
-    P.final <- expmax(P.init, g = grid, L = L.arr, K1, K2, save = T)
+    P.final <- expmax(p.init=p.guess, g = grid, L = L.arr, K1, K2, save = T)
     save.p <- P.final[[2]]; P.final <- P.final[[1]]
   } else{
-    P.final <- P.init
+    P.final <- matrix(c(p.guess[1], 1 - p.guess[1], 1 - p.guess[2], p.guess[2]), 2, 2, byrow = TRUE)
+
   }
   
   return(list(K1 = K1, K2 = K2, P.final = P.final))

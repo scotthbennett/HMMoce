@@ -39,7 +39,8 @@ calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE
   
   options(warn=1)
   
-  start.t <- Sys.time()
+  t0 <- Sys.time()
+  print(paste('Starting OHC likelihood calculation...'))
   
   # constants for OHC calc
   cp <- 3.993 # kJ/kg*C <- heat capacity of seawater
@@ -69,7 +70,7 @@ calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE
   
 # BEGIN PARALLEL STUFF  
   
-  print('processing in parallel... ')
+  print('Processing in parallel... ')
   
   # ncores = detectCores()  # should be an input argument
   cl = parallel::makeCluster(ncores)
@@ -218,7 +219,8 @@ calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE
   
   names(L.ohc) = as.character(dateVec)
   
-  print(Sys.time() - start.t)
+  t1 <- Sys.time()
+  print(paste('OHC calculations took ', round(as.numeric(difftime(t1, t0, units='mins')), 2), 'minutes...'))
   
   # return ohc likelihood surfaces
   return(L.ohc)

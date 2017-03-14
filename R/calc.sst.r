@@ -34,7 +34,8 @@
 
 calc.sst <- function(tag.sst, ptt, sst.dir, dateVec, sens.err = 1){
   
-  start.t <- Sys.time()
+  print(paste('Starting SST likelihood calculation...'))
+  t0 <- Sys.time()
   
   tag.sst$dts <- as.POSIXct(tag.sst$Date, format = findDateFormat(tag.sst$Date))
   by_dte <- dplyr::group_by(tag.sst, as.factor(tag.sst$dts))  # group by unique DAILY time points
@@ -44,7 +45,7 @@ calc.sst <- function(tag.sst, ptt, sst.dir, dateVec, sens.err = 1){
   
   T <- length(tag.sst[,1])
   
-  print(paste('Starting iterations through time ', '...'))
+  print(paste('Starting iterations through deployment period ', '...'))
   
   for(i in 1:T){
     
@@ -94,6 +95,9 @@ calc.sst <- function(tag.sst, ptt, sst.dir, dateVec, sens.err = 1){
   L.sst <- raster::flip(L.sst, direction = 'y')
     
   L.sst[L.sst < 0] <- 0
+  
+  t1 <- Sys.time()
+  print(paste('SST calculations took ', round(as.numeric(difftime(t1, t0, units='mins')), 2), 'minutes...'))
   
   # return sst likelihood surfaces
   return(L.sst)

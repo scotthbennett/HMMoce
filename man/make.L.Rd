@@ -5,7 +5,8 @@
 \title{Combine individual source likelihoods}
 \usage{
 make.L(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res,
-  dateVec = NULL, locs.grid = NULL, iniloc = NULL)
+  dateVec = NULL, locs.grid = NULL, iniloc = NULL, bathy = NULL,
+  pdt = NULL)
 }
 \arguments{
 \item{L1}{a likelihood array}
@@ -25,6 +26,10 @@ parameter estimation step later on}
 \item{locs.grid}{is output grid from \code{setup.locs.grid}. Only required if known.locs is not NULL.}
 
 \item{iniloc}{is matrix of tag and pop locations. Default is NULL because this should be taken care of elsewhere.}
+
+\item{bathy}{is bathymetry raster (likely from ETOPO1) as acquired by \code{get.bath.data}}
+
+\item{pdt}{is data frame output from read.wc(type='pdt')}
 }
 \value{
 a list containing: L, the overall likelihood array and L.mle, a more 
@@ -38,4 +43,3 @@ SST, OHC) to make overall combined likelihoods for each time point
 This function currently only supports the use of 3 input likelihood 
   data sources. This will be expanded in the future based on user needs.
 }
-

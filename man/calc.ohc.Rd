@@ -46,4 +46,3 @@ L.ohc <- calc.ohc(pdt, ptt, ohc.dir = hycom.dir, dateVec = dateVec,
 \seealso{
 \code{\link{calc.woa}}
 }
-

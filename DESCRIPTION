@@ -35,7 +35,7 @@ Imports:
 Suggests: 
     knitr,
     rmarkdown
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 URL: http://www.camrinbraun.com/HMMoce/
 BugReports: https://github.com/camrinbraun/HMMoce/issues
 LazyData: true

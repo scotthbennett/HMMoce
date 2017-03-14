@@ -59,4 +59,3 @@ Woillez M, Fablet R, Ngo TT, et al. (2016) A HMM-based model to
   geolocate pelagic fish from high-resolution individual temperature and 
   depth histories: European sea bass as a case study. Ecol Modell 321:10-22.
 }
-

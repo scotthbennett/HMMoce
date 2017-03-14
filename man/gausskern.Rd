@@ -28,14 +28,13 @@ kern = gausskern(3, 0.5)
 }
 
 }
-\author{
-Function originally written for Matlab by Martin W. Pedersen,
-  translated to R by Benjamin Galuardi
-}
 \references{
 Pedersen, M.W., Righton, D., Thygesen, U.H., Andersen, K.H., and
   Madsen, H. 2008. Geolocation of North Sea cod (Gadus morhua) using hidden
   Markov models and behavioural switching. Canadian Journal of Fisheries and
   Aquatic Sciences 65(11): 2167-1377.
 }
-
+\author{
+Function originally written for Matlab by Martin W. Pedersen,
+  translated to R by Benjamin Galuardi
+}

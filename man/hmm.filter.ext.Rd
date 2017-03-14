@@ -4,7 +4,8 @@
 \alias{hmm.filter.ext}
 \title{HMM filter functions}
 \usage{
-hmm.filter.ext(g, L, K1, K2, P, maskL = T)
+hmm.filter.ext(g, L, K1, K2, P, maskL = T, bound.thr = 0.1,
+  minBounds = 10)
 }
 \arguments{
 \item{g}{grid from \code{\link{setup.grid}}}
@@ -37,4 +38,3 @@ f <- hmm.filter(g, L, K1, K2, P.final)
 }
 
 }
-

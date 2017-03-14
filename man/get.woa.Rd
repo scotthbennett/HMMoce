@@ -18,4 +18,3 @@ name and directory of the downloaded data
 \code{get.woa} downloads World Ocean Atlas 2013 mean climatological
 temperature data from GitHub
 }
-

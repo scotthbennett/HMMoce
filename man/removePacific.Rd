@@ -31,4 +31,3 @@ woa <- removePacific(woa, lat, lon)
 image.plot(woa[,,1,1])
 }
 }
-

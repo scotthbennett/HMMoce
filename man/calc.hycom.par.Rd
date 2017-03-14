@@ -40,4 +40,3 @@ hycom.dir = '~/hycom/'
 res = calc.hycom.par(pdt, ptt, isotherm = '', hycom.dir = hycom.dir, dateVec = dateVec, bathy = T)
 }
 }
-

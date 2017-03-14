@@ -35,6 +35,8 @@
 
 calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, sens.err = 1, ncores = parallel::detectCores()){
   
+  print(paste('Starting SST likelihood calculation...'))
+  
   start.t <- Sys.time()
   
   tag.sst$dts <- as.POSIXct(tag.sst$Date, format = findDateFormat(tag.sst$Date))

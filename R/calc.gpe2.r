@@ -37,7 +37,7 @@
 
 calc.gpe2 <- function(locs, locDates, iniloc, locs.grid, dateVec, errEll = TRUE, gpeOnly = TRUE){
   
-  print(paste('Starting likelihood calculation...'))
+  print(paste('Starting light likelihood calculation...'))
   
   # get rid of non-GPE locations if gpeOnly == TRUE and check length of resulting locs file
   if(gpeOnly == TRUE){

@@ -16,7 +16,7 @@
 #' @export
 #' 
 
-hmm.smoother.fix <- function(f, K1, K2, L, P){
+hmm.smoother <- function(f, K1, K2, L, P){
   ## Smoothing the filtered estimates
   ## The equations for smoothing are presented in Pedersen et al. 2011, Oikos, Appendix
   T <- dim(f$phi)[2]

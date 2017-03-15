@@ -36,8 +36,10 @@
 #' }
 
 calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){
+  
   options(warn=2)
-  start.t <- Sys.time()
+  t0 <- Sys.time()
+  print(paste('Starting light likelihood calculation using SRSS times...'))
   
   #=====
   # BUILD A SPOT FOR THE RESULTS TO GO
@@ -61,7 +63,7 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){
   #==================
   # build the SRSS grids
   #==================
-  print(paste('Starting SRSS grids', '...'))
+  print(paste('Building SRSS grids', '...'))
   
   # expand.grid and SpatialPoints establishes a grid
   xy = as.matrix(expand.grid(lon,lat))
@@ -228,6 +230,9 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){
   } # end for loop
   
   L.light[L.light < 0] <- 0
+  
+  t1 <- Sys.time()
+  print(paste('Light calculations took ', round(as.numeric(difftime(t1, t0, units='mins')), 2), 'minutes...'))
   
   L.light
   

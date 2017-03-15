@@ -36,4 +36,3 @@ tr <- calc.track(s, g, dateVec)
 }
 
 }
-

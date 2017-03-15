@@ -30,4 +30,3 @@ nothing, just downloads the data to your local machine
 a remote server and downloads the temporal and spatial extent of interest for
 further use
 }
-

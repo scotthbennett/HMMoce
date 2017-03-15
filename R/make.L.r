@@ -71,15 +71,15 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
   if(is.null(L2) & is.null(L3)){
     print('One likelihood raster has been specified...')
     
-    L <- L1 * 0
+    L <- L1
     
     # GET RID OF NA VALUES
-    L[is.na(L)] <- 0
+    #L1[is.na(L1)] <- 0
     
     # ALL CELLS IN A LIKELIHOOD SURFACE == 0?
-    naLidx = raster::cellStats(L, sum, na.rm=T) != 0
+    #naLidx = raster::cellStats(L1, sum, na.rm=T) != 0
     
-    L <- L[naLidx]
+    #L <- L1[naLidx]
     
   } else if(!is.null(L2) & is.null(L3)){
     print('Two likelihood rasters have been specified...')
@@ -292,6 +292,8 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
   # MAKE BOTH RASTERS (COARSE AND FINE RES L's) INTO AN ARRAY
   L <- aperm(raster::as.array(raster::flip(L, direction = 'y')), c(3, 2, 1))
   L.mle <- aperm(raster::as.array(raster::flip(L.mle, direction = 'y')), c(3, 2, 1))
+  
+  print('Finishing make.L...', sep='')
   
   return(list(L = L, L.mle = L.mle))
 }

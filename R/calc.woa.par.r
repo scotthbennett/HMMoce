@@ -48,7 +48,9 @@
 calc.woa.par <- function(pdt, ptt, woa.data = NULL, dateVec, focalDim = NULL, use.se = TRUE, ncores = parallel::detectCores()){
   
   options(warn=-1)
-  start.t <- Sys.time()
+
+  t0 <- Sys.time()
+  print(paste('Starting WOA likelihood calculation...'))
   
   if(is.null(woa.data)){
     stop('Error: data must be specified')
@@ -75,7 +77,7 @@ calc.woa.par <- function(pdt, ptt, woa.data = NULL, dateVec, focalDim = NULL, us
   
   # BEGIN PARALLEL STUFF
   
-  print('processing in parallel... ')
+  print('Processing in parallel... ')
   
   # ncores <- detectCores() # as input argument
   cl = parallel::makeCluster(ncores)
@@ -198,7 +200,9 @@ crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
 L.ras <- raster::brick(L.prof, xmn = min(woa.data$lon), xmx = max(woa.data$lon), ymn = min(woa.data$lat), ymx = max(woa.data$lat), transpose = T, crs)
 L.ras <- raster::flip(L.ras, direction = 'y')
 
-print(Sys.time() - start.t)
+t1 <- Sys.time()
+print(paste('WOA calculations took ', round(as.numeric(difftime(t1, t0, units='mins')), 2), 'minutes...'))
+
 options(warn = 2)
 
 return(L.ras)

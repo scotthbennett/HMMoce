@@ -23,4 +23,3 @@ dte.POSIX <- as.POSIXct(dte, format = findDateFormat(dte))
 dte.POSIX
 }
 }
-

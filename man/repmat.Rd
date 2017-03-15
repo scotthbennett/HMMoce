@@ -30,4 +30,3 @@ Pedersen MW, Patterson TA, Thygesen UH, Madsen H (2011)
   Estimating animal behavior and residency from movement data. Oikos
   120:1281-1290.
 }
-

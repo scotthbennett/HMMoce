@@ -38,6 +38,7 @@
 calc.gpe2 <- function(locs, locDates, iniloc, locs.grid, dateVec, errEll = TRUE, gpeOnly = TRUE){
   
   print(paste('Starting light likelihood calculation...'))
+  t0 <- Sys.time()
   
   # get rid of non-GPE locations if gpeOnly == TRUE and check length of resulting locs file
   if(gpeOnly == TRUE){
@@ -144,6 +145,9 @@ calc.gpe2 <- function(locs, locDates, iniloc, locs.grid, dateVec, errEll = TRUE,
   L.gpe2 <- raster::flip(L.gpe2, direction = 'y')
   
   L.gpe2[L.gpe2 < 0] <- 0
+  
+  t1 <- Sys.time()
+  print(paste('Light calculations took ', round(as.numeric(difftime(t1, t0, units='mins')), 2), 'minutes...'))
   
   return(L.gpe2)
   

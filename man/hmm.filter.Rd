@@ -37,4 +37,3 @@ f <- hmm.filter(g, L, K1, K2, P.final)
 }
 
 }
-

@@ -1,3 +1,14 @@
+#' \code{calc.errEll} calculates error ellipses around input locations
+#' 
+#' Error ellipses are generated around WC tag based positions using
+#' tag-calculated error structure.
+#' 
+#' @param locs is file of locations typically read from -Locations.csv output
+#'   from Wildlife Computers
+#' @param locs.grid is list output from \code{setup.locs.grid}
+#' 
+#' @return an array of elliptical error ellipses for input light-based locations  
+
 calc.errEll <- function(locs, locs.grid){
 
   # arithmetic converts from meters to degrees

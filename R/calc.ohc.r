@@ -33,7 +33,8 @@ calc.ohc <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE, us
 
   options(warn=1)
   
-  start.t <- Sys.time()
+  t0 <- Sys.time()
+  print(paste('Starting OHC likelihood calculation...'))
   
   # constants for OHC calc
   cp <- 3.993 # kJ/kg*C <- heat capacity of seawater
@@ -48,7 +49,7 @@ calc.ohc <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE, us
   
   if(isotherm != '') iso.def <- TRUE else iso.def <- FALSE
   
-  print(paste('Starting iterations through time ', '...'))
+  print(paste('Starting iterations through deployment period ', '...'))
   
   for(i in 1:T){
     
@@ -181,6 +182,9 @@ calc.ohc <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE, us
   L.ohc <- raster::flip(L.ohc, direction = 'y')
 
   L.ohc[L.ohc < 0] <- 0
+  
+  t1 <- Sys.time()
+  print(paste('OHC calculations took ', round(as.numeric(difftime(t1, t0, units='mins')), 2), 'minutes...'))
   
   # return ohc likelihood surfaces
   return(L.ohc)

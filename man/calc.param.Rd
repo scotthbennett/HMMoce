@@ -4,12 +4,15 @@
 \alias{calc.param}
 \title{Calculates movement parameters used for behavior kernels}
 \usage{
-calc.param(migr.spd, resid.spd = NULL, g)
+calc.param(migr.spd, resid.frac = 0.1, g)
 }
 \arguments{
-\item{migr.spd}{is numeric indicating movement speed of animal (in m s) while in migratory behavior state.}
+\item{migr.spd}{is numeric indicating movement speed of animal (in m s) while
+in migratory behavior state.}
 
-\item{resid.spd}{is numeric indicating movement speed of animal (in m s) while in resident behavior state. If not specified, default is 10 percent of migratory speed.}
+\item{resid.frac}{is numeric indicating percent of migratory speed that
+should be used for resident-like movements. Default is 10% of migratory
+speed.}
 
 \item{g}{is grid from \code{setup.grid}}
 }
@@ -20,7 +23,6 @@ a list of movement parameters
 \code{calc.param} calculates movement parameters used to generate kernels
 }
 \details{
-Movement parameters for each of two behavioral modes are generated using an input grid
-and user-input speed (m s) for at least the migratory state.
+Movement parameters for each of two behavioral modes are generated using an
+input grid and user-input speed (m s) for at least the migratory state.
 }
-

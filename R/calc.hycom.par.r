@@ -32,16 +32,9 @@ calc.hycom.par <- function(pdt, ptt, hycom.dir, focalDim = 9, dateVec, use.se = 
   
   options(warn=-1)
   
-  start.t <- Sys.time()
-  
-  #max_ohc_date = max(as.Date(substr(dir(hycom.dir), 8, 17)))
-  #pdt_idx = as.Date(pdt$Date) <= max_ohc_date
-  #pdt = pdt[pdt_idx, ]
-  
-  #dvidx = dateVec <= max_ohc_date
-  
-  #dateVec = dateVec[dvidx]
-  
+  t0 <- Sys.time()
+  print(paste('Starting Hycom profile likelihood calculation...'))
+
   # calculate midpoint of tag-based min/max temps
   pdt$MidTemp <- (pdt$MaxTemp + pdt$MinTemp) / 2
   
@@ -51,7 +44,7 @@ calc.hycom.par <- function(pdt, ptt, hycom.dir, focalDim = 9, dateVec, use.se = 
   udates <- unique(lubridate::parse_date_time(pdt$Date, orders = '%Y-%m-%d %H%:%M:%S'))
   T <- length(udates)
   
-  print(paste0('Generating OHC likelihood for ', udates[1], ' through ', udates[length(udates)]))
+  print(paste0('Generating profile likelihood for ', udates[1], ' through ', udates[length(udates)]))
   
   nc1 <- RNetCDF::open.nc(dir(hycom.dir, full.names = T)[1])
   depth <- RNetCDF::var.get.nc(nc1, 'depth')
@@ -63,7 +56,7 @@ calc.hycom.par <- function(pdt, ptt, hycom.dir, focalDim = 9, dateVec, use.se = 
 
   # BEGIN PARALLEL STUFF  
   
-  print('processing in parallel... ')
+  print('Processing in parallel... ')
   
   # ncores = detectCores()  # should be an input argument
   cl = parallel::makeCluster(ncores)
@@ -186,7 +179,9 @@ calc.hycom.par <- function(pdt, ptt, hycom.dir, focalDim = 9, dateVec, use.se = 
   
   names(L.hycom) = as.character(dateVec)
   
-  print(Sys.time() - start.t)
+  t1 <- Sys.time()
+  print(paste('Hycom profile calculations took ', round(as.numeric(difftime(t1, t0, units='mins')), 2), 'minutes...'))
+  
   options(warn=2)
   
   # return hycom likelihood surfaces

@@ -32,4 +32,3 @@ res is either 30 second, one or two minute resolution (.5, 1)
 \note{
 Be patient! The download can take a few minutes!
 }
-

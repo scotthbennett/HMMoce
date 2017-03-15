@@ -90,7 +90,9 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
     # GET RID OF NA VALUES
     L1[is.na(L1)] <- 0
     L2[is.na(L2)] <- 0
-    
+    L1[is.infinite(L1)] <- 0
+    L2[is.infinite(L2)] <- 0
+
     # ALL CELLS IN A LIKELIHOOD SURFACE == 0?
     naL1idx = raster::cellStats(L1, sum, na.rm=T) != 0
     naL2idx = raster::cellStats(L2, sum, na.rm=T) != 0
@@ -128,7 +130,10 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
     L1[is.na(L1)] <- 0
     L2[is.na(L2)] <- 0
     L3[is.na(L3)] <- 0
-    
+    L1[is.infinite(L1)] <- 0
+    L2[is.infinite(L2)] <- 0
+    L3[is.infinite(L3)] <- 0
+
     # ALL CELLS IN A LIKELIHOOD SURFACE == 0?
     naL1idx = raster::cellStats(L1, sum, na.rm=T) != 0
     naL2idx = raster::cellStats(L2, sum, na.rm=T) != 0

@@ -111,7 +111,7 @@ expmax <- function(p.init, g, L, K1, K2, niter = 1000, threshold = .01, save = F
     if(exists('thr1')){
       if (thr1 <= threshold & thr2 <= threshold){
         t2 <- Sys.time()
-        print(paste('Convergence took ', round((t2 - t1) / 60),' minutes...',sep=''))
+        print(paste('Convergence took ', round(as.numeric(difftime(t2, t1, units='mins')), 2),' minutes...',sep=''))
         break
       } else if (i == niter){
         stop(paste('Maximum iterations reached (', niter, ') without crossing percent change threshold...', sep=''))

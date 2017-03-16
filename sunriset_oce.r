@@ -140,6 +140,8 @@ gtrack$Date = ymd_hms(gtrack$Date, tz ='UTC')
 
 ll$dtime = dmy_hms(paste(ll$Day, ll$Time), tz = 'UTC')+ll$Delta*4
 
+ll$date = as.POSIXct(trunc(ll$dtime, 'day'))
+
 dawnidx  = ll$Type=='Dawn'
 duskidx  = ll$Type=='Dusk'
 
@@ -159,13 +161,14 @@ rise.v = ll$dtime[dawnidx]
 set.v = ll$dtime[duskidx]
 
 # adjustment
-ll$adj = 3600*3*(abs(ll$mean_light-IO(ll$mean_light, .01, ll$middepth))) # adjustment in minutes
+ll$adj = 60*2.5*log(abs(ll$mean_light-IO(ll$mean_light, .1, ll$middepth))) # adjustment in minutes
+ll$adj[is.infinite(ll$adj)] = 0
 
 
-rise.v = rise.v+ll$adj[dawnidx]
-set.v = set.v-ll$adj[duskidx]
+rise.v = rise.v-ll$adj[dawnidx]
+set.v = set.v +ll$adj[duskidx]
 
-newlon = newlon2 = numeric(length = length(rise.v))
+newlon = newlon2 = newlat = numeric(length = length(rise.v))
 newlon[1] = newlon2[1] = sp[1]
 
 for(i in 2:length(rise.v)){
@@ -183,7 +186,19 @@ for(i in 2:length(rise.v)){
     sunAngle(rise, sp[1], sp[2])$altitude^2 + sunAngle(set, sp[1], sp[2])$altitude^2 + sunAngle(rise, ep[1], ep[2])$altitude^2 + sunAngle(set, ep[1], ep[2])$altitude^2
   }
   
-  res = optim(c(sp[1] ,sp[2]), mismatch, lower = c(newlon[i-1]-2, sp[2]-5), upper = c(newlon[i-1]+2, sp[2]+5) )
+  if (i >=5) {
+    medlon = median(newlon[(i-4):i])
+    lim = 2*sd(newlon[(i-4):i])
+  }else{
+  medlon = newlon[i-1]  
+  lim = 2  
+  }
+  
+  
+  res = optim(c(sp[1] ,sp[2]), mismatch, lower = c(medlon-lim, sp[2]-5), upper = c(medlon+lim, sp[2]+5) )
+  
+  # res = optim(c(sp[1] ,sp[2]), mismatch)
+  
   res2 =   res = optim(c(ep[1] ,ep[2]), mismatch, lower = c(newlon2[i-1]-2, ep[2]-5), upper = c(newlon2[i-1]+2, ep[2]+5) )
   # res2 =   res = optim(c(ep[1] ,ep[2]), mismatch, lower = c(newlon[i-1]-3, ep[2]-10), upper = c(newlon[i-1]+3, ep[2]+10) )
   
@@ -200,11 +215,11 @@ for(i in 2:length(rise.v)){
 ##
 par(mfrow=c(2,1))
 
+idx = newlon > quantile(newlon, .75)|newlon < quantile(newlon, .25)
+
 plot(rise.v, newlon, pch = 19)
 points(rise.v[idx], newlon[idx], col = 2, pch = 19)
 title('flag middle 50% quantile')
-
-idx = newlon > quantile(newlon, .75)|newlon < quantile(newlon, .25)
 
 # plot(rise.v[!idx], newlon[!idx], col = 1, pch = 19, lty = 2, typ = 'o')
 plot(rise.v, newlon, col = 1, pch = 19, lty = 2, typ = 'o')
@@ -261,3 +276,13 @@ lines(rise.v, newlon2, col = 2)
 # }
 # 
 # 
+
+#--------------------------------------------------------------------#
+librry(plyr)
+ddepth = ddply(ll, 'date', function(x) x$MaxDepth[1] - x$MinDepth[1])
+ddepth$newlon = newlon[2:(length(newlon)-1)]
+
+ddepth = merge(ddepth, ctrack, by = 'date')
+
+plot(ddepth$V1, ddepth$lon - ddepth$newlon)
+

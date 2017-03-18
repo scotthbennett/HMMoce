@@ -34,7 +34,7 @@ calc.hycom.par <- function(pdt, ptt, hycom.dir, focalDim = 9, dateVec, use.se = 
   
   t0 <- Sys.time()
   print(paste('Starting Hycom profile likelihood calculation...'))
-
+  
   # calculate midpoint of tag-based min/max temps
   pdt$MidTemp <- (pdt$MaxTemp + pdt$MinTemp) / 2
   
@@ -53,7 +53,7 @@ calc.hycom.par <- function(pdt, ptt, hycom.dir, focalDim = 9, dateVec, use.se = 
   # result will be array of likelihood surfaces
   
   L.hycom <- array(0, dim = c(length(lon), length(lat), length(dateVec)))
-
+  
   # BEGIN PARALLEL STUFF  
   
   print('Processing in parallel... ')
@@ -118,7 +118,7 @@ calc.hycom.par <- function(pdt, ptt, hycom.dir, focalDim = 9, dateVec, use.se = 
       f1 = t(raster::as.matrix(raster::flip(f1, 2)))
       sd.i[,,ii] = f1
     }
-
+    
     # make index of dates for filling in lik.prof
     didx = base::match(udates, dateVec)
     
@@ -129,11 +129,15 @@ calc.hycom.par <- function(pdt, ptt, hycom.dir, focalDim = 9, dateVec, use.se = 
       #calculate the likelihood for each depth level, b
       lik.try <- try(likint3(dat[,,depIdx[b]], sd.i[,,b], df[b, 1], df[b, 2]), TRUE)
       
+      if(!any(which(lik.try > 0))) class(lik.try) <- 'try-error'
+      
       if(class(lik.try) == 'try-error' & use.se == FALSE){
         df[b,1] <- pred.low$fit[b] - pred.low$se.fit[b] * sqrt(n)
         df[b,2] <- pred.high$fit[b] - pred.high$se.fit[b] * sqrt(n)
         
         lik.try <- try(likint3(dat[,,depIdx[b]], sd.i[,,b], df[b, 1], df[b, 2]), TRUE)
+        
+        if(!any(which(lik.try > 0))) class(lik.try) <- 'try-error'
         
         if (class(lik.try) == 'try-error'){
           lik.try <- dat[,,depIdx[b]] * 0
@@ -149,8 +153,12 @@ calc.hycom.par <- function(pdt, ptt, hycom.dir, focalDim = 9, dateVec, use.se = 
       
     }
     
+    lik.pdt0 <- lik.pdt
+    lik.pdt0[is.na(lik.pdt0)] <- 0
+    use.idx <- unique(which(lik.pdt0 != 0, arr.ind=T)[,3])
+    
     # multiply likelihood across depth levels for each day
-    lik.pdt <- apply(lik.pdt, 1:2, prod, na.rm = F)
+    lik.pdt <- apply(lik.pdt[,,use.idx], 1:2, prod, na.rm = F)
     
   }
   

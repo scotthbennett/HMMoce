@@ -10,8 +10,12 @@
 #' @return an array of dim(w) that represents the likelihood of the tag-measured variable as compared to the input grid
 #' @export 
 
-likint3.hycom <- function(w, wsd, minT, maxT){
-  widx = w >= minT-5 & w <= maxT+5 & !is.na(w)
+likint3 <- function(w, wsd, minT, maxT){
+  #lwr <- minT - .5 * (maxT - minT)
+  #upr <- maxT + .5 * (maxT - minT)
+  #widx = w >= minT-1 & w <= maxT+1 & !is.na(w)
+  #widx = w >= minT-1 & w <= maxT+1 & 
+  widx <- !is.na(w)
   wdf = data.frame(w = as.vector(w[widx]), wsd = as.vector(wsd[widx]))
   wdf$wsd[is.na(wdf$wsd)] = 1e-3
   # wint = apply(wdf, 1, function(x) pracma::integral(dnorm, minT, maxT, mean = x[1], sd = x[2]))

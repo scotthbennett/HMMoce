@@ -73,7 +73,7 @@ calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, sens.err = 1, ncores = 
   sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
   
   # compare sst to that day's tag-based ohc
-  lik.sst <- likint3(dat, sdx, sst1[1], sst1[2])
+  lik.sst <- likint3.hycom(dat, sdx, sst1[1], sst1[2])
   
   # result will be array of likelihood surfaces
   L.sst <- array(0, dim = c(dim(lik.sst), length(dateVec)))
@@ -103,7 +103,7 @@ calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, sens.err = 1, ncores = 
     sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
     
     # compare sst to that day's tag-based ohc
-    lik.sst <- likint3(dat, sdx, sst.i[1], sst.i[2])
+    lik.sst <- likint3.hycom(dat, sdx, sst.i[1], sst.i[2])
     
     #idx <- which(dateVec == as.Date(time))
     #L.sst[,,idx] = (lik.sst / max(lik.sst, na.rm=T)) - 0.2

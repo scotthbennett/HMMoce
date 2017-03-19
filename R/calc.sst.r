@@ -72,7 +72,7 @@ calc.sst <- function(tag.sst, ptt, sst.dir, dateVec, sens.err = 1){
     sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
 
     # compare sst to that day's tag-based ohc
-    lik.sst <- likint3(dat, sdx, sst.i[1], sst.i[2])
+    lik.sst <- likint3.hycom(dat, sdx, sst.i[1], sst.i[2])
 
     if(i == 1){
       lon <- RNetCDF::var.get.nc(nc, 'longitude')

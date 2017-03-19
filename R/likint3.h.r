@@ -10,7 +10,7 @@
 #' @return an array of dim(w) that represents the likelihood of the tag-measured variable as compared to the input grid
 #' @export 
 
-likint3.hycom <- function(w, wsd, minT, maxT){
+likint3.h <- function(w, wsd, minT, maxT){
   #lwr <- minT - .75 * (maxT - minT)
   #upr <- maxT + .75 * (maxT - minT)
   #widx = w >= minT-1 & w <= maxT+1 & !is.na(w)

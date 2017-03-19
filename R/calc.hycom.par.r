@@ -127,7 +127,7 @@ calc.hycom.par <- function(pdt, ptt, hycom.dir, focalDim = 9, dateVec, use.se = 
     
     for (b in 1:length(depIdx)) {
       #calculate the likelihood for each depth level, b
-      lik.try <- try(likint3.hycom(dat[,,depIdx[b]], sd.i[,,b], df[b, 1], df[b, 2]), TRUE)
+      lik.try <- try(likint3.h(dat[,,depIdx[b]], sd.i[,,b], df[b, 1], df[b, 2]), TRUE)
       
       if(!any(which(lik.try > 0))) class(lik.try) <- 'try-error'
       
@@ -135,7 +135,7 @@ calc.hycom.par <- function(pdt, ptt, hycom.dir, focalDim = 9, dateVec, use.se = 
         df[b,1] <- pred.low$fit[b] - pred.low$se.fit[b] * sqrt(n)
         df[b,2] <- pred.high$fit[b] - pred.high$se.fit[b] * sqrt(n)
         
-        lik.try <- try(likint3.hycom(dat[,,depIdx[b]], sd.i[,,b], df[b, 1], df[b, 2]), TRUE)
+        lik.try <- try(likint3.h(dat[,,depIdx[b]], sd.i[,,b], df[b, 1], df[b, 2]), TRUE)
         
         if(!any(which(lik.try > 0))) class(lik.try) <- 'try-error'
         

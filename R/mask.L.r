@@ -25,7 +25,9 @@
 #'   previous days filter prediction that L data wtihin that box will be 
 #'   included. Outside this box (centered on t-1 filter prediction), L will be 
 #'   masked out.
+#' @importFrom methods as
 #' @return post matrix as a product of the input prediction and L values
+#' 
 
 mask.L <- function(pred.t, L.t, lon, lat, par0, bound.thr = .05, minBounds=NULL){
   crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
@@ -64,7 +66,7 @@ mask.L <- function(pred.t, L.t, lon, lat, par0, bound.thr = .05, minBounds=NULL)
     
   }
   
-  new.ex <- methods::as(ex, 'SpatialPolygons')  
+  new.ex <- as(ex, 'SpatialPolygons')  
   
   p.mask <- raster::mask(r, new.ex, updatevalue=1, inverse=T)
   p.mask[p.mask < 1] <- 1e-15

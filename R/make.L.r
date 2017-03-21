@@ -202,15 +202,6 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
     
   }
   
-  if(!is.null(known.locs)){
-    print('Finalizing known locations...')
-    #print(known.locs)
-    #print(!is.null('known.locs'))
-     for(bb in idx){
-       L[[bb]] <- L.locs[[bb]]
-     }
-  }
-  
   # normalize
   sumIdx <- which(raster::cellStats(L, sum, na.rm = T) != 0)
   for (i in sumIdx){
@@ -237,7 +228,7 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
     y = which.min((iniloc$lat[1] - lat) ^ 2)
 
     # assign the known location for this day, i, as 1 in likelihood raster
-    L.locs[[1]][raster::cellFromXY(L.locs[[1]], iniloc[1,c(5,4)])] <- 1
+    L.locs[[1]][raster::cellFromXY(L.locs[[1]], iniloc[1, c(5,4)])] <- 1
     #print(raster::cellStats(L.locs[[1]], max))
     
     # pop up location
@@ -261,7 +252,7 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
   if(!is.null(bathy)){
     print('Starting bathymetry mask...')
     
-    maxDep <- data.frame(dplyr::summarise(dplyr::group_by(pdt, Date), max(Depth)))
+    maxDep <- data.frame(dplyr::summarise_(dplyr::group_by_(pdt, "Date"), "max(Depth)"))
     maxDep$Date <- as.Date(maxDep$Date)
     maxDep.df <- data.frame(Date = dateVec)
     maxDep.df <- merge(maxDep.df, maxDep, by = 'Date', all.x=T)

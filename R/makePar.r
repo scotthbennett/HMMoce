@@ -1,14 +1,23 @@
 #' \code{makePar} gets parameters for subsequent filter/smoother
 #' 
-#' Function builds movement kernels for 2 different behavior states and calculates, if desired, switching probability using an expectation maximization routine
+#' Function builds movement kernels for 2 different behavior states and
+#' calculates, if desired, switching probability using an expectation
+#' maximization routine
 #' 
 #' @param migr.spd is numeric input to \code{calc.param}
-#' @param grid is a grid output by \code{resample.grid} that corresponds to the extent and resolution of L.arr (below).
-#' @param L.arr is the likelihood array used for state switch probability calculation (see \code{expmax}). This is typically the L.mle array returned from \code{make.L} because it's typically more coarse (and thus faster) than the higher-resolution L array.
-#' @param p.guess is vector of length 2 indicating probability of staying in states 1 and 2, respectively
-#' @param calcP is logical indicating whether to use \code{expmax} to calculate state-switching probabilities
-#' 
-#' @return list of parameters including movement kernels (K1, K2) and switch probability (P.final)
+#' @param grid is a grid output by \code{resample.grid} that corresponds to the
+#'   extent and resolution of L.arr (below).
+#' @param L.arr is the likelihood array used for state switch probability
+#'   calculation (see \code{expmax}). This is typically the L.mle array returned
+#'   from \code{make.L} because it's typically more coarse (and thus faster)
+#'   than the higher-resolution L array.
+#' @param p.guess is vector of length 2 indicating probability of staying in
+#'   states 1 and 2, respectively
+#' @param calcP is logical indicating whether to use \code{expmax} to calculate
+#'   state-switching probabilities
+#'   
+#' @return list of parameters including movement kernels (K1, K2) and switch
+#'   probability (P.final)
 #' @export
 #' 
 

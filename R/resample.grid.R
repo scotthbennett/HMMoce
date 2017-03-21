@@ -8,6 +8,7 @@
 #'   to aggregate grid cells to generate a coarse raster for parameter
 #'   estimation that ends up around resolution of 1deg. Otherwise, the coarse
 #'   grid outputs will be based on the max resolution of inputs rasters.
+#' @param cellAgg is fact argument to \code{\link[raster]{aggregate}}
 #'   
 #' @return a list of all resampled likelihood rasters and g, the common grid
 #' @export
@@ -48,8 +49,8 @@ resample.grid <- function(L.rasters, L.res, aggregate=FALSE, cellAgg=NULL){
     L.mle.res <- raster::aggregate(L.mle.res, cellAgg)
   }
   
-  g <- HMMoce:::setup.grid.raster(L.res)
-  g.mle <- HMMoce:::setup.grid.raster(L.mle.res)
+  g <- setup.grid.raster(L.res)
+  g.mle <- setup.grid.raster(L.mle.res)
   
   print(paste('Raster resample took ', Sys.time() - start.t, '.'))
   

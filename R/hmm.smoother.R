@@ -11,6 +11,7 @@
 #'   2
 #' @param P is transition matrix (usually 2x2) representing probability of state
 #'   switching
+#' @param L is likelihood array output from \code{make.L}
 #'   
 #' @return an array of the final state estimates of dim(state, time, lon, lat)
 #' @export

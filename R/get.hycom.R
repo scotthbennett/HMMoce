@@ -28,6 +28,7 @@
 #'   and 'a' is analysis. see \url{https://hycom.org/dataserver/} for details.
 #' @return The url used to extract the requested data from the NetCDF subset 
 #'   service.
+#' @importFrom curl curl_download
 #' @examples 
 #' \dontrun{
 #' lon <- c(-90, -60)
@@ -127,7 +128,7 @@ get.hycom <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
   if(filename != ''){
     if(download.file == TRUE){
       #download.file(url, filename, method = 'auto')
-      curl::curl_download(url, filename, quiet=FALSE)
+      curl_download(url, filename, quiet=FALSE)
     } else if(download.file == FALSE){
       system(sprintf('curl -o "%s" "%s"', filename, url))
     }

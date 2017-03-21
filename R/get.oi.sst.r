@@ -21,6 +21,7 @@
 #'   exist, it will be created.
 #' @return The url used to extract the requested data from the NetCDF subset 
 #'   service.
+#' @importFrom curl curl_download
 #' @examples 
 #' \dontrun{
 #' sp.lim <- list(-90, -60, 0, 30)
@@ -87,7 +88,7 @@ get.oi.sst <- function(limits, time, filename='', download.file=TRUE, dir = getw
   if(filename != ''){
     if(download.file == TRUE){
       #download.file(url, filename, method = 'auto')
-      curl::curl_download(url, filename, quiet=FALSE)
+      curl_download(url, filename, quiet=FALSE)
     } else if(download.file == FALSE){
       system(sprintf('curl -o "%s" "%s"', filename, url))
     }

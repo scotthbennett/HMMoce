@@ -1,18 +1,24 @@
 #' HMM filter functions
-#'
+#' 
 #' 
 #' @param g grid from \code{\link{setup.grid}}
-#' @param L final likelihood (2D)
+#' @param L is likelihood array output from \code{make.L}
 #' @param K1 first movement (diffusion) kernel see \code{\link{gausskern}}
 #' @param K2 second movement (diffusion) kernel see \code{\link{gausskern}}
 #' @param P 2x2 probability matrix for tranisitons between states (K1 and K2)
-#'
-#' @return a list: list(phi = phi, pred = pred, psi = psi) where
-#' \itemize{
-#'  \item phi. is the probability for each state at each trime step 
-#'  \item pred. is ....
-#'  \item psi. is.... 
-#' }
+#' @param maskL is logical indicating whether to mask the input L layer. See
+#'   \code{mask.L} for details.
+#' @param bound.thr is numeric indicating the percent threshold that is added 
+#'   and substracted from the bounding box of the filter output from the 
+#'   previous day before masking. Default is .05 (5 percent).
+#' @param minBounds is size (in degrees) of the minimum bounding box around the 
+#'   previous days filter prediction that L data wtihin that box will be 
+#'   included. Outside this box (centered on t-1 filter prediction), L will be 
+#'   masked out.
+#'   
+#' @return a list: list(phi = phi, pred = pred, psi = psi) where \itemize{ \item
+#'   phi. is the probability for each state at each trime step \item pred. is
+#'   .... \item psi. is.... }
 #' @export
 #' @examples 
 #' \dontrun{
@@ -21,9 +27,9 @@
 #' f <- hmm.filter(g, L, K1, K2, P.final)
 #' 
 #' }
-#'
+#' 
 
-hmm.filter <- function(g, L, K1, K2, P){
+hmm.filter <- function(g, L, K1, K2, P, maskL = T, bound.thr = 0.1, minBounds = 10){
   
   ## Filter data to estimate locations and behaviour
   
@@ -64,8 +70,13 @@ hmm.filter <- function(g, L, K1, K2, P){
     # is there a data-based likelihood observation for this day, t?
     sumL = sum(L[t,,])  
     if(sumL > 1e-6){
-      post1 <- pred[1,t,,] * L[t,,]
-      post2 <- pred[2,t,,] * L[t,,]
+      if(maskL){
+        post1 <- mask.L(pred.t = pred[1,t,,], L.t = L[t,,], lon = g$lon[1,], lat = g$lat[,1], par0 = dim(K1)[1], bound.thr = bound.thr, minBounds=minBounds)
+        post2 <- mask.L(pred.t = pred[2,t,,], L.t = L[t,,], lon = g$lon[1,], lat = g$lat[,1], par0 = dim(K1)[1], bound.thr = bound.thr, minBounds=minBounds)
+      } else{
+        post1 <- pred[1,t,,] * L[t,,]
+        post2 <- pred[2,t,,] * L[t,,]
+      }
     }else{
       post1 <- pred[1,t,,]
       post2 <- pred[2,t,,]
@@ -77,12 +88,6 @@ hmm.filter <- function(g, L, K1, K2, P){
     phi[2,t,,] <- post2 / (psi[t-1] + 1e-15)
     
   }
-  
-  # End in resident state at the known final location
-  #phi[1,T,,]  <- L[T,,] # last position is known
-  #phi[2,T,,]  <- L[T,,] # last position is known
-  #pred[1,T,,] <- L[T,,] # last position is known
-  #pred[2,T,,] <- L[T,,] # last position is known
   
   list(phi = phi, pred = pred, psi = psi)
   

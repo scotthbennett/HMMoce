@@ -126,7 +126,8 @@ get.hycom <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
   ## Download the data if a filename was provided.
   if(filename != ''){
     if(download.file == TRUE){
-      download.file(url, filename, method = 'auto')
+      #download.file(url, filename, method = 'auto')
+      curl::curl_download(url, filename, quiet=FALSE)
     } else if(download.file == FALSE){
       system(sprintf('curl -o "%s" "%s"', filename, url))
     }

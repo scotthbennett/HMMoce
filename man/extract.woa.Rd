@@ -4,10 +4,10 @@
 \alias{extract.woa}
 \title{Extract temperatures from World Ocean Atlas}
 \usage{
-extract.woa(nc.dir, bbox = NULL, resolution)
+extract.woa(dir, bbox = NULL, resolution)
 }
 \arguments{
-\item{nc.dir}{directory to load the global nc file from; specify the complete
+\item{dir}{path to load the global nc file from; specify the complete
 path to the nc file unless it is in your current working directory}
 
 \item{bbox}{bounding box of form list(long min, long max, lat min, lat max)}

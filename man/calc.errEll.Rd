@@ -19,4 +19,3 @@ an array of elliptical error ellipses for input light-based locations
 Error ellipses are generated around WC tag based positions using
 tag-calculated error structure.
 }
-

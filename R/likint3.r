@@ -11,7 +11,11 @@
 #' @export 
 
 likint3 <- function(w, wsd, minT, maxT){
-  widx = w >= minT-1 & w <= maxT+1 & !is.na(w)
+  #lwr <- minT - .75 * (maxT - minT)
+  #upr <- maxT + .75 * (maxT - minT)
+  #widx = w >= minT-1 & w <= maxT+1 & !is.na(w)
+  #widx = w >= minT-1 & w <= maxT+1 & 
+  widx <- !is.na(w)
   wdf = data.frame(w = as.vector(w[widx]), wsd = as.vector(wsd[widx]))
   wdf$wsd[is.na(wdf$wsd)] = 1e-3
   # wint = apply(wdf, 1, function(x) pracma::integral(dnorm, minT, maxT, mean = x[1], sd = x[2]))

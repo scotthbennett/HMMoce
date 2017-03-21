@@ -50,6 +50,8 @@ read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst'){
   } else if(type == 'light'){
     # READ IN LIGHT DATA FROM WC FILES
     data <- utils::read.table(paste(wd,'/', ptt, '-LightLoc.csv', sep=''), sep=',',header=T, blank.lines.skip=F,skip=2)
+    if(!any(grep('depth', names(data), ignore.case=T))) data <- utils::read.table(paste(wd,'/', ptt, '-LightLoc.csv', sep=''), sep=',',header=T, blank.lines.skip=F,skip=1)
+    if(!any(grep('depth', names(data), ignore.case=T))) data <- utils::read.table(paste(wd,'/', ptt, '-LightLoc.csv', sep=''), sep=',',header=T, blank.lines.skip=F,skip=0)
     data <- data[which(!is.na(data[,1])),]
     
     #dts <- as.POSIXct(data$Day, format = findDateFormat(data$Day), tz = 'UTC')

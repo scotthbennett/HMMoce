@@ -9,6 +9,7 @@
 #' @param res is numeric indicating resolution in minutes. Choices are 0.5 or 1.
 #' @param raster is logical indicating whether you want the function to return a raster or not (a list will be returned).
 #' @export
+#' @importFrom curl curl_download
 #' @note Be patient! The download can take a few minutes!
 
 get.bath.data <- function(lonlow, lonhigh, latlow, lathigh, folder = tempdir(), seaonly = T, res = c(.5,1), raster=TRUE){
@@ -42,7 +43,8 @@ get.bath.data <- function(lonlow, lonhigh, latlow, lathigh, folder = tempdir(), 
   opt <- sub("LONLOW", lonlow, opt)
   opt <- sub("LONHIGH", lonhigh, opt)
   
-  utils::download.file(opt, fname)
+  curl_download(opt, fname, quiet=FALSE)
+  #utils::download.file(opt, fname)
   
   nc <- RNetCDF::open.nc(fname)
   lon <- as.numeric(RNetCDF::var.get.nc(nc, variable = "longitude"))

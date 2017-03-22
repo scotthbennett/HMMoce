@@ -52,10 +52,10 @@ calc.ohc <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE, us
   print(paste('Starting iterations through deployment period ', '...'))
   
   for(i in 1:T){
-    
     time <- udates[i]
     pdt.i <- pdt[which(pdt$Date == time),]
-
+    #print(paste(time))
+    
     # open day's hycom data
     nc <- RNetCDF::open.nc(paste(ohc.dir, ptt,'_', as.Date(time), '.nc', sep=''))
     dat <- RNetCDF::var.get.nc(nc, 'water_temp') * RNetCDF::att.get.nc(nc, 'water_temp', attribute='scale_factor') + 
@@ -89,10 +89,10 @@ calc.ohc <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE, us
     
     # make predictions based on the regression model earlier for the temperature at standard WOA depth levels for low and high temperature at that depth
     suppressWarnings(
-    fit.low <- locfit::locfit(pdt.i$MinTemp ~ pdt.i$Depth)
+    fit.low <- locfit::locfit(pdt.i$MinTemp ~ pdt.i$Depth, maxk=500)
     )
     suppressWarnings(
-    fit.high <- locfit::locfit(pdt.i$MaxTemp ~ pdt.i$Depth)
+    fit.high <- locfit::locfit(pdt.i$MaxTemp ~ pdt.i$Depth, maxk=500)
     )
     n = length(hycomDep)
       

@@ -77,7 +77,7 @@ expmax <- function(p.init, g, L, K1, K2, niter = 1000, threshold = .01, save = F
     }
     
     # RUN THE FILTER STEP
-    f <- hmm.filter(g, L, K1, K2, P=p.init)
+    f <- hmm.filter(g, L, K1, K2, P=p.init, maskL=F)
     
     # RUN THE SMOOTHING STEP
     s <- hmm.smoother(f, K1, K2, L=L, P=p.init)
@@ -102,9 +102,9 @@ expmax <- function(p.init, g, L, K1, K2, niter = 1000, threshold = .01, save = F
     
     save.p[i,] <- c(P[1,1], P[2,2])
 
-    if (i > 20){
-      thr1 <- (save.p[i,1] - mean(save.p[i:(i-20),1])) / mean(save.p[i:(i-20),1])
-      thr2 <- (save.p[i,2] - mean(save.p[i:(i-20),2])) / mean(save.p[i:(i-20),2])
+    if (i > 10){
+      thr1 <- (save.p[i,1] - mean(save.p[i:(i-10),1])) / mean(save.p[i:(i-10),1])
+      thr2 <- (save.p[i,2] - mean(save.p[i:(i-10),2])) / mean(save.p[i:(i-10),2])
     }
     
     # CHECK IF THRESHOLD IS MET. IF NOT, RE-ITERATE

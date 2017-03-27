@@ -19,6 +19,14 @@
 #'   dataDir/ptt/ for the tag data files.
 
 dataDir <- '/home/rstudio/HMMoce_run/data/'
+ptt <- 141257
+myDir <- paste(dataDir, ptt, '/', sep='')
+load(paste(myDir, ptt, '_finaltrack_BEST.RData', sep=''))
+dataDir <- '/home/rstudio/HMMoce_run/data/'
+envDir <- '/home/rstudio/HMMoce_run/env_data/'
+myDir <- paste(dataDir, ptt, '/', sep='')
+gpeNo <- 2
+
 #dataDir <- '~/Documents/WHOI/RCode/HMMoce_run_data/data/'
 #envDir <- '~/Documents/WHOI/RCode/HMMoce_run_data/env_data/'
 envDir <- '/home/rstudio/HMMoce_run/env_data/'
@@ -241,15 +249,19 @@ runHMM <- function(likVec=c(1,2,3,4,5), inilocList, pttList, sp.limList, bndVec,
           res <- compareTracks(df)
           res[[4]] <- apply(res$gcd, 2, FUN=function(x) mean(x, na.rm=T))
           res[[5]] <- apply(res$gcd, 2, FUN=function(x) sd(x, na.rm=T))
+          res[[6]] <- df
+          names(res) <- list('rmse.lon','rmse.lat','gcd','mean.gcd','sd.gcd','tracks')
+          save(res, file=paste(ptt, '_res.RData', sep=''))
+          save.image(file=paste(ptt, '_finaltrack.RData', sep=''))
           
           # WRITE OUT RESULTS
           outVec <- matrix(c(ptt=ptt, minBounds = bnd, migr.spd = i, rmseLon=res$rmse.lon, rmseLat=res$rmse.lat,
                       gcdMean=res[[4]], gcdSD=res[[5]], paste(L.idx[[tt]],collapse=''), P1 = P.final[1,1], P2 = P.final[2,2]), ncol=30)
           write.table(outVec,paste(dataDir, 'outVec_results.csv', sep=''), sep=',', col.names=F, append=T)
-          #colnames(outVec) <- list('ptt', 'minBnd','migr.spd','rmselon.ti','rmselon.tib','rmselon.kf','rmselon.kfb','rmselon.gpe','rmselon.hmm',
-          #                   'rmselat.ti','rmselat.tib','rmselat.kf','rmselat.kfb','rmselat.gpe','rmselat.hmm',
-          #                   'gcdm.ti','gcdm.tib','gcdm.kf','gcdm.kfb','gcdm.gpe','gcdm.hmm',
-          #                  'gcdsd.ti','gcdsd.tib','gcdsd.kf','gcdsd.kfb','gcdsd.gpe','gcdsd.hmm', 'L.idx')
+          colnames(outVec) <- list('ptt', 'minBnd','migr.spd','rmselon.ti','rmselon.tib','rmselon.kf','rmselon.kfb','rmselon.gpe','rmselon.hmm',
+                             'rmselat.ti','rmselat.tib','rmselat.kf','rmselat.kfb','rmselat.gpe','rmselat.hmm',
+                             'gcdm.ti','gcdm.tib','gcdm.kf','gcdm.kfb','gcdm.gpe','gcdm.hmm',
+                            'gcdsd.ti','gcdsd.tib','gcdsd.kf','gcdsd.kfb','gcdsd.gpe','gcdsd.hmm', 'L.idx', 'migr','resid')
           
         } # parVec loop
       } # bndVec loop
@@ -259,3 +271,17 @@ runHMM <- function(likVec=c(1,2,3,4,5), inilocList, pttList, sp.limList, bndVec,
 
 }
 
+
+
+pdf('check_L_259_v2.pdf', height=18, width=12)
+par(mfrow=c(3,2))
+for(i in 1:length(dateVec)){
+  plot(L.res[[1]]$L.1[[i]]); world(add=T); title(paste(dateVec[i], '-light')); points(spot$lon[i], spot$lat[i])
+  plot(L.res[[1]]$L.2[[i]]); world(add=T); title(paste(dateVec[i], '-sst')); points(spot$lon[i], spot$lat[i])
+  plot(L.res[[1]]$L.3[[i]]); world(add=T); title(paste(dateVec[i], '-ohc')); points(spot$lon[i], spot$lat[i])
+  plot(L.res[[1]]$L.5[[i]]); world(add=T); title(paste(dateVec[i], '-hycom')); points(spot$lon[i], spot$lat[i])
+  image.plot(lon,lat,L[i,,]); world(add=T); title(paste(dateVec[i], '-L')); points(spot$lon[i], spot$lat[i])
+  image.plot(lon,lat,f$phi[1,i,,]); world(add=T); title(paste(dateVec[i], '-f$phi')); points(spot$lon[i], spot$lat[i])
+}
+
+dev.off()

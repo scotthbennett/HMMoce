@@ -30,24 +30,13 @@ gpeNo <- c(4,1,1,5)
 bndVec <- c(NA, 5, 10)
 
 # TAG/POPUP DATES AND LOCATIONS (dd, mm, YYYY, lat, lon)
-inilocList <- list(data.frame(matrix(c(13, 10, 2015, 41.3, -69.27, 
-                                       10, 4, 2016, 40.251, -36.061), nrow = 2, ncol = 5, byrow = T)),
-                   data.frame(matrix(c(15, 10, 2015, 41.637, -69.706, 
-                                       12, 4, 2016, 37.751, -71.649), nrow = 2, ncol = 5, byrow = T)),
-                   data.frame(matrix(c(13, 10, 2015, 41.575, -69.423, 
-                                       24, 2, 2016, 26.6798, -69.0147), nrow = 2, ncol = 5, byrow = T)),
-                   data.frame(matrix(c(21, 10, 2015, 41.597,	-69.445, 
-                                       5, 2, 2016, 38.589, -54.874), nrow = 2, ncol = 5, byrow = T)))
-for (i in 1:4){
-  names(inilocList[[i]]) <- list('day','month','year','lat','lon')
-}
+iniloc <- data.frame(matrix(c(8, 6, 2011, 41.0284, -71.0167, 
+                                       1, 4, 2012, 39.02799988, -70.19100952), nrow = 2, ncol = 5, byrow = T))
+                   
+names(iniloc) <- list('day','month','year','lat','lon')
 
-sp.limList <- list(list(lonmin = -82, lonmax = -25, latmin = 15, latmax = 50),
-                   list(lonmin = -85, lonmax = -50, latmin = 20, latmax = 50),
-                   list(lonmin = -95, lonmax = -52, latmin = 10, latmax = 55),
-                   list(lonmin = -85, lonmax = -45, latmin = 30, latmax = 50))
-
-
+sp.lim <- list(lonmin = -85, lonmax = -55, latmin = 10, latmax = 55)
+              
 runHMM <- function(likVec=c(1,2,3,4,5), inilocList, pttList, sp.limList, bndVec, parVec){
   
   for (ii in 1:length(pttList)){
@@ -57,7 +46,7 @@ runHMM <- function(likVec=c(1,2,3,4,5), inilocList, pttList, sp.limList, bndVec,
     # READ IN TAG DATA
     # TAG/POPUP DATES AND LOCATIONS (dd, mm, YYYY, lat, lon)
     ptt <- pttList[ii]
-    iniloc <- inilocList[[ii]]
+    #iniloc <- iniloc
     tag <- as.POSIXct(paste(iniloc[1,1], '/', iniloc[1,2], '/', iniloc[1,3], sep=''), format = '%d/%m/%Y', tz='UTC')
     pop <- as.POSIXct(paste(iniloc[2,1], '/', iniloc[2,2], '/', iniloc[2,3], sep=''), format = '%d/%m/%Y', tz='UTC')
     
@@ -81,7 +70,7 @@ runHMM <- function(likVec=c(1,2,3,4,5), inilocList, pttList, sp.limList, bndVec,
     
     # OPTIONAL: light data as output from GPE2, different filtering algorithm seems to work better for light likelihood generation
     locs <- read.table(paste(myDir, ptt, '-Locations-GPE2.csv', sep = ''), sep = ',', header = T, blank.lines.skip = F)
-    locs <- locs[which(locs$Longitude > -75),]
+    #locs <- locs[which(locs$Longitude > -75),]
     locDates <- as.Date(as.POSIXct(locs$Date, format=HMMoce:::findDateFormat(locs$Date)))
     
     #----------------------------------------------------------------------------------#
@@ -90,7 +79,7 @@ runHMM <- function(likVec=c(1,2,3,4,5), inilocList, pttList, sp.limList, bndVec,
     #----------------------------------------------------------------------------------#
     
     # SET SPATIAL LIMITS, IF DESIRED
-    sp.lim <- sp.limList[[ii]]
+    #sp.lim <- sp.limList[[ii]]
     
     if (exists('sp.lim')){
       locs.grid <- setup.locs.grid(sp.lim)
@@ -109,7 +98,7 @@ runHMM <- function(likVec=c(1,2,3,4,5), inilocList, pttList, sp.limList, bndVec,
     # HYCOM DATA
     hycom.dir <- paste(envDir, ptt, '/hycom/', sep='')
     dir.create(file.path(hycom.dir), recursive = TRUE, showWarnings = FALSE)
-    get.pdt.dates <- pdt.udates[!(pdt.udates %in% as.Date(substr(list.files(hycom.dir), 8, 17)))]
+    get.pdt.dates <- pdt.udates[!(pdt.udates %in% as.Date(substr(list.files(hycom.dir), 7, 16)))]
     if (length(get.pdt.dates) > 0) get.env(get.pdt.dates, ptt=ptt, type = 'hycom', spatLim = sp.lim, save.dir = hycom.dir)
     
     # AND/OR WOA DATA
@@ -119,15 +108,6 @@ runHMM <- function(likVec=c(1,2,3,4,5), inilocList, pttList, sp.limList, bndVec,
       download.file('https://www.dropbox.com/s/a1pte87a172ezdh/woa.quarter.rda?dl=1', 'woa.quarter.rda')
     }
     load(paste(woa.dir,'woa.quarter.atl.rda',sep=''))
-    #bbox=list(lonmin=-100,lonmax=-20,latmin=5,latmax=60)
-    #xmin = which.min((bbox[[1]] - woa.quarter$lon) ^ 2)
-    #xmax = which.min((bbox[[2]] - woa.quarter$lon) ^ 2)
-    #ymin = which.min((bbox[[3]] - woa.quarter$lat) ^ 2) 
-    #ymax = which.min((bbox[[4]] - woa.quarter$lat) ^ 2)
-    #woa.quarter$watertemp <- woa.quarter$watertemp[xmin:xmax, ymin:ymax,,]
-    #woa.quarter$lon <- woa.quarter$lon[xmin:xmax]
-    #woa.quarter$lat <- woa.quarter$lat[ymin:ymax]
-    #save(woa.quarter, file='~/HMMoce_run/env_data/woa.quarter.atl.rda', compress='xz')
     
     # GET BATHYMETRY
     bathy <- get.bath.data(sp.lim$lonmin, sp.lim$lonmax, sp.lim$latmin, sp.lim$latmax, res = c(.5))
@@ -152,7 +132,7 @@ runHMM <- function(likVec=c(1,2,3,4,5), inilocList, pttList, sp.limList, bndVec,
     
     if (any(likVec == 3)){
       t0 <- Sys.time()
-      L.3 <- calc.ohc.par(pdt, ptt, ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = T)
+      L.3 <- calc.ohc(pdt, ptt, ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = T)
       t1 <- Sys.time()
       print(paste('OHC calculations took ', round(as.numeric(difftime(t1, t0, units='mins')), 2), 'minutes...'))
     }

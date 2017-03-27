@@ -570,3 +570,26 @@ plotHMM(s, tr, dateVec, save.plot = TRUE)
 
 # References
 
+<!--
+
+# Case study: Blue shark movement in Northwest Atlantic {#sec:case}
+We illustrate the functionality of the package using a blue shark (*Prionace glauca*) movement dataset collected from a pop-up satellite archival transmitting (PSAT) tag (miniPAT; Wildlife Computers, Inc., USA). This individual was also equipped with a SPOT tag (position-only; Wildlife Computers) that provided 'known' positions with minimal error to compare model results. The PSAT tag was deployed for 180 days starting in October 2015 during which it collected extensive depth-temperature profiles, light-level data, and sea surface temperature measurements (Fig. \@ref(fig:pdt)). 
+
+Data returned from a deployment is often parsed by proprietary software and exported as .csv files for further analysis. Examples of these "raw" files are provided in the package and are simply read into R using `read.wc` to generate the example data (see package vignette for more details). Similarly, this function can be used for user data and automatically reads and formats the provided "raw" files as downloaded from the WC data portal. After installing and loading the package, the example data can also be accessed with `data(blue259)`. After data preprocessing (Section \@ref(sec:prep)), we calculate likelihoods based on observed data. We use a suite of `calc.xxx` functions (where `xxx` is the input tag data stream like `calc.sst`) to calculate the likelihood for a given input data type (Table \@ref(tab:env)). Examples of each likelihood resulting from the different `calc` functions are shown in Figure \@ref(fig:lik).
+
+Ocean heat content (`calc.ohc`) and depth-temperature profile matching (`calc.hycom.par` or `calc.woa.par`) are the two methods by which the package can use the 3-D depth-temperature data from the tag to generate likelihoods for the observation model. OHC and profile calculations are performed against the HYbrid Coordinate Ocean Model (HYCOM) and World Ocean Atlas (WOA). The use of these two metrics is not new (WOA, @Skomal2009; OHC, @Luo2015), but the underlying statistical methodology for their use in animal movement analysis has been significantly improved and made accessible in this package.
+
+After combining the likelihoods from each data source, we choose theoretical movement parameters (assuming diffusive, brownian motin) for each behavior state and use the EM approach (Section \@ref(sec:em)) to estimate state switching parameters. The estimated parameters are then used to generate movement kernels for our process model (*i.e.* how we expect the animal to move) which finalizes the two independent parts of our modeling approach. Finally, we use the HMM to convolve the process and observation models (Section \@ref(sec:model)).
+
+insert script here demonstrating the bare bones of the above process
+
+
+The final results in `s` contain the posterior distribution for each state and time point over the spatial limits we assigned earlier and are of `dim`$(I,T,X,Y)$. Figure \@ref(fig:track) shows the common results of interest including the most probable track, estimated behavioral modes and key habitats identified.
+
+In this example, we are able to compare model results to "known" positions of this animal from an independent tag. The SPOT tag collects Doppler-based geopositions when a wet/dry switch on the tag is activated at the surface-air interface. Resulting locations are assigned error flags called location classes: LC 3, <250 m; LC 2, 250-500 m; LC 1, 500-1500 m; LC 0, >1500m for classes 3, 2, 1, 0. Additional classes A, B represent positions derived from less than 4 satellite messages and are impossible to calculate an estimated spatial accuracy. Location class Z positions are considered invalid and were removed from further analysis [@CLS2008]. The remaining positions were filtered using a speed filter (2 $m s^{-1}$) from the `trip` package [@Sumner2015] and regularized to daily positions using `crawl` [@Johnson2008a] in R [@RDevelopmentCoreTeam2015]. The largest temporal gap in the SPOT data was ???. Light and light with SST data were also processed in the two most widely used movement analysis packages in the fisheries literature to date, (UKFSST [@Sibert2003] and trackit [@Nielsen2007]). Figure \@ref(fig:alltracks) shows how well the `HMMoce` model performs against traditional approaches for fish movements. *something about RMSE, maybe a table*
+
+ - table result could include RMSE for all the different approaches compared to known
+ - or a figure similar to [@Braun2015a]
+
+-->
+

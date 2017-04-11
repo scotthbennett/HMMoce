@@ -43,15 +43,15 @@ setup.locs.grid <- function(limits, res = 'quarter'){
   } else if(class(limits) == 'data.frame'){
 
     # Find longitude extents
-    il <- floor(min(limits$Longitude) - 5)
-    al <- ceiling(max(limits$Longitude) + 5)
+    il <- floor(min(limits$Longitude, na.rm=T) - 5)
+    al <- ceiling(max(limits$Longitude, na.rm=T) + 5)
     lx <- 0.1 * (al - il)
     lonl <- il - lx
     lonu <- al + lx
     
     # Find latitude extents
-    ila <- floor(min(limits$Latitude) - 10)
-    ala <- ceiling(max(limits$Latitude) + 10)
+    ila <- floor(min(limits$Latitude, na.rm=T) - 10)
+    ala <- ceiling(max(limits$Latitude, na.rm=T) + 10)
     ly <- 0.1 * (ala - ila)
     latl <- ila - ly
     latu <- ala + ly

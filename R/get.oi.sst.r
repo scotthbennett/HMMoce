@@ -53,7 +53,7 @@ get.oi.sst <- function(limits, time, filename='', download.file=TRUE, dir = getw
   expts = data.frame(
     start=c(as.Date('1981-09-01')),
     end=c(Sys.Date() + 1),
-    url=c('http://coastwatch.pfeg.noaa.gov/erddap/griddap/ncdcOisst2Agg_LonPM180.nc?sst')
+    url=c('http://upwell.pfeg.noaa.gov/erddap/griddap/ncdcOisst2Agg_LonPM180.nc?sst')
     )
   
   if(time[1] < expts$start[1])
@@ -83,6 +83,7 @@ get.oi.sst <- function(limits, time, filename='', download.file=TRUE, dir = getw
   ## Add the spatial domain.
   url = sprintf('%s[(0):1:(0)][(%s):1:(%s)][(%s):1:(%s)]',
                 url, limits[[3]], limits[[4]], limits[[1]], limits[[2]])
+  print(url)
   
   ## Download the data if a filename was provided.
   if(filename != ''){

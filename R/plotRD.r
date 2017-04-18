@@ -19,10 +19,12 @@
 plotRD <- function(distr, track, known=NULL, xlims, ylims, save.plot=FALSE){
   
   crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
-  rd.cols <- colorRampPalette(rev(brewer.pal(11, 'RdYlGn')))
+  rd.cols <- colorRampPalette(rev(RColorBrewer::brewer.pal(11, 'RdYlGn')))
   
   p.1 <- apply(distr[1,,,], 1, sum)
   p.2 <- apply(distr[2,,,], 1, sum)
+  sv <- -(apply(distr[1,,,], 1, sum) > apply(distr[2,,,], 1, sum)) + 1
+  #sv[sv == 0] <- NA
   
   # normalize for each behav at each time point
   norm <- array(NA, dim=dim(distr)[c(3,4,2,1)])
@@ -101,9 +103,9 @@ plotRD <- function(distr, track, known=NULL, xlims, ylims, save.plot=FALSE){
   world(add=T, fill=T, col='grey60')
   box()
   mtext('Migratory behavior', 4, line=2)
-  graphics::points(track$lon[idx1], track$lat[idx1], bg='white', pch=21, cex=1)
-  graphics::points(track$lon[1], track$lat[1], bg = 'green', pch = 21, cex=2)
-  graphics::points(track$lon[TT], track$lat[TT], bg = 'red', pch = 21, cex=2)
+  graphics::points(track$lon[idx1], track$lat[idx1], bg='white', pch=21, cex=1.25)
+  graphics::points(track$lon[1], track$lat[1], bg = 'green', pch = 21, cex=1.75)
+  graphics::points(track$lon[TT], track$lat[TT], bg = 'red', pch = 21, cex=1.75)
   
   # FILL COLORBAR SPACE
   plot.new()
@@ -117,9 +119,9 @@ plotRD <- function(distr, track, known=NULL, xlims, ylims, save.plot=FALSE){
   world(add=T, fill=T, col='grey60')
   box()
   mtext('Resident behavior', 4, line=2)
-  graphics::points(track$lon[idx2], track$lat[idx2], bg='grey60', pch=21, cex=1)
-  graphics::points(track$lon[1], track$lat[1], bg = 'green', pch = 21, cex=2)
-  graphics::points(track$lon[TT], track$lat[TT], bg = 'red', pch = 21, cex=2)
+  graphics::points(track$lon[idx2], track$lat[idx2], bg='grey60', pch=21, cex=1.25)
+  graphics::points(track$lon[1], track$lat[1], bg = 'green', pch = 21, cex=1.75)
+  graphics::points(track$lon[TT], track$lat[TT], bg = 'red', pch = 21, cex=1.75)
   
   # FILL COLORBAR SPACE
   plot.new()

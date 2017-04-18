@@ -26,6 +26,7 @@ read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst'){
   if(type == 'pdt'){
     # READ IN PDT DATA FROM WC FILES
     data <- utils::read.table(paste(wd, ptt,'-PDTs.csv', sep=''), sep=',',header=T,blank.lines.skip=F, skip = 0)
+    print(paste('If read.wc() fails for type=pdt, check the number of column headers in the PDTs.csv file.'))
     data <- extract.pdt(data)
     dts <- as.POSIXct(data$Date, format = findDateFormat(data$Date))
     d1 <- as.POSIXct('1900-01-02') - as.POSIXct('1900-01-01')

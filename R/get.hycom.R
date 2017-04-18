@@ -66,12 +66,12 @@ get.hycom <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
       end=c(as.Date('1995-07-31'), as.Date('2011-12-31'),
             as.Date('2013-08-20'), as.Date('2014-04-04'),
             as.Date('2016-04-17'), Sys.Date() + 1),
-      url=c('http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_19.0?',
-            'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_19.1?',
-            'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_90.9?',
-            'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_91.0?',
-            'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_91.1?',
-            'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_91.2?'))
+      url=c('http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_19.0/',
+            'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_19.1/',
+            'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_90.9/',
+            'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_91.0/',
+            'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_91.1/',
+            'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_91.2/'))
   } else if(type == 'r'){
     expts = data.frame(
       start=c(as.Date('1992-10-02'),
@@ -98,6 +98,8 @@ get.hycom <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
   if(type == 'r'){
     url = sprintf('%s/%s', url, as.numeric(format(time, '%Y')))
     url = sprintf('%s?%s', url, '')
+  } else if(type == 'a'){
+    url <- sprintf('%s%s?', url, as.numeric(format(time, '%Y')))
   }
   
   ## Add the variables.
@@ -124,6 +126,8 @@ get.hycom <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
     url = sprintf('%saddLatLon=true&', url)
   ## Finish the URL.
   url = sprintf('%sdisableProjSubset=on&vertCoord=&accept=netcdf', url)
+  print(url)
+  
   ## Download the data if a filename was provided.
   if(filename != ''){
     if(download.file == TRUE){
@@ -133,6 +137,7 @@ get.hycom <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
       system(sprintf('curl -o "%s" "%s"', filename, url))
     }
   }
+  
   return(url)
 }
 

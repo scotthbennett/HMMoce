@@ -19,9 +19,9 @@
 #'   dataDir/ptt/ for the tag data files.
 
 dataDir <- '/home/rstudio/HMMoce_run/data/'
-ptt <- 141257
+ptt <- 141259
 myDir <- paste(dataDir, ptt, '/', sep='')
-load(paste(myDir, ptt, '_finaltrack_BEST.RData', sep=''))
+load(paste(myDir, ptt, '_finaltrack.RData', sep=''))
 dataDir <- '/home/rstudio/HMMoce_run/data/'
 envDir <- '/home/rstudio/HMMoce_run/env_data/'
 myDir <- paste(dataDir, ptt, '/', sep='')
@@ -270,6 +270,9 @@ runHMM <- function(likVec=c(1,2,3,4,5), inilocList, pttList, sp.limList, bndVec,
   
 
 }
+
+ans <- plotRD(distr, track, known = NULL, xlims=c(-80,-55), ylims=c(30,45), save.plot=T)
+
 
 
 

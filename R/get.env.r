@@ -58,8 +58,8 @@ get.env <- function(uniqueDates = NULL, ptt = NULL, type = NULL, spatLim = NULL,
     for(i in 1:length(uniqueDates)){
       time <- as.Date(uniqueDates[i])
       repeat{
-        get.hycom(spatLim, time, type = 'a', filename = paste(ptt, '_', time, '.nc', sep = ''),
-                  download.file = TRUE, dir = save.dir, vars = 'water_temp') 
+        get.hycom2(spatLim, time, filename = paste(ptt, '_', time, '.nc', sep = ''),
+                  download.file = TRUE, dir = save.dir, vars = c('temperature','mld','mlp')) 
         tryCatch({
           err <- try(RNetCDF::open.nc(paste(save.dir,'/', ptt, '_', time, '.nc', sep = '')), silent = T)
         }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})

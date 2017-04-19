@@ -4,7 +4,12 @@
 #' likelihoods
 #' 
 #' @param tag.sst variable containing tag-collected SST data
-#' @param ptt is unique tag identifier
+#' @param filename is the first part of the filename specified to the download 
+#'   function \code{\link{get.env}}. For example, if downloaded files were 
+#'   specific to a particular dataset, you may want to identify that with a name
+#'   like 'tuna' or 'shark1'. This results in a downloaded filename of, for 
+#'   example, 'tuna_date.nc'. This filename is required here so the calc
+#'   function knows where to get the env data.
 #' @param sst.dir local directory where remote sensing SST downloads are stored
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
 #' @param sens.err is numeric indicating the percent sensor error in the tag sst sensor. Default is 1.
@@ -32,7 +37,7 @@
 #' 
 #' }
 
-calc.sst <- function(tag.sst, ptt, sst.dir, dateVec, focalDim = NULL, sens.err = 1){
+calc.sst <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.err = 1){
   
   print(paste('Starting SST likelihood calculation...'))
   t0 <- Sys.time()
@@ -53,7 +58,7 @@ calc.sst <- function(tag.sst, ptt, sst.dir, dateVec, focalDim = NULL, sens.err =
     sst.i <- c(tag.sst$minT[i] * (1 - sens.err / 100), tag.sst$maxT[i] * (1 + sens.err / 100)) # sensor error
     
     # open day's sst data
-    nc <- RNetCDF::open.nc(paste(sst.dir, 'sword', '_', as.Date(time), '.nc', sep='')) #add lat lon in filename '.nc', sep=''))
+    nc <- RNetCDF::open.nc(paste(sst.dir, filename, '_', as.Date(time), '.nc', sep='')) #add lat lon in filename '.nc', sep=''))
     
     if (i == 1){
       # get correct name in sst data

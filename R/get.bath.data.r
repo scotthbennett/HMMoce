@@ -6,13 +6,13 @@
 #' @param lathigh see lonlow
 #' @param folder is destination folder. Default is a temporary directory.
 #' @param seaonly is logical indicating whether you want to mask out anything on land.
-#' @param res is numeric indicating resolution in minutes. Choices are 0.5 or 1.
+#' @param res is numeric indicating resolution in minutes. Choices currently limited to just 0.5.
 #' @param raster is logical indicating whether you want the function to return a raster or not (a list will be returned).
 #' @export
 #' @importFrom curl curl_download
 #' @note Be patient! The download can take a few minutes!
 
-get.bath.data <- function(lonlow, lonhigh, latlow, lathigh, folder = tempdir(), seaonly = T, res = c(.5,1), raster=TRUE){
+get.bath.data <- function(lonlow, lonhigh, latlow, lathigh, folder = tempdir(), seaonly = T, res = c(.5), raster=TRUE){
   #require(RNetCDF)
   
   #rot90 <- function(A) {

@@ -3,7 +3,12 @@
 #' Compare tag data to OHC grid and calculate likelihoods
 #' 
 #' @param pdt is variable containing tag-collected PDT data
-#' @param ptt is unique tag identifier
+#' @param filename is the first part of the filename specified to the download 
+#'   function \code{\link{get.env}}. For example, if downloaded files were 
+#'   specific to a particular dataset, you may want to identify that with a name
+#'   like 'tuna' or 'shark1'. This results in a downloaded filename of, for 
+#'   example, 'tuna_date.nc'. This filename is required here so the calc
+#'   function knows where to get the env data.
 #' @param isotherm default '' in which isotherm is calculated on the fly based 
 #'   on daily tag data. Otherwise, numeric isotherm constraint can be specified 
 #'   (e.g. 20 deg C).
@@ -25,11 +30,11 @@
 #' pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop); 
 #' pdt.udates <- pdt$udates; pdt <- pdt$data
 #' # GENERATE DAILY OCEAN HEAT CONTENT (OHC) LIKELIHOODS
-#' L.ohc <- calc.ohc(pdt, ptt, ohc.dir = hycom.dir, dateVec = dateVec,
+#' L.ohc <- calc.ohc(pdt, filename='tuna', ohc.dir = hycom.dir, dateVec = dateVec,
 #'                   isotherm = '')
 #' }
 
-calc.ohc <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE, use.se = TRUE){
+calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRUE, use.se = TRUE){
 
   options(warn=1)
   
@@ -57,7 +62,7 @@ calc.ohc <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE, us
     #print(paste(time))
     
     # open day's hycom data
-    nc <- RNetCDF::open.nc(paste(ohc.dir, ptt,'_', as.Date(time), '.nc', sep=''))
+    nc <- RNetCDF::open.nc(paste(ohc.dir, filename,'_', as.Date(time), '.nc', sep=''))
     dat <- RNetCDF::var.get.nc(nc, 'water_temp') * RNetCDF::att.get.nc(nc, 'water_temp', attribute='scale_factor') + 
       RNetCDF::att.get.nc(nc, variable='water_temp', attribute='add_offset')
     

@@ -4,7 +4,12 @@
 #' likelihoods
 #' 
 #' @param tag.sst variable containing tag-collected SST data
-#' @param ptt is unique tag identifier
+#' @param filename is the first part of the filename specified to the download 
+#'   function \code{\link{get.env}}. For example, if downloaded files were 
+#'   specific to a particular dataset, you may want to identify that with a name
+#'   like 'tuna' or 'shark1'. This results in a downloaded filename of, for 
+#'   example, 'tuna_date.nc'. This filename is required here so the calc
+#'   function knows where to get the env data.
 #' @param sst.dir local directory where remote sensing SST downloads are stored
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
 #' @param sens.err is numeric indicating the percent sensor error in the tag sst sensor. Default is 1.
@@ -33,7 +38,7 @@
 #' 
 #' }
 
-calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, focalDim = NULL, sens.err = 1, ncores = parallel::detectCores()){
+calc.sst.par <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.err = 1, ncores = parallel::detectCores()){
   
   print(paste('Starting SST likelihood calculation...'))
   
@@ -55,7 +60,7 @@ calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, focalDim = NULL, sens.e
   sst1 <- c(tag.sst$minT[1] * (1 - sens.err), tag.sst$maxT[1] * (1 + sens.err)) # sensor error
   
   # open day's sst data
-  nc1 <- RNetCDF::open.nc(paste(sst.dir, ptt, '_', as.Date(time1), '.nc', sep='')) #add lat lon in filename '.nc', sep=''))
+  nc1 <- RNetCDF::open.nc(paste(sst.dir, filename, '_', as.Date(time1), '.nc', sep='')) #add lat lon in filename '.nc', sep=''))
   
   # get correct name in sst data
   ncnames = NULL
@@ -112,7 +117,7 @@ calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, focalDim = NULL, sens.e
     sst.i <- c(tag.sst$minT[i] * (1 - sens.err / 100), tag.sst$maxT[i] * (1 + sens.err / 100)) # sensor error
     
     # open day's sst data
-    nc <- RNetCDF::open.nc(paste(sst.dir, ptt, '_', as.Date(time), '.nc', sep='')) #add lat lon in filename '.nc', sep=''))
+    nc <- RNetCDF::open.nc(paste(sst.dir, filename, '_', as.Date(time), '.nc', sep='')) #add lat lon in filename '.nc', sep=''))
     dat <- RNetCDF::var.get.nc(nc, nameidx) # for OI SST
     
     # calc sd of SST

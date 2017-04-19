@@ -32,7 +32,7 @@
 #' 
 #' }
 
-calc.sst <- function(tag.sst, ptt, sst.dir, dateVec, sens.err = 1){
+calc.sst <- function(tag.sst, ptt, sst.dir, dateVec, focalDim = NULL, sens.err = 1){
   
   print(paste('Starting SST likelihood calculation...'))
   t0 <- Sys.time()
@@ -53,30 +53,40 @@ calc.sst <- function(tag.sst, ptt, sst.dir, dateVec, sens.err = 1){
     sst.i <- c(tag.sst$minT[i] * (1 - sens.err / 100), tag.sst$maxT[i] * (1 + sens.err / 100)) # sensor error
     
     # open day's sst data
-    nc <- RNetCDF::open.nc(paste(sst.dir, ptt, '_', as.Date(time), '.nc', sep='')) #add lat lon in filename '.nc', sep=''))
+    nc <- RNetCDF::open.nc(paste(sst.dir, 'sword', '_', as.Date(time), '.nc', sep='')) #add lat lon in filename '.nc', sep=''))
     
     if (i == 1){
       # get correct name in sst data
       ncnames = NULL
       nmax <- RNetCDF::file.inq.nc(nc)$nvars - 1
       for(ii in 0:nmax) ncnames[ii + 1] <- RNetCDF::var.inq.nc(nc, ii)$name
-      nameidx <- grep('sst', ncnames) - 1
+      nameidx <- grep('sst', ncnames, ignore.case=TRUE) - 1
+      
+      lon <- RNetCDF::var.get.nc(nc, 'longitude')
+      lat <- RNetCDF::var.get.nc(nc, 'latitude')
     }
     
     dat <- RNetCDF::var.get.nc(nc, nameidx) # for OI SST
     
     # calc sd of SST
     # focal calc on mean temp and write to sd var
-    r = raster::flip(raster::raster(t(dat)), 2)
-    sdx = raster::focal(r, w = matrix(1, nrow = 3, ncol = 3), fun = function(x) stats::sd(x, na.rm = T))
+    r = raster::flip(raster::raster(t(dat), xmn=min(lon), xmx=max(lon),
+                                    ymn=min(lat), ymx=max(lat)), 2)
+    
+    if(round(res(r)[1], 2) < 0.1) r <- raster::aggregate(r, fact = round(0.1 / round(res(r)[1], 2), 0))
+    
+    if(is.null(focalDim)){
+      focalDim <- round(0.25 / raster::res(r)[1], 0)
+      if(focalDim %% 2 == 0) focalDim <- focalDim - 1
+    }
+
+    sdx = raster::focal(r, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = T))
     sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
 
     # compare sst to that day's tag-based ohc
     lik.sst <- likint3(dat, sdx, sst.i[1], sst.i[2])
 
     if(i == 1){
-      lon <- RNetCDF::var.get.nc(nc, 'longitude')
-      lat <- RNetCDF::var.get.nc(nc, 'latitude')
       # result will be array of likelihood surfaces
       L.sst <- array(0, dim = c(dim(lik.sst), length(dateVec)))
     }

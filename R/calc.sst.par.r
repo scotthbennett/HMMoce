@@ -33,7 +33,7 @@
 #' 
 #' }
 
-calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, sens.err = 1, ncores = parallel::detectCores()){
+calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, focalDim = NULL, sens.err = 1, ncores = parallel::detectCores()){
   
   print(paste('Starting SST likelihood calculation...'))
   
@@ -61,15 +61,27 @@ calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, sens.err = 1, ncores = 
   ncnames = NULL
   nmax <- RNetCDF::file.inq.nc(nc1)$nvars - 1
   for(ii in 0:nmax) ncnames[ii + 1] <- RNetCDF::var.inq.nc(nc1, ii)$name
-  nameidx <- grep('sst', ncnames) - 1
+  nameidx <- grep('sst', ncnames, ignore.case = TRUE) - 1
   dat <- RNetCDF::var.get.nc(nc1, nameidx)
   lon <- RNetCDF::var.get.nc(nc1, 'longitude')
   lat <- RNetCDF::var.get.nc(nc1, 'latitude')
   
   # calc sd of SST
   # focal calc on mean temp and write to sd var
-  r = raster::flip(raster::raster(t(dat)), 2)
-  sdx = raster::focal(r, w = matrix(1, nrow = 3, ncol = 3), fun = function(x) stats::sd(x, na.rm = T))
+  r = raster::flip(raster::raster(t(dat), xmn=min(lon), xmx=max(lon),
+                                  ymn=min(lat), ymx=max(lat)), 2)
+  
+  # check for coarse enough resolution that our calculations wont take all day
+  if(round(res(r)[1], 2) < 0.1) r <- raster::aggregate(r, fact = round(0.1 / round(res(r)[1], 2), 0))
+  
+  # set up a focal() dimension if not specified by user, we use this for sd() of surround 0.25deg worth of grid cells
+  if(is.null(focalDim)){
+    focalDim <- round(0.25 / raster::res(r)[1], 0)
+    if(focalDim %% 2 == 0) focalDim <- focalDim - 1
+  }
+  
+  # calculate sd from sst grid using focal()
+  sdx = raster::focal(r, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = T))
   sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
   
   # compare sst to that day's tag-based ohc
@@ -98,8 +110,14 @@ calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, sens.err = 1, ncores = 
     
     # calc sd of SST
     # focal calc on mean temp and write to sd var
-    r = raster::flip(raster::raster(t(dat)), 2)
-    sdx = raster::focal(r, w = matrix(1, nrow = 3, ncol = 3), fun = function(x) stats::sd(x, na.rm = T))
+    r = raster::flip(raster::raster(t(dat), xmn=min(lon), xmx=max(lon),
+                                    ymn=min(lat), ymx=max(lat)), 2)
+    
+    # check for coarse enough resolution that our calculations wont take all day
+    if(round(res(r)[1], 2) < 0.1) r <- raster::aggregate(r, fact = round(0.1 / round(res(r)[1], 2), 0))
+    
+    # calculate sd from sst grid using focal()
+    sdx = raster::focal(r, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = T))
     sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
     
     # compare sst to that day's tag-based ohc

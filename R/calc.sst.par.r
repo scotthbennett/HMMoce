@@ -84,12 +84,19 @@ calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, focalDim = NULL, sens.e
   sdx = raster::focal(r, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = T))
   sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
   
+  # re-calc dat after raster::aggregate, if it happened
+  dat <- base::t(raster::as.matrix(raster::flip(r, 2)))
+  
   # compare sst to that day's tag-based ohc
   lik.sst <- likint3(dat, sdx, sst1[1], sst1[2])
   
   # result will be array of likelihood surfaces
   L.sst <- array(0, dim = c(dim(lik.sst), length(dateVec)))
 
+  # get aggregated version of lat/lon for raster creation later
+  lon.agg <- seq(extent(r)[1], extent(r)[2], length.out=dim(r)[2])
+  lat.agg <- seq(extent(r)[3], extent(r)[4], length.out=dim(r)[1])
+  
   ## END of SETUP RUN
   
   print('Processing in parallel... ')
@@ -120,6 +127,9 @@ calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, focalDim = NULL, sens.e
     sdx = raster::focal(r, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = T))
     sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
     
+    # re-calc dat after raster::aggregate, if it happened
+    dat <- base::t(raster::as.matrix(raster::flip(r, 2)))
+    
     # compare sst to that day's tag-based ohc
     lik.sst <- likint3(dat, sdx, sst.i[1], sst.i[2])
     
@@ -146,7 +156,7 @@ calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, focalDim = NULL, sens.e
   print(paste('Making final likelihood raster...'))
   
   crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
-  list.sst <- list(x = lon, y = lat, z = L.sst)
+  list.sst <- list(x = lon.agg, y = lat.agg, z = L.sst)
   ex <- raster::extent(list.sst)
   L.sst <- raster::brick(list.sst$z, xmn=ex[1], xmx=ex[2], ymn=ex[3], ymx=ex[4], transpose=T, crs)
   L.sst <- raster::flip(L.sst, direction = 'y')

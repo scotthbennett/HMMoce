@@ -70,7 +70,7 @@ calc.sst <- function(tag.sst, ptt, sst.dir, dateVec, focalDim = NULL, sens.err =
     
     # calc sd of SST
     # focal calc on mean temp and write to sd var
-    r = raster::flip(raster::raster(t(dat), xmn=min(lon), xmx=max(lon),
+    r <- raster::flip(raster::raster(t(dat), xmn=min(lon), xmx=max(lon),
                                     ymn=min(lat), ymx=max(lat)), 2)
     
     if(round(res(r)[1], 2) < 0.1) r <- raster::aggregate(r, fact = round(0.1 / round(res(r)[1], 2), 0))
@@ -82,6 +82,7 @@ calc.sst <- function(tag.sst, ptt, sst.dir, dateVec, focalDim = NULL, sens.err =
 
     sdx = raster::focal(r, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = T))
     sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
+    dat <- base::t(raster::as.matrix(raster::flip(r, 2)))
 
     # compare sst to that day's tag-based ohc
     lik.sst <- likint3(dat, sdx, sst.i[1], sst.i[2])
@@ -89,6 +90,9 @@ calc.sst <- function(tag.sst, ptt, sst.dir, dateVec, focalDim = NULL, sens.err =
     if(i == 1){
       # result will be array of likelihood surfaces
       L.sst <- array(0, dim = c(dim(lik.sst), length(dateVec)))
+      
+      lon.agg <- seq(extent(r)[1], extent(r)[2], length.out=dim(r)[2])
+      lat.agg <- seq(extent(r)[3], extent(r)[4], length.out=dim(r)[1])
     }
     
     idx <- which(dateVec == as.Date(time))
@@ -99,7 +103,7 @@ calc.sst <- function(tag.sst, ptt, sst.dir, dateVec, focalDim = NULL, sens.err =
   print(paste('Making final likelihood raster...'))
   
   crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
-  list.sst <- list(x = lon, y = lat, z = L.sst)
+  list.sst <- list(x = lon.agg, y = lat.agg, z = L.sst)
   ex <- raster::extent(list.sst)
   L.sst <- raster::brick(list.sst$z, xmn=ex[1], xmx=ex[2], ymn=ex[3], ymx=ex[4], transpose=T, crs)
   L.sst <- raster::flip(L.sst, direction = 'y')

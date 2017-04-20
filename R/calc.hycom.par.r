@@ -54,12 +54,42 @@ calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.
   
   print(paste0('Generating profile likelihood for ', udates[1], ' through ', udates[length(udates)]))
   
-  nc1 <- RNetCDF::open.nc(dir(hycom.dir, full.names = T)[1])
-  depth <- RNetCDF::var.get.nc(nc1, 'depth')
-  lon <- RNetCDF::var.get.nc(nc1, 'lon')
-  lat <- RNetCDF::var.get.nc(nc1, 'lat')
-  # result will be array of likelihood surfaces
+  # open nc and get the indices for the vars
+  nc1 =  RNetCDF::open.nc(dir(ohc.dir, full.names = T)[1])
+  ncnames = NULL
+  nmax <- RNetCDF::file.inq.nc(nc1)$nvars - 1
+  for(ii in 0:nmax) ncnames[ii + 1] <- RNetCDF::var.inq.nc(nc1, ii)$name
+  temp.idx <- grep('temp', ncnames, ignore.case=TRUE) - 1
+  lat.idx <- grep('lat', ncnames, ignore.case=TRUE) - 1
+  lon.idx <- grep('lon', ncnames, ignore.case=TRUE) - 1
+  dep.idx <- grep('dep', ncnames, ignore.case=TRUE) - 1
   
+  # get attributes, if they exist
+  ncatts <- NULL
+  nmax <- RNetCDF::var.inq.nc(nc1, temp.idx)$natts - 1
+  for(ii in 0:nmax) ncatts[ii + 1] <- RNetCDF::att.inq.nc(nc1, temp.idx, ii)$name
+  scale.idx <- grep('scale', ncatts, ignore.case=TRUE) - 1
+  if(length(scale.idx) != 0){
+    scale <- RNetCDF::att.get.nc(nc1, temp.idx, attribute=scale.idx)
+  } else{
+    scale <- 1
+  }
+  off.idx <- grep('off', ncatts, ignore.case=TRUE) - 1
+  if(length(off.idx) != 0){
+    offset <- RNetCDF::att.get.nc(nc1, temp.idx, attribute=off.idx)
+  } else{
+    offset <- 1
+  }
+  
+  # get and check the vars
+  depth <- RNetCDF::var.get.nc(nc1, dep.idx)
+  lon <- RNetCDF::var.get.nc(nc1, lon.idx)
+  if(length(dim(lon)) == 2) lon <- lon[,1]
+  if(!any(lon < 180)) lon <- lon - 360
+  lat <- RNetCDF::var.get.nc(nc1, lat.idx)
+  if(length(dim(lat)) == 2) lat <- lat[1,]
+  
+  # result will be array of likelihood surfaces
   L.hycom <- array(0, dim = c(length(lon), length(lat), length(dateVec)))
   
   # BEGIN PARALLEL STUFF  
@@ -77,8 +107,7 @@ calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.
     
     # open day's hycom data
     nc <- RNetCDF::open.nc(paste(hycom.dir, filename, '_', as.Date(time), '.nc', sep=''))
-    dat <- RNetCDF::var.get.nc(nc, 'water_temp') * RNetCDF::att.get.nc(nc, 'water_temp', attribute='scale_factor') + 
-      RNetCDF::att.get.nc(nc, variable='water_temp', attribute='add_offset')
+    dat <- RNetCDF::var.get.nc(nc, temp.idx) * scale + offset
     
     #extracts depth from tag data for day i
     y <- pdt.i$Depth[!is.na(pdt.i$Depth)] 

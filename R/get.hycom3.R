@@ -47,7 +47,7 @@
 #' @references \url{https://hycom.org/}
 #'
 
-get.hycom2 <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
+get.hycom3 <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
                       filename='', download.file=TRUE, dir = getwd()) {
 
   dir.create(file.path(dir), recursive = TRUE, showWarnings = FALSE)
@@ -66,10 +66,10 @@ get.hycom2 <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
          as.Date('2016-04-17'), Sys.Date() + 1),
     url=c('http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_19.0/',
           'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_19.1/',
-          'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_90.9/',
-          'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_91.0/',
-          'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_91.1/',
-          'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_91.2/'))
+          'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_90.9?',
+          'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_91.0?',
+          'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_91.1?',
+          'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_91.2?'))
 
   if(time[1] < expts$start[1])
     stop('Data begins at %s and is not available at %s.',
@@ -84,7 +84,7 @@ get.hycom2 <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
       url = expts$url[i]
   }
 
-  url = sprintf('%s%s?', url, as.numeric(format(time, '%Y')))
+ if(any(grep('19', url))) url = sprintf('%s%s?', url, as.numeric(format(time, '%Y')))
 
   ## Add the variables.
   for(var in vars)

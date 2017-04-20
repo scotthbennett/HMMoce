@@ -39,7 +39,7 @@ calc.sst.par <- function(tag.sst, ptt, sst.dir, dateVec, focalDim = NULL, sens.e
   
   t0 <- Sys.time()
   
-  tag.sst$dts <- as.POSIXct(tag.sst$Date, format = findDateFormat(tag.sst$Date))
+  tag.sst$dts <- as.Date(as.POSIXct(tag.sst$Date, format = findDateFormat(tag.sst$Date)))
   by_dte <- dplyr::group_by(tag.sst, as.factor(tag.sst$dts))  # group by unique DAILY time points
   tag.sst <- data.frame(dplyr::summarise_(by_dte, "min(Temperature)", "max(Temperature)"))
   colnames(tag.sst) <- list('date', 'minT', 'maxT')

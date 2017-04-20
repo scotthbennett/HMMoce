@@ -37,7 +37,7 @@ calc.sst <- function(tag.sst, ptt, sst.dir, dateVec, focalDim = NULL, sens.err =
   print(paste('Starting SST likelihood calculation...'))
   t0 <- Sys.time()
   
-  tag.sst$dts <- as.POSIXct(tag.sst$Date, format = findDateFormat(tag.sst$Date))
+  tag.sst$dts <- as.Date(as.POSIXct(tag.sst$Date, format = findDateFormat(tag.sst$Date)))
   by_dte <- dplyr::group_by(tag.sst, as.factor(tag.sst$dts))  # group by unique DAILY time points
   tag.sst <- data.frame(dplyr::summarise_(by_dte, "min(Temperature)", "max(Temperature)"))
   colnames(tag.sst) <- list('date', 'minT', 'maxT')
@@ -51,7 +51,7 @@ calc.sst <- function(tag.sst, ptt, sst.dir, dateVec, focalDim = NULL, sens.err =
     
     time <- tag.sst$date[i]
     sst.i <- c(tag.sst$minT[i] * (1 - sens.err / 100), tag.sst$maxT[i] * (1 + sens.err / 100)) # sensor error
-    
+
     # open day's sst data
     nc <- RNetCDF::open.nc(paste(sst.dir, 'sword', '_', as.Date(time), '.nc', sep='')) #add lat lon in filename '.nc', sep=''))
     

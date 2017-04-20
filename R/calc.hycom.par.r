@@ -1,21 +1,29 @@
 #' Hycom Profile LIkelihood in Parallel
-#'
+#' 
 #' Calculate Hycom profile probability surface in parallel
-#'
+#' 
 #' @param pdt input PAT data see \code{\link{extract.pdt}}
-#' @param ptt name of tag i.e. 123645
+#' @param filename is the first part of the filename specified to the download 
+#'   function \code{\link{get.env}}. For example, if downloaded files were 
+#'   specific to a particular dataset, you may want to identify that with a name
+#'   like 'tuna' or 'shark1'. This results in a downloaded filename of, for 
+#'   example, 'tuna_date.nc'. This filename is required here so the calc
+#'   function knows where to get the env data.
 #' @param hycom.dir directory of downloaded hycom (or other)data
-#' @param focalDim is integer for dimensions of raster::focal used to calculate
+#' @param focalDim is integer for dimensions of raster::focal used to calculate 
 #'   sd() of temperature grid cell. Recommend focalDim = 3 if woa.data = woa.one
 #'   and 9 if using woa.quarter.
-#' @param dateVec vector of complete dates for data range. This should be in 'Date' format
-#' @param use.se is logical indicating whether or not to use SE when using regression to predict temperature at specific depth levels.
-#' @param ncores specify number of cores, or leave blank and use whatever you have!
-#'
+#' @param dateVec vector of complete dates for data range. This should be in 
+#'   'Date' format
+#' @param use.se is logical indicating whether or not to use SE when using 
+#'   regression to predict temperature at specific depth levels.
+#' @param ncores specify number of cores, or leave blank and use whatever you 
+#'   have!
+#'   
 #' @return a raster brick of Hycom profile likelihood
 #' @export
 #' @importFrom foreach %dopar%
-#'
+#'   
 #' @examples
 #' # load workspace
 #' \dontrun{
@@ -24,11 +32,11 @@
 #' # define hycom.dir
 #' hycom.dir = '~/hycom/'
 #' # run in parallel
-#' res = calc.hycom.par(pdt, ptt, isotherm = '', hycom.dir = hycom.dir, dateVec = dateVec, bathy = T)
+#' res = calc.hycom.par(pdt, filename='tuna', isotherm = '', hycom.dir = hycom.dir, dateVec = dateVec, bathy = T)
 #' }
 
 
-calc.hycom.par <- function(pdt, ptt, hycom.dir, focalDim = 9, dateVec, use.se = TRUE, ncores = parallel::detectCores()){
+calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se = TRUE, ncores = parallel::detectCores()){
   
   options(warn=-1)
   
@@ -68,7 +76,7 @@ calc.hycom.par <- function(pdt, ptt, hycom.dir, focalDim = 9, dateVec, use.se = 
     pdt.i <- pdt[which(pdt$Date == time),]
     
     # open day's hycom data
-    nc <- RNetCDF::open.nc(paste(hycom.dir, ptt, '_', as.Date(time), '.nc', sep=''))
+    nc <- RNetCDF::open.nc(paste(hycom.dir, filename, '_', as.Date(time), '.nc', sep=''))
     dat <- RNetCDF::var.get.nc(nc, 'water_temp') * RNetCDF::att.get.nc(nc, 'water_temp', attribute='scale_factor') + 
       RNetCDF::att.get.nc(nc, variable='water_temp', attribute='add_offset')
     

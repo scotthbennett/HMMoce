@@ -2,7 +2,12 @@
 #' Calculate Ocean Heat Content (OHC) probability surface in parallel
 #'
 #' @param pdt input PAT data see \code{\link{extract.pdt}}
-#' @param ptt name of tag i.e. 123645
+#' @param filename is the first part of the filename specified to the download 
+#'   function \code{\link{get.env}}. For example, if downloaded files were 
+#'   specific to a particular dataset, you may want to identify that with a name
+#'   like 'tuna' or 'shark1'. This results in a downloaded filename of, for 
+#'   example, 'tuna_date.nc'. This filename is required here so the calc
+#'   function knows where to get the env data.
 #' @param isotherm if specifying a particular isotherm, otherwise leave blank. default value is 
 #' @param ohc.dir directory of downloaded hycom (or other)data
 #' @param dateVec vector of complete dates for data range. This should be in 'Date' format
@@ -23,11 +28,11 @@
 #' # define ohc.dir
 #' ohc.dir = '~/hycom/'
 #' # run in parallel
-#' res = calc.ohc.par(pdt, ptt, isotherm = '', ohc.dir = ohc.dir, dateVec = dateVec, bathy = T)
+#' res = calc.ohc.par(pdt, filename='tuna', isotherm = '', ohc.dir = ohc.dir, dateVec = dateVec, bathy = T)
 #' }
 
 
-calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE, use.se = TRUE, ncores = parallel::detectCores()){
+calc.ohc.par <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRUE, use.se = TRUE, ncores = parallel::detectCores()){
   
   #max_ohc_date = max(as.Date(substr(dir(ohc.dir), 8, 17)))
   #pdt_idx = as.Date(pdt$Date)<=max_ohc_date
@@ -96,7 +101,7 @@ calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE
     pdt.i <- pdt[which(pdt$Date == time),]
     
     # open day's hycom data
-    nc <- RNetCDF::open.nc(paste(ohc.dir, ptt, '_', as.Date(time), '.nc', sep=''))
+    nc <- RNetCDF::open.nc(paste(ohc.dir, filename, '_', as.Date(time), '.nc', sep=''))
     dat <- RNetCDF::var.get.nc(nc, 'water_temp') * RNetCDF::att.get.nc(nc, 'water_temp', attribute='scale_factor') + 
       RNetCDF::att.get.nc(nc, variable='water_temp', attribute='add_offset')
     

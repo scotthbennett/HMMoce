@@ -1,22 +1,27 @@
 #' Download and Read Oceanographic Data
 #' 
-#' \code{get.env} accesses oceanographic data like sea surface temperature from
+#' \code{get.env} accesses oceanographic data like sea surface temperature from 
 #' a remote server and downloads the temporal and spatial extent of interest for
 #' further use
 #' 
 #' @param uniqueDates is a POSIXct vector of desired dates
-#' @param ptt is unique tag identifier
+#' @param filename is first part of the filename specified to the download
+#'   function. For example, if downloaded files were specific to a particular
+#'   dataset, you may want to identify that with a name like 'tuna' or 'shark1'.
+#'   This results in a downloaded filename of, for example, 'tuna_date.nc'.
 #' @param type is a character string indicating whether you're after sea surface
-#'   temperature 'sst', hybrid coordinate ocean model 'hycom', or world ocean atlas 'woa' data
-#' @param spatLim is a list of spatial limits as \code{list(xmin, xmax, ymin,
+#'   temperature 'sst', hybrid coordinate ocean model 'hycom', or world ocean
+#'   atlas 'woa' data
+#' @param spatLim is a list of spatial limits as \code{list(xmin, xmax, ymin, 
 #'   ymax)}
-#' @param resol is character describing the desired resolution in degrees if type = 'woa', otherwise NULL.
+#' @param resol is character describing the desired resolution in degrees if
+#'   type = 'woa', otherwise NULL.
 #' @param save.dir is the directory to save the downloaded data to
 #'   
 #' @return nothing, just downloads the data to your local machine
 #' @export
 
-get.env <- function(uniqueDates = NULL, ptt = NULL, type = NULL, spatLim = NULL, resol = NULL, save.dir = getwd(), sst.type=NULL){
+get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = NULL, resol = NULL, save.dir = getwd(), sst.type=NULL){
   
   if(is.null(type)){
     
@@ -32,9 +37,9 @@ get.env <- function(uniqueDates = NULL, ptt = NULL, type = NULL, spatLim = NULL,
       for(i in 1:length(uniqueDates)){
         time <- as.Date(uniqueDates[i])
         repeat{
-          get.oi.sst(spatLim, time, filename = paste(ptt, '_', time, '.nc', sep = ''), download.file = TRUE, dir = save.dir) # filenames based on dates from above
+          get.oi.sst(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''), download.file = TRUE, dir = save.dir) # filenames based on dates from above
           tryCatch({
-            err <- try(RNetCDF::open.nc(paste(save.dir, ptt, '_', time, '.nc', sep = '')), silent = T)
+            err <- try(RNetCDF::open.nc(paste(save.dir, filename, '_', time, '.nc', sep = '')), silent = T)
           }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})
           if(class(err) != 'try-error') break
         }
@@ -43,9 +48,9 @@ get.env <- function(uniqueDates = NULL, ptt = NULL, type = NULL, spatLim = NULL,
       for(i in 1:length(uniqueDates)){
         time <- as.Date(uniqueDates[i])
         repeat{
-          get.ghr.sst(spatLim, time, filename = paste(ptt, '_', time, '.nc', sep = ''), download.file = TRUE, dir = save.dir) # filenames based on dates from above
+          get.ghr.sst(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''), download.file = TRUE, dir = save.dir) # filenames based on dates from above
           tryCatch({
-            err <- try(RNetCDF::open.nc(paste(save.dir, ptt, '_', time, '.nc', sep = '')), silent = T)
+            err <- try(RNetCDF::open.nc(paste(save.dir, filename, '_', time, '.nc', sep = '')), silent = T)
           }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})
           if(class(err) != 'try-error') break
         }
@@ -58,10 +63,10 @@ get.env <- function(uniqueDates = NULL, ptt = NULL, type = NULL, spatLim = NULL,
     for(i in 1:length(uniqueDates)){
       time <- as.Date(uniqueDates[i])
       repeat{
-        get.hycom2(spatLim, time, filename = paste(ptt, '_', time, '.nc', sep = ''),
+        get.hycom2(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''),
                   download.file = TRUE, dir = save.dir, vars = c('temperature','mld','mlp')) 
         tryCatch({
-          err <- try(RNetCDF::open.nc(paste(save.dir,'/', ptt, '_', time, '.nc', sep = '')), silent = T)
+          err <- try(RNetCDF::open.nc(paste(save.dir,'/', filename, '_', time, '.nc', sep = '')), silent = T)
         }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})
         if(class(err) != 'try-error') break
       }

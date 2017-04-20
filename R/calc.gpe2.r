@@ -42,7 +42,10 @@ calc.gpe2 <- function(locs, locDates, iniloc, locs.grid, dateVec, errEll = TRUE,
   
   # get rid of non-GPE locations if gpeOnly == TRUE and check length of resulting locs file
   if(gpeOnly == TRUE){
-    locs <- locs[which(locs$Type == 'GPE'),]
+    loc.idx <- which(locs$Type == 'GPE')
+    locs <- locs[loc.idx,]
+    locDates <- locDates[loc.idx]
+    
     if(length(locs[,1]) < 1){
       stop('No GPE positions available in input locs file. Make sure you have calculated GPE positions and exported the resulting -Locations.csv file from WC DAP/GPE2 software.')
     }

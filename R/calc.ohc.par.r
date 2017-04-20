@@ -34,14 +34,6 @@
 
 calc.ohc.par <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRUE, use.se = TRUE, ncores = parallel::detectCores()){
   
-  #max_ohc_date = max(as.Date(substr(dir(ohc.dir), 8, 17)))
-  #pdt_idx = as.Date(pdt$Date)<=max_ohc_date
-  #pdt = pdt[pdt_idx, ]
-  
-  #dvidx = dateVec <= max_ohc_date
-  
-  #dateVec = dateVec[dvidx]
-  
   options(warn=1)
   
   t0 <- Sys.time()
@@ -64,8 +56,8 @@ calc.ohc.par <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy =
   
   print(paste0('Generating OHC likelihood for ', udates[1], ' through ', udates[length(udates)]))
   
+  # open nc and get the indices for the vars
   nc1 =  RNetCDF::open.nc(dir(ohc.dir, full.names = T)[1])
-  
   ncnames = NULL
   nmax <- RNetCDF::file.inq.nc(nc1)$nvars - 1
   for(ii in 0:nmax) ncnames[ii + 1] <- RNetCDF::var.inq.nc(nc1, ii)$name
@@ -74,7 +66,24 @@ calc.ohc.par <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy =
   lon.idx <- grep('lon', ncnames, ignore.case=TRUE) - 1
   dep.idx <- grep('dep', ncnames, ignore.case=TRUE) - 1
   
+  # get attributes, if they exist
+  ncatts <- NULL
+  nmax <- RNetCDF::var.inq.nc(nc1, temp.idx)$natts - 1
+  for(ii in 0:nmax) ncatts[ii + 1] <- RNetCDF::att.inq.nc(nc1, temp.idx, ii)$name
+  scale.idx <- grep('scale', ncnames, ignore.case=TRUE) - 1
+  if(length(scale.idx) != 0){
+    scale <- RNetCDF::att.get.nc(nc1, temp.idx, attribute=scale.idx)
+  } else{
+    scale <- 1
+  }
+  off.idx <- grep('off', ncnames, ignore.case=TRUE) - 1
+  if(length(off.idx) != 0){
+    offset <- RNetCDF::att.get.nc(nc1, temp.idx, attribute=off.idx)
+  } else{
+    offset <- 1
+  }
   
+  # get and check the vars
   depth <- RNetCDF::var.get.nc(nc1, dep.idx)
   lon <- RNetCDF::var.get.nc(nc1, lon.idx)
   if(length(dim(lon)) == 2) lon <- lon[,1]
@@ -82,16 +91,12 @@ calc.ohc.par <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy =
   lat <- RNetCDF::var.get.nc(nc1, lat.idx)
   if(length(dim(lat)) == 2) lat <- lat[1,]
   
-  # result will be array of likelihood surfaces
-  
+  # results will be array of likelihood surfaces
   L.ohc <- array(0, dim = c(length(lon), length(lat), length(dateVec)))
   start.t <- Sys.time()
   
-# BEGIN PARALLEL STUFF  
-  
+  # BEGIN PARALLEL STUFF  
   print('Processing in parallel... ')
-  
-  # ncores = detectCores()  # should be an input argument
   cl = parallel::makeCluster(ncores)
   doParallel::registerDoParallel(cl, cores = ncores)
   
@@ -102,8 +107,7 @@ calc.ohc.par <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy =
     
     # open day's hycom data
     nc <- RNetCDF::open.nc(paste(ohc.dir, filename, '_', as.Date(time), '.nc', sep=''))
-    dat <- RNetCDF::var.get.nc(nc, 'water_temp') * RNetCDF::att.get.nc(nc, 'water_temp', attribute='scale_factor') + 
-      RNetCDF::att.get.nc(nc, variable='water_temp', attribute='add_offset')
+    dat <- RNetCDF::var.get.nc(nc, temp.idx) * scale + offset
     
     #extracts depth from tag data for day i
     y <- pdt.i$Depth[!is.na(pdt.i$Depth)] 
@@ -200,24 +204,14 @@ calc.ohc.par <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy =
     
     lik.ohc <- lik.try
     
-    # if(i == 1){
-    #   # result will be array of likelihood surfaces
-    #   L.ohc <- array(0, dim = c(dim(lik.ohc), length(dateVec)))
-    # }
-    
-    # idx <- which(dateVec == as.Date(time))
-    # L.ohc[,,idx] = (lik.ohc / max(lik.ohc, na.rm=T)) - 0.2
-    # 
   }
   
   parallel::stopCluster(cl)
   
   # make index of dates for filling in L.ohc
-  
   didx = base::match(udates, dateVec)
   
-  
-  # lapply 
+  # lapply to put parallel answers back together
   lik.ohc = lapply(ans, function(x) x / max(x, na.rm = T))
   
   ii = 1
@@ -229,7 +223,8 @@ calc.ohc.par <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy =
   print(paste('Making final likelihood raster...'))
   
   crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
-  list.ohc <- list(x = lon - 360, y = lat, z = L.ohc)
+  if(!any(lon < 180)) lon <- lon - 360
+  list.ohc <- list(x = lon, y = lat, z = L.ohc)
   ex <- raster::extent(list.ohc)
   L.ohc <- raster::brick(list.ohc$z, xmn=ex[1], xmx=ex[2], ymn=ex[3], ymx=ex[4], transpose=T, crs)
   L.ohc <- raster::flip(L.ohc, direction = 'y')

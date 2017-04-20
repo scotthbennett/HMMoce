@@ -1,41 +1,47 @@
-#' Calculate Ocean Heat Content (OHC) probability surface
-#' 
-#' Compare tag data to OHC grid and calculate likelihoods
-#' 
-#' @param pdt is variable containing tag-collected PDT data
+#' OHC Parallel
+#' Calculate Ocean Heat Content (OHC) probability surface in parallel
+#'
+#' @param pdt input PAT data see \code{\link{extract.pdt}}
 #' @param filename is the first part of the filename specified to the download 
 #'   function \code{\link{get.env}}. For example, if downloaded files were 
 #'   specific to a particular dataset, you may want to identify that with a name
 #'   like 'tuna' or 'shark1'. This results in a downloaded filename of, for 
 #'   example, 'tuna_date.nc'. This filename is required here so the calc
 #'   function knows where to get the env data.
-#' @param isotherm default '' in which isotherm is calculated on the fly based 
-#'   on daily tag data. Otherwise, numeric isotherm constraint can be specified 
-#'   (e.g. 20 deg C).
-#' @param ohc.dir local directory where \code{get.env} downloads are stored.
-#' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
-#' @param bathy is logical indicating whether or not a bathymetric mask should
-#'   be applied
+#' @param isotherm if specifying a particular isotherm, otherwise leave blank. default value is 
+#' @param ohc.dir directory of downloaded hycom (or other)data
+#' @param dateVec vector of complete dates for data range. This should be in 'Date' format
+#' @param bathy should the land be flagged out? defaults to TRUE
 #' @param use.se is logical indicating whether or not to use SE when using regression to predict temperature at specific depth levels.
-#'   
-#' @return likelihood is raster brick of likelihood surfaces representing 
-#'   estimated position based on tag-based OHC compared to calculated OHC using 
-#'   HYCOM
-#'   
+#' @param ncores specify number of cores, or leave blank and use whatever you have!
+#'
+#' @return a raster brick of OHC likelihood
+#' @seealso \code{\link{calc.ohc}}
 #' @export
-#' @seealso \code{\link{calc.woa}}
+#' @importFrom foreach "%dopar%"
+#'
 #' @examples
+#' # load workspace
 #' \dontrun{
-#' # depth-temp profile data
-#' pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop); 
-#' pdt.udates <- pdt$udates; pdt <- pdt$data
-#' # GENERATE DAILY OCEAN HEAT CONTENT (OHC) LIKELIHOODS
-#' L.ohc <- calc.ohc(pdt, filename='tuna', ohc.dir = hycom.dir, dateVec = dateVec,
-#'                   isotherm = '')
+#' load('~/DATA/blue259.RData')
+
+#' # define ohc.dir
+#' ohc.dir = '~/hycom/'
+#' # run in parallel
+#' res = calc.ohc.par(pdt, filename='tuna', isotherm = '', ohc.dir = ohc.dir, dateVec = dateVec, bathy = T)
 #' }
 
-calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRUE, use.se = TRUE){
 
+calc.ohc.par <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRUE, use.se = TRUE, ncores = parallel::detectCores()){
+  
+  #max_ohc_date = max(as.Date(substr(dir(ohc.dir), 8, 17)))
+  #pdt_idx = as.Date(pdt$Date)<=max_ohc_date
+  #pdt = pdt[pdt_idx, ]
+  
+  #dvidx = dateVec <= max_ohc_date
+  
+  #dateVec = dateVec[dvidx]
+  
   options(warn=1)
   
   t0 <- Sys.time()
@@ -49,13 +55,17 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
   pdt$MidTemp <- (pdt$MaxTemp + pdt$MinTemp) / 2
   
   # get unique time points
-  udates <- unique(pdt$Date)
-  T <- length(udates)
+  dateVec = lubridate::parse_date_time(dateVec, '%Y-%m-%d')
   
+  udates <- unique(lubridate::parse_date_time(pdt$Date, orders = '%Y-%m-%d %H%:%M:%S'))
+  T <- length(udates)
+
   if(isotherm != '') iso.def <- TRUE else iso.def <- FALSE
   
-  # open nc and get the indices for the vars
+  print(paste0('Generating OHC likelihood for ', udates[1], ' through ', udates[length(udates)]))
+  
   nc1 =  RNetCDF::open.nc(dir(ohc.dir, full.names = T)[1])
+  
   ncnames = NULL
   nmax <- RNetCDF::file.inq.nc(nc1)$nvars - 1
   for(ii in 0:nmax) ncnames[ii + 1] <- RNetCDF::var.inq.nc(nc1, ii)$name
@@ -64,24 +74,7 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
   lon.idx <- grep('lon', ncnames, ignore.case=TRUE) - 1
   dep.idx <- grep('dep', ncnames, ignore.case=TRUE) - 1
   
-  # get attributes, if they exist
-  ncatts <- NULL
-  nmax <- RNetCDF::var.inq.nc(nc1, temp.idx)$natts - 1
-  for(ii in 0:nmax) ncatts[ii + 1] <- RNetCDF::att.inq.nc(nc1, temp.idx, ii)$name
-  scale.idx <- grep('scale', ncatts, ignore.case=TRUE) - 1
-  if(length(scale.idx) != 0){
-    scale <- RNetCDF::att.get.nc(nc1, temp.idx, attribute=scale.idx)
-  } else{
-    scale <- 1
-  }
-  off.idx <- grep('off', ncatts, ignore.case=TRUE) - 1
-  if(length(off.idx) != 0){
-    offset <- RNetCDF::att.get.nc(nc1, temp.idx, attribute=off.idx)
-  } else{
-    offset <- 1
-  }
   
-  # get and check the vars
   depth <- RNetCDF::var.get.nc(nc1, dep.idx)
   lon <- RNetCDF::var.get.nc(nc1, lon.idx)
   if(length(dim(lon)) == 2) lon <- lon[,1]
@@ -89,16 +82,28 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
   lat <- RNetCDF::var.get.nc(nc1, lat.idx)
   if(length(dim(lat)) == 2) lat <- lat[1,]
   
-  print(paste('Starting iterations through deployment period ', '...'))
+  # result will be array of likelihood surfaces
   
-  for(i in 1:T){
-    time <- udates[i]
+  L.ohc <- array(0, dim = c(length(lon), length(lat), length(dateVec)))
+  start.t <- Sys.time()
+  
+# BEGIN PARALLEL STUFF  
+  
+  print('Processing in parallel... ')
+  
+  # ncores = detectCores()  # should be an input argument
+  cl = parallel::makeCluster(ncores)
+  doParallel::registerDoParallel(cl, cores = ncores)
+  
+  ans = foreach::foreach(i = 1:T) %dopar%{
+    
+    time <- as.Date(udates[i])
     pdt.i <- pdt[which(pdt$Date == time),]
-    #print(paste(time))
     
     # open day's hycom data
-    nc <- RNetCDF::open.nc(paste(ohc.dir, filename,'_', as.Date(time), '.nc', sep=''))
-    dat <- RNetCDF::var.get.nc(nc, temp.idx) * scale + offset
+    nc <- RNetCDF::open.nc(paste(ohc.dir, filename, '_', as.Date(time), '.nc', sep=''))
+    dat <- RNetCDF::var.get.nc(nc, 'water_temp') * RNetCDF::att.get.nc(nc, 'water_temp', attribute='scale_factor') + 
+      RNetCDF::att.get.nc(nc, variable='water_temp', attribute='add_offset')
     
     #extracts depth from tag data for day i
     y <- pdt.i$Depth[!is.na(pdt.i$Depth)] 
@@ -122,13 +127,13 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
     
     # make predictions based on the regression model earlier for the temperature at standard WOA depth levels for low and high temperature at that depth
     suppressWarnings(
-    fit.low <- locfit::locfit(pdt.i$MinTemp ~ pdt.i$Depth, maxk=500)
+      fit.low <- locfit::locfit(pdt.i$MinTemp ~ pdt.i$Depth)
     )
     suppressWarnings(
-    fit.high <- locfit::locfit(pdt.i$MaxTemp ~ pdt.i$Depth, maxk=500)
+      fit.high <- locfit::locfit(pdt.i$MaxTemp ~ pdt.i$Depth)
     )
     n = length(hycomDep)
-      
+    
     #suppressWarnings(
     pred.low = stats::predict(fit.low, newdata = hycomDep, se = T, get.data = T)
     #suppressWarnings(
@@ -165,10 +170,9 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
     sdx = raster::focal(r, w = matrix(1, nrow = 9, ncol = 9),
                         fun = function(x) stats::sd(x, na.rm = T))
     sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
-
+    
     # compare hycom to that day's tag-based ohc
     #lik.ohc <- likint3(ohc, sdx, minT.ohc, maxT.ohc)
-    #lik.ohc <- lik.ohc / max(lik.ohc, na.rm = T)
     
     lik.try <- try(likint3(ohc, sdx, minT.ohc, maxT.ohc), TRUE)
     
@@ -194,27 +198,42 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
       warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral for ', time, '...', sep=''))
     }
     
-    lik.ohc <- lik.try / max(lik.try, na.rm = T)
+    lik.ohc <- lik.try
     
-    if(i == 1){
-      # result will be array of likelihood surfaces
-      L.ohc <- array(0, dim = c(dim(lik.ohc), length(dateVec)))
-    }
+    # if(i == 1){
+    #   # result will be array of likelihood surfaces
+    #   L.ohc <- array(0, dim = c(dim(lik.ohc), length(dateVec)))
+    # }
     
-    idx <- which(dateVec == as.Date(time))
-    L.ohc[,,idx] = lik.ohc
-
+    # idx <- which(dateVec == as.Date(time))
+    # L.ohc[,,idx] = (lik.ohc / max(lik.ohc, na.rm=T)) - 0.2
+    # 
+  }
+  
+  parallel::stopCluster(cl)
+  
+  # make index of dates for filling in L.ohc
+  
+  didx = base::match(udates, dateVec)
+  
+  
+  # lapply 
+  lik.ohc = lapply(ans, function(x) x / max(x, na.rm = T))
+  
+  ii = 1
+  for(i in didx){
+    L.ohc[,,i] = lik.ohc[[ii]]
+    ii = ii+1  
   }
 
   print(paste('Making final likelihood raster...'))
   
   crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
-  if(!any(lon < 180)) lon <- lon - 360
-  list.ohc <- list(x = lon, y = lat, z = L.ohc)
+  list.ohc <- list(x = lon - 360, y = lat, z = L.ohc)
   ex <- raster::extent(list.ohc)
   L.ohc <- raster::brick(list.ohc$z, xmn=ex[1], xmx=ex[2], ymn=ex[3], ymx=ex[4], transpose=T, crs)
   L.ohc <- raster::flip(L.ohc, direction = 'y')
-
+  
   L.ohc[L.ohc < 0] <- 0
   
   names(L.ohc) = as.character(dateVec)
@@ -226,4 +245,5 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
   return(L.ohc)
   
 }
+
 

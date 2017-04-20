@@ -60,10 +60,24 @@ calc.ohc.par <- function(pdt, ptt, isotherm = '', ohc.dir, dateVec, bathy = TRUE
   print(paste0('Generating OHC likelihood for ', udates[1], ' through ', udates[length(udates)]))
   
   nc1 =  RNetCDF::open.nc(dir(ohc.dir, full.names = T)[1])
-  depth <- RNetCDF::var.get.nc(nc1, 'depth')
-  lon <- RNetCDF::var.get.nc(nc1, 'lon')
-  lat <- RNetCDF::var.get.nc(nc1, 'lat')
-# result will be array of likelihood surfaces
+  
+  ncnames = NULL
+  nmax <- RNetCDF::file.inq.nc(nc1)$nvars - 1
+  for(ii in 0:nmax) ncnames[ii + 1] <- RNetCDF::var.inq.nc(nc1, ii)$name
+  temp.idx <- grep('temp', ncnames, ignore.case=TRUE) - 1
+  lat.idx <- grep('lat', ncnames, ignore.case=TRUE) - 1
+  lon.idx <- grep('lon', ncnames, ignore.case=TRUE) - 1
+  dep.idx <- grep('dep', ncnames, ignore.case=TRUE) - 1
+  
+  
+  depth <- RNetCDF::var.get.nc(nc1, dep.idx)
+  lon <- RNetCDF::var.get.nc(nc1, lon.idx)
+  if(length(dim(lon)) == 2) lon <- lon[,1]
+  if(!any(lon < 180)) lon <- lon - 360
+  lat <- RNetCDF::var.get.nc(nc1, lat.idx)
+  if(length(dim(lat)) == 2) lat <- lat[1,]
+  
+  # result will be array of likelihood surfaces
   
   L.ohc <- array(0, dim = c(length(lon), length(lat), length(dateVec)))
   start.t <- Sys.time()

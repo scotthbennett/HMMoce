@@ -70,13 +70,13 @@ calc.ohc.par <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy =
   ncatts <- NULL
   nmax <- RNetCDF::var.inq.nc(nc1, temp.idx)$natts - 1
   for(ii in 0:nmax) ncatts[ii + 1] <- RNetCDF::att.inq.nc(nc1, temp.idx, ii)$name
-  scale.idx <- grep('scale', ncnames, ignore.case=TRUE) - 1
+  scale.idx <- grep('scale', ncatts, ignore.case=TRUE) - 1
   if(length(scale.idx) != 0){
     scale <- RNetCDF::att.get.nc(nc1, temp.idx, attribute=scale.idx)
   } else{
     scale <- 1
   }
-  off.idx <- grep('off', ncnames, ignore.case=TRUE) - 1
+  off.idx <- grep('off', ncatts, ignore.case=TRUE) - 1
   if(length(off.idx) != 0){
     offset <- RNetCDF::att.get.nc(nc1, temp.idx, attribute=off.idx)
   } else{

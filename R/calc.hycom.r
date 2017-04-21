@@ -36,7 +36,7 @@
 #' }
 
 
-calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se = TRUE, ncores = parallel::detectCores()){
+calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se = TRUE){
   
   options(warn=-1)
   
@@ -55,7 +55,7 @@ calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.
   print(paste0('Generating profile likelihood for ', udates[1], ' through ', udates[length(udates)]))
   
   # open nc and get the indices for the vars
-  nc1 =  RNetCDF::open.nc(dir(hycom.dir, full.names = T)[1])
+  nc1 =  RNetCDF::open.nc(dir(ohc.dir, full.names = T)[1])
   ncnames = NULL
   nmax <- RNetCDF::file.inq.nc(nc1)$nvars - 1
   for(ii in 0:nmax) ncnames[ii + 1] <- RNetCDF::var.inq.nc(nc1, ii)$name
@@ -94,16 +94,17 @@ calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.
   
   # BEGIN PARALLEL STUFF  
   
-  print('Processing in parallel... ')
+  #print('Processing in parallel... ')
   
   # ncores = detectCores()  # should be an input argument
-  cl = parallel::makeCluster(ncores)
-  doParallel::registerDoParallel(cl, cores = ncores)
+  #cl = parallel::makeCluster(ncores)
+  #doParallel::registerDoParallel(cl, cores = ncores)
   
-  ans = foreach::foreach(i = 1:T) %dopar%{
-    
+  #ans = foreach::foreach(i = 1:T) %dopar%{
+  for(i in 1:T){ 
     time <- as.Date(udates[i])
     pdt.i <- pdt[which(pdt$Date == time),]
+    print(paste('Starting ', time,'...',sep=''))
     
     # open day's hycom data
     nc <- RNetCDF::open.nc(paste(hycom.dir, filename, '_', as.Date(time), '.nc', sep=''))
@@ -199,22 +200,30 @@ calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.
     # multiply likelihood across depth levels for each day
     lik.pdt <- apply(lik.pdt[,,use.idx], 1:2, FUN=function(x) prod(x, na.rm=F))
     
+    if(i == 1){
+      # result will be array of likelihood surfaces
+      L.hycom <- array(0, dim = c(dim(lik.pdt), length(dateVec)))
+    }
+    
+    idx <- which(dateVec == as.Date(time))
+    L.hycom[,,idx] = lik.pdt / max(lik.pdt, na.rm=T)
+    
   }
   
-  parallel::stopCluster(cl)
+  #parallel::stopCluster(cl)
   
   # make index of dates for filling in L.hycom
-  didx <- base::match(udates, dateVec)
+  #didx <- base::match(udates, dateVec)
   
   # lapply to normalize
-  lik.pdt <- lapply(ans, function(x) x / max(x, na.rm = T))
+  #lik.pdt <- lapply(ans, function(x) x / max(x, na.rm = T))
   
   # fill in L.hycom from the list output
-  ii = 1
-  for(i in didx){
-    L.hycom[,,i] = lik.pdt[[ii]]
-    ii = ii+1  
-  }
+  #ii = 1
+  #for(i in didx){
+  #  L.hycom[,,i] = lik.pdt[[ii]]
+  #  ii = ii+1  
+  #}
   
   print(paste('Making final likelihood raster...'))
   

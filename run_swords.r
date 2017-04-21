@@ -202,10 +202,10 @@ for (ii in 3:nrow(meta)){
   
   if (any(likVec == 5)){
     L.5t <- calc.hycom.par(pdt, filename='sword', hycom.dir, focalDim = 9, dateVec = dateVec, use.se = T)
-    L.5f <- calc.hycom.par(pdt, filename='sword', hycom.dir, focalDim = 9, dateVec = dateVec, use.se = F)
+    #L.5f <- calc.hycom.par(pdt, filename='sword', hycom.dir, focalDim = 9, dateVec = dateVec, use.se = F)
   }
   save.image(paste(myDir, ptt, '_likelihoods2.RData', sep=''))
-  rm(L.3); rm(L.4); rm(L.5); rm(pdt); rm(ptt); gc(); closeAllConnections()
+  rm(L.3f); rm(L.5t); rm(pdt); rm(ptt); gc(); closeAllConnections()
 }
 
 

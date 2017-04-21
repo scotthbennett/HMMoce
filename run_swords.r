@@ -75,7 +75,7 @@ for (ii in 1:nrow(meta)){
   }
   
   if (any(likVec == 5)){
-    L.5 <- calc.hycom.par(pdt1, filename='sword', hycom.dir, focalDim = 9, dateVec = dateVec, use.se = T)
+    L.5 <- calc.hycom.par(pdt, filename='sword', hycom.dir, focalDim = 9, dateVec = dateVec, use.se = T)
   }
   
   #----------------------------------------------------------------------------------#
@@ -149,6 +149,63 @@ for (ii in 1:nrow(meta)){
   } # L.idx loop
   
   
+}
+
+#=================================
+save.image(paste(myDir, ptt, '_likelihoods2.RData', sep=''))
+
+rm(list=ls()); gc(); closeAllConnections()
+
+#library(HMMoce)
+setwd('~/HMMoce/'); devtools::load_all()
+dataDir <- '~/Data/Swordfish/batch/'
+envDir <- '~/EnvData/'
+
+meta <- read.table(paste(dataDir, 'swords_meta.csv',sep=''), sep=',', header=T)
+
+likVec=c(1,2,3,5)
+
+for (ii in 3:nrow(meta)){
+  setwd('~/HMMoce/'); devtools::load_all()
+  dataDir <- '~/Data/Swordfish/batch/'
+  envDir <- '~/EnvData/'
+  
+  meta <- read.table(paste(dataDir, 'swords_meta.csv',sep=''), sep=',', header=T)
+  
+  likVec=c(1,2,3,5)
+  
+  ptt <- meta$PTT[ii]
+  iniloc <- data.frame(matrix(c(meta$TagDay[ii], meta$TagMonth[ii], meta$TagYear[ii], meta$TagLat[ii], meta$TagLong[ii], 
+                                meta$PopDay[ii], meta$PopMonth[ii], meta$PopYear[ii], meta$PopLat[ii], meta$PopLong[ii]), nrow = 2, ncol = 5, byrow = T))
+  names(iniloc) <- list('day','month','year','lat','lon')
+  
+  tag <- as.POSIXct(paste(iniloc[1,1], '/', iniloc[1,2], '/', iniloc[1,3], sep=''), format = '%d/%m/%Y', tz='UTC')
+  pop <- as.POSIXct(paste(iniloc[2,1], '/', iniloc[2,2], '/', iniloc[2,3], sep=''), format = '%d/%m/%Y', tz='UTC')
+  
+  # VECTOR OF DATES FROM DATA. THIS WILL BE THE TIME STEPS, T, IN THE LIKELIHOODS
+  dateVec <- as.Date(seq(tag, pop, by = 'day')) 
+  
+  # READ IN DATA FROM WC FILES
+  myDir <- paste(dataDir, ptt, '/', sep='')
+  load(paste(myDir, ptt,'_likelihoods.RData', sep=''))
+  
+  # depth-temp profile data
+  pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop); 
+  pdt.udates <- pdt$udates; pdt <- pdt$data
+  
+  if (any(likVec == 3)){
+    hycom.dir <- '~/EnvData/hycom3/Swordfish/'
+    if(length(pdt.udates[!(pdt.udates %in% as.Date(substr(list.files(hycom.dir), 7, 16)))]) > 0) stop('Not all hycom data is available!')
+    #L.3t <- calc.ohc.par(pdt, filename='sword', ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = F)
+    L.3f <- calc.ohc.par(pdt, filename='sword', ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = F)
+  }
+  
+  if (any(likVec == 5)){
+    L.5t <- calc.hycom.par(pdt, filename='sword', hycom.dir, focalDim = 9, dateVec = dateVec, use.se = T)
+    L.5f <- calc.hycom.par(pdt, filename='sword', hycom.dir, focalDim = 9, dateVec = dateVec, use.se = F)
+  }
+  save.image(paste(myDir, ptt, '_likelihoods2.RData', sep=''))
+  rm(L.3); rm(L.4); rm(L.5); rm(pdt); rm(ptt); gc(); closeAllConnections()
 }
 
 

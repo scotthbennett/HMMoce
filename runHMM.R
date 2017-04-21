@@ -225,8 +225,6 @@ runHMM <- function(likVec=c(1,2,3,4,5), inilocList, pttList, sp.limList, bndVec,
           # GET MOVEMENT KERNELS AND SWITCH PROB FOR FINER GRID
           par0 <- makePar(migr.spd=i, grid=g, L.arr=L, p.guess=c(.9,.9), calcP=F)
           K1 <- par0$K1; K2 <- par0$K2; P.final <- par0$P.final
-          K1 <- plotrix::rescale(K1, c(0.1,1))
-          K2 <- plotrix::rescale(K2, c(0.1,1))
           
           # RUN THE FILTER STEP
           if(!is.na(bnd)){

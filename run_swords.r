@@ -21,7 +21,7 @@ for (ii in 1:nrow(meta)){
   
   # READ IN DATA FROM WC FILES
   myDir <- paste(dataDir, ptt, '/', sep='')
-  load(paste(myDir, ptt,'_likelihoods.RData', sep=''))
+  #load(paste(myDir, ptt,'_likelihoods.RData', sep=''))
   
   # sst data
   tag.sst <- read.wc(ptt, wd = myDir, type = 'sst', tag=tag, pop=pop); 
@@ -65,17 +65,17 @@ for (ii in 1:nrow(meta)){
   }
   
   if (any(likVec == 3)){
-    hycom.dir <- '~/EnvData/hycom/Swordfish/'
+    hycom.dir <- '~/EnvData/hycom3/Swordfish/'
     if(length(pdt.udates[!(pdt.udates %in% as.Date(substr(list.files(hycom.dir), 7, 16)))]) > 0) stop('Not all hycom data is available!')
     L.3 <- calc.ohc.par(pdt, filename='sword', ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = F)
   }
   
   if (any(likVec == 4)){
-    L.4 <- calc.woa.par(pdt, ptt, woa.data = woa.quarter, focalDim = 9, dateVec = dateVec, use.se = T)
+    L.4 <- calc.woa.par(pdt, filename='', woa.data = woa.quarter, focalDim = 9, dateVec = dateVec, use.se = T)
   }
   
   if (any(likVec == 5)){
-    L.5 <- calc.hycom.par(pdt, ptt, hycom.dir, focalDim = 9, dateVec = dateVec, use.se = T)
+    L.5 <- calc.hycom.par(pdt1, filename='sword', hycom.dir, focalDim = 9, dateVec = dateVec, use.se = T)
   }
   
   #----------------------------------------------------------------------------------#

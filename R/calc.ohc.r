@@ -94,7 +94,7 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
   for(i in 1:T){
     time <- udates[i]
     pdt.i <- pdt[which(pdt$Date == time),]
-    #print(paste(time))
+    print(paste(time))
     
     # open day's hycom data
     nc <- RNetCDF::open.nc(paste(ohc.dir, filename,'_', as.Date(time), '.nc', sep=''))

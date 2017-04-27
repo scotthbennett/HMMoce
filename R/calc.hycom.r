@@ -55,7 +55,7 @@ calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se =
   print(paste0('Generating profile likelihood for ', udates[1], ' through ', udates[length(udates)]))
   
   # open nc and get the indices for the vars
-  nc1 =  RNetCDF::open.nc(dir(ohc.dir, full.names = T)[1])
+  nc1 =  RNetCDF::open.nc(dir(hycom.dir, full.names = T)[1])
   ncnames = NULL
   nmax <- RNetCDF::file.inq.nc(nc1)$nvars - 1
   for(ii in 0:nmax) ncnames[ii + 1] <- RNetCDF::var.inq.nc(nc1, ii)$name

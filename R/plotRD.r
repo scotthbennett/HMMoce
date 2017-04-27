@@ -1,22 +1,22 @@
 #' Plot RD results
-#' 
+#'
 #' \code{plotRD} uses HMM output via \code{calc.track} to calculate and plot residency distributions for each behavior state and combined data
-#' 
+#'
 #' @param distr is output array from \code{hmm.smoother}
 #' @param track is output dataframe from \code{calc.track}
-#' @param known is 3 column data frame containing date, lat, lon of known 
-#'   movement track. This is only useful for comparing HMMoce results to known 
+#' @param known is 3 column data frame containing date, lat, lon of known
+#'   movement track. This is only useful for comparing HMMoce results to known
 #'   track collected by SPOT or GPS, for example. Default is NULL.
 #' @param xlims a vector of length 2 indicating longitude limits (-180 to 180).
 #' @param ylims a vector of length 2 indicating latitude limits
 #' @param save.plot is logical indicating whether you want the plot written to
 #'   disk using \code{pdf}.
 #' @importFrom fields "world"
-#'   
+#'
 #' @return a list of one raster layer for the combined RD and one raster brick (2 layers) for the individual behavior RDs.
 #' @export
 
-plotRD <- function(distr, track, known=NULL, xlims, ylims, save.plot=FALSE){
+plotRD <- function(distr, track, known=NULL, g, xlims, ylims, save.plot=FALSE){
   
   crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
   rd.cols <- colorRampPalette(rev(RColorBrewer::brewer.pal(11, 'RdYlGn')))
@@ -42,10 +42,10 @@ plotRD <- function(distr, track, known=NULL, xlims, ylims, save.plot=FALSE){
   norm[,,2] <- norm[,,2] / max(norm[,,2], na.rm=T)
   
   # get pdf as raster
-  norm <- flip(raster::brick(norm, xmn=min(lon), xmx=max(lon),
-                             ymn=min(lat), ymx=max(lat), crs=crs, transpose=T), 2)
-  all <- flip(raster::raster(t(all), xmn=min(lon), xmx=max(lon),
-                             ymn=min(lat), ymx=max(lat), crs=crs), 2)
+  norm <- raster::flip(raster::brick(norm, xmn=min(g$lon), xmx=max(g$lon),
+                                     ymn=min(g$lat), ymx=max(g$lat), crs=crs, transpose=T), 2)
+  all <- raster::flip(raster::raster(t(all), xmn=min(g$lon), xmx=max(g$lon),
+                                     ymn=min(g$lat), ymx=max(g$lat), crs=crs), 2)
   
   # set up plot brks and cols
   #norm.rnge <- cellStats(norm, 'range')
@@ -81,8 +81,8 @@ plotRD <- function(distr, track, known=NULL, xlims, ylims, save.plot=FALSE){
   # COMBINED PANEL
   par (mar=mar.bottom)
   
-  image(all, maxpixels=ncell(all), xlim=xlims, ylim=ylims, axes=F,
-        col=plot.rd.col, breaks=norm.breaks, xlab='', ylab='')#, main='All')#, zlim=c(.05,1))#, axes=F)#, main=dt.idx) #, breaks=zbreaks
+  raster::image(all, maxpixels=raster::ncell(all), xlim=xlims, ylim=ylims, axes=F,
+                col=plot.rd.col, breaks=norm.breaks, xlab='', ylab='')#, main='All')#, zlim=c(.05,1))#, axes=F)#, main=dt.idx) #, breaks=zbreaks
   axis(1, at=x.at, labels=FALSE)
   axis(2, at=y.at, labels=y.labels);
   world(add=T, fill=T, col='grey60')
@@ -96,8 +96,8 @@ plotRD <- function(distr, track, known=NULL, xlims, ylims, save.plot=FALSE){
   
   # MIGRATORY PANEL
   par (mar=mar.bottom)
-  image(norm[[1]], maxpixels=ncell(norm[[1]]), xlim=xlims, ylim=ylims, axes=F,
-        col=plot.rd.col, breaks=norm.breaks, xlab='', ylab='')#, main='Migratory')#, zlim=c(.05,1))#, axes=F)#, main=dt.idx) #, breaks=zbreaks
+  raster::image(norm[[1]], maxpixels=raster::ncell(norm[[1]]), xlim=xlims, ylim=ylims, axes=F,
+                col=plot.rd.col, breaks=norm.breaks, xlab='', ylab='')#, main='Migratory')#, zlim=c(.05,1))#, axes=F)#, main=dt.idx) #, breaks=zbreaks
   axis(1, at=x.at, labels=FALSE)
   axis(2, at=y.at, labels=y.labels)
   world(add=T, fill=T, col='grey60')
@@ -112,8 +112,8 @@ plotRD <- function(distr, track, known=NULL, xlims, ylims, save.plot=FALSE){
   
   # RESIDENT PANEL
   par (mar=mar.default)
-  image(norm[[2]], maxpixels=ncell(norm[[2]]), xlim=xlims, ylim=ylims, axes=F,
-        col=plot.rd.col, breaks=norm.breaks, xlab='', ylab='')#, main='Resident')#, zlim=c(.05,1))#, axes=F)#, main=dt.idx) #, breaks=zbreaks
+  raster::image(norm[[2]], maxpixels=raster::ncell(norm[[2]]), xlim=xlims, ylim=ylims, axes=F,
+                col=plot.rd.col, breaks=norm.breaks, xlab='', ylab='')#, main='Resident')#, zlim=c(.05,1))#, axes=F)#, main=dt.idx) #, breaks=zbreaks
   axis(1, at=x.at, labels=x.labels)
   axis(2, at=y.at, labels=y.labels);
   world(add=T, fill=T, col='grey60')

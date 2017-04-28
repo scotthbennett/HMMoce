@@ -40,6 +40,8 @@ extract.pdt <- function(pdt){
   
   for(i in 1:max(dateidx)){
     pdt.i <- pdt[which(dateidx == i),]
+    pdt.i$Depth[which(pdt.i$Depth < 0)] <- 0
+    pdt.i <- pdt.i[which(!duplicated(pdt.i$Depth)),]
 
     if(length(unique(pdt.i[,5])) <= 2){ 
     

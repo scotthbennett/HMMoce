@@ -154,7 +154,7 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
     maxT.ohc <- cp * rho * sum(df$high - isotherm, na.rm = T) / 10000
     
     # Perform hycom integration
-    dat[dat < isotherm] <- NA
+    #dat[dat < isotherm] <- NA
     dat <- dat - isotherm
     ohc <- cp * rho * apply(dat[,,depIdx], 1:2, sum, na.rm = T) / 10000 
     ohc[ohc == 0] <- NA

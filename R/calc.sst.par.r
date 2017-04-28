@@ -99,8 +99,8 @@ calc.sst.par <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, s
   L.sst <- array(0, dim = c(dim(lik.sst), length(dateVec)))
 
   # get aggregated version of lat/lon for raster creation later
-  lon.agg <- seq(extent(r)[1], extent(r)[2], length.out=dim(r)[2])
-  lat.agg <- seq(extent(r)[3], extent(r)[4], length.out=dim(r)[1])
+  lon.agg <- seq(raster::extent(r)[1], raster::extent(r)[2], length.out=dim(r)[2])
+  lat.agg <- seq(raster::extent(r)[3], raster::extent(r)[4], length.out=dim(r)[1])
   
   ## END of SETUP RUN
   

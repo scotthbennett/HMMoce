@@ -51,56 +51,72 @@ for (ii in 1:nrow(meta)){
   parVec <- c(2,4)
   
   for (tt in 1:length(L.idx)){
+    tt.new <- TRUE
     for (bnd in bndVec){
       for (i in parVec){
         
-        #----------------------------------------------------------------------------------#
-        # COMBINE LIKELIHOOD MATRICES
-        #----------------------------------------------------------------------------------#
-        L <- make.L(L1 = L.res[[1]][L.idx[[tt]]],
-                    L.mle.res = L.res$L.mle.res, dateVec = dateVec,
-                    locs.grid = locs.grid, iniloc = iniloc, bathy = bathy,
-                    pdt = pdt)
-        
-        L.mle <- L$L.mle
-        L <- L$L
-        g <- L.res$g
-        g.mle <- L.res$g.mle
-        lon <- g$lon[1,]
-        lat <- g$lat[,1]
-        
-        # GET MOVEMENT KERNELS AND SWITCH PROB FOR COARSE GRID
-        par0 <- makePar(migr.spd=i, grid=g.mle, L.arr=L.mle, calcP=T)
-        #K1 <- par0$K1; K2 <- par0$K2; 
-        P.final <- par0$P.final
-        #P.final[1,1] <- .885; P.final[2,2] <- .942
+        #if(bnd == bndVec[1] & i == parVec[1]) tt.new <- TRUE
+        if(tt.new){
+          #----------------------------------------------------------------------------------#
+          # COMBINE LIKELIHOOD MATRICES
+          #----------------------------------------------------------------------------------#
+          L <- make.L(L1 = L.res[[1]][L.idx[[tt]]],
+                      L.mle.res = L.res$L.mle.res, dateVec = dateVec,
+                      locs.grid = locs.grid, iniloc = iniloc, bathy = bathy,
+                      pdt = pdt)
+          
+          L.mle <- L$L.mle
+          L <- L$L
+          g <- L.res$g
+          g.mle <- L.res$g.mle
+          lon <- g$lon[1,]
+          lat <- g$lat[,1]
+        }
+          # GET MOVEMENT KERNELS AND SWITCH PROB FOR COARSE GRID
+          par0 <- makePar(migr.spd=i, grid=g, L.arr=L, calcP=T)
+          #K1 <- par0$K1; K2 <- par0$K2; 
+          P.final <- par0$P.final
+          
+          #L.rev <- L
+          #for (bb in 1:dim(L)[1]){
+          #  iddx <- (dim(L)[1]+1) - bb
+          #  L.rev[iddx,,] <- L[bb,,]
+          #  print(paste('Replacing', iddx, 'with ', bb))
+          #}
+          
+        #P.final[1,1] <- .86; P.final[2,2] <- .875
         #P.final[1,2] <- 1-P.final[1,1]; P.final[2,1] <- 1-P.final[2,2]
         # GET MOVEMENT KERNELS AND SWITCH PROB FOR FINER GRID
-        par0 <- makePar(migr.spd=i, grid=g, L.arr=L, calcP=F)
+        par0 <- makePar(migr.spd=i, grid=g, L.arr=L.rev, calcP=F)
         K1 <- par0$K1; K2 <- par0$K2; #P.final <- par0$P.final
         
         # RUN THE FILTER STEP
         if(!is.na(bnd)){
           f <- hmm.filter(g, L, K1, K2, maskL=T, P.final, minBounds = bnd)
         } else{
-          f <- hmm.filter(g, L, K1, K2, P.final, maskL=F)
+          f <- hmm.filter(g, L, K1, K2, P.final, bathy, maskL=F)
         }
         nllf <- -sum(log(f$psi[f$psi>0]))
         
         # RUN THE SMOOTHING STEP
         s <- hmm.smoother(f, K1, K2, L, P.final)
+        #s <- hmm.smoother.mod(f, K1, K2, L.rev, P.final, g, bathy)
         
         # GET THE MOST PROBABLE TRACK
         tr <- calc.track(s, g, dateVec)
-        #plotHMM(s, tr, dateVec, ptt, save.plot = F, behav.pts=T)
-        
+        plotHMM(s, tr, dateVec, ptt, save.plot = F, behav.pts=T)
+
         # COMPARE HMM, GPE3, SPOT
         #setwd(myDir)
         
         # WRITE OUT RESULTS
         outVec <- matrix(c(ptt=paste(ptt,'_nll',sep=''), minBounds = bnd, migr.spd = i, paste(L.idx[[tt]],collapse=''), P1 = P.final[1,1], P2 = P.final[2,2], NLL = nllf), ncol=7)
         write.table(outVec,paste(dataDir, 'outVec_results.csv', sep=''), sep=',', col.names=F, append=T)
-        #save.image(paste(ptt, '_knock_track.RData', sep=''))
+        #base::save.image(file=paste(dataDir, ptt, '/', ptt, '-HMMoce.RData', sep=''))
+        #res <- list(outVec = outVec, s = s, tr = tr, dateVec=dateVec, iniloc=iniloc, grid = raster::res(L.rasters[[resamp.idx]])[1])
+        #base::save(res, file=paste(dataDir, ptt, '/', ptt, '-HMMoce_res.RData', sep=''))
+        
+        tt.new <- FALSE
         
         print(outVec)
         
@@ -110,4 +126,19 @@ for (ii in 1:nrow(meta)){
   
   
 }
+
+
+pdf(paste('check_',ptt,'_125_2_5.pdf', sep=''), height=18, width=12)
+par(mfrow=c(3,2))
+for(i in 1:length(dateVec)){
+  #plot(L.res[[1]]$L.1[[i]]); world(add=T); title(paste(dateVec[i], '-light'))#; points(spot$lon[i], spot$lat[i])
+  plot(L.res[[1]]$L.2[[i]]); world(add=T); title(paste(dateVec[i], '-sst'))#; points(spot$lon[i], spot$lat[i])
+  plot(L.res[[1]]$L.3[[i]]); world(add=T); title(paste(dateVec[i], '-ohc'))#; points(spot$lon[i], spot$lat[i])
+  plot(L.res[[1]]$L.5[[i]]); world(add=T); title(paste(dateVec[i], '-hycom'))#; points(spot$lon[i], spot$lat[i])
+  image.plot(lon,lat,L[i,,]); world(add=T); title(paste(dateVec[i], '-L'))#; points(spot$lon[i], spot$lat[i])
+  image.plot(lon,lat,f$phi[1,i,,]); world(add=T); title(paste(dateVec[i], '-f$phi[1]'))#; points(spot$lon[i], spot$lat[i])
+  image.plot(lon,lat,s[1,i,,]); world(add=T); title(paste(dateVec[i], '-s[1]'))#; points(spot$lon[i], spot$lat[i])
+}
+
+dev.off()
 

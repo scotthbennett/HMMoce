@@ -77,7 +77,10 @@ calc.sst.par <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, s
                                   ymn=min(lat), ymx=max(lat)), 2)
   
   # check for coarse enough resolution that our calculations wont take all day
-  if(round(raster::res(r)[1], 2) < 0.1) r <- raster::aggregate(r, fact = round(0.1 / round(raster::res(r)[1], 2), 0))
+  if(round(raster::res(r)[1], 2) < 0.1){
+    aggFact <- round(0.1 / round(raster::res(r)[1], 2), 0)
+    if(aggFact > 1) r <- raster::aggregate(r, fact = aggFact)
+  } 
   
   # set up a focal() dimension if not specified by user, we use this for sd() of surround 0.25deg worth of grid cells
   if(is.null(focalDim)){
@@ -126,7 +129,10 @@ calc.sst.par <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, s
                                     ymn=min(lat), ymx=max(lat)), 2)
     
     # check for coarse enough resolution that our calculations wont take all day
-    if(round(raster::res(r)[1], 2) < 0.1) r <- raster::aggregate(r, fact = round(0.1 / round(raster::res(r)[1], 2), 0))
+    if(round(raster::res(r)[1], 2) < 0.1){
+      aggFact <- round(0.1 / round(raster::res(r)[1], 2), 0)
+      if(aggFact > 1) r <- raster::aggregate(r, fact = aggFact)
+    }
     
     # calculate sd from sst grid using focal()
     sdx = raster::focal(r, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = T))

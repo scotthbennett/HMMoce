@@ -78,7 +78,10 @@ calc.sst <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.
     r <- raster::flip(raster::raster(t(dat), xmn=min(lon), xmx=max(lon),
                                     ymn=min(lat), ymx=max(lat)), 2)
     
-    if(round(res(r)[1], 2) < 0.1) r <- raster::aggregate(r, fact = round(0.1 / round(res(r)[1], 2), 0))
+    if(round(raster::res(r)[1], 2) < 0.1){
+      aggFact <- round(0.1 / round(raster::res(r)[1], 2), 0)
+      if(aggFact != 1) r <- raster::aggregate(r, fact = aggFact)
+    } 
     
     if(is.null(focalDim)){
       focalDim <- round(0.25 / raster::res(r)[1], 0)

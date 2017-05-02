@@ -7,6 +7,7 @@
 #' @param known is 3 column data frame containing date, lat, lon of known
 #'   movement track. This is only useful for comparing HMMoce results to known
 #'   track collected by SPOT or GPS, for example. Default is NULL.
+#' @param g grid from \code{\link{setup.grid}}
 #' @param xlims a vector of length 2 indicating longitude limits (-180 to 180).
 #' @param ylims a vector of length 2 indicating latitude limits
 #' @param save.plot is logical indicating whether you want the plot written to

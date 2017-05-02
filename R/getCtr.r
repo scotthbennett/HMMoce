@@ -7,17 +7,20 @@
 #' @param tr is output dataframe from \code{calc.track}
 #' @param g grid from \code{\link{setup.grid}}
 #' @param threshold numeric indicating the percent contour of interest. Default 
-#'   is 50%.
-#' @param plot is logical indicating whether or not to plot at each iteration
+#'   is 50 percent.
+#' @param makePlot is logical indicating whether or not to plot at each iteration
 #'   
 #' @return a list of length T, dim(distr)[2], containing 1) coordinates of the 
-#'   contour at each time, t, 2) the x and y distance to that contour from the 
-#'   mean of the distribution (lat/lon in track); 3) reference coordinate from
-#'   mean of distribution; 4) the points of intersection of the contour by which
+#'   contour at each time, t. 2) the x and y distance to that contour from the 
+#'   mean of the distribution (lat/lon in track). 3) reference coordinate from
+#'   mean of distribution. 4) the points of intersection of the contour by which
 #'   distance is measured in x and y
 #' @export
+#' @importFrom grDevices colorRampPalette
+#' @importFrom grDevices contourLines
+#' @importFrom graphics axis box image layout lines mtext par plot.new points
 
-getCtr <- function(distr, tr, g, threshold = 50, plot=F){
+getCtr <- function(distr, tr, g, threshold = 50, makePlot=FALSE){
   
   p.1 <- apply(distr[1,,,], 1, sum)
   p.2 <- apply(distr[2,,,], 1, sum)
@@ -65,7 +68,7 @@ getCtr <- function(distr, tr, g, threshold = 50, plot=F){
       
       
     } else{
-      if(plot){
+      if(makePlot){
         xl <- c(ctr.i@bbox[1,1]-1, ctr.i@bbox[1,2]+1)
         yl <- c(ctr.i@bbox[2,1]-1, ctr.i@bbox[2,2]+1)
         

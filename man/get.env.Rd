@@ -4,29 +4,37 @@
 \alias{get.env}
 \title{Download and Read Oceanographic Data}
 \usage{
-get.env(uniqueDates = NULL, ptt = NULL, type = NULL, spatLim = NULL,
-  resol = NULL, save.dir = getwd(), sst.type = NULL)
+get.env(uniqueDates = NULL, filename = NULL, type = NULL,
+  spatLim = NULL, resol = NULL, save.dir = getwd(), sst.type = NULL)
 }
 \arguments{
 \item{uniqueDates}{is a POSIXct vector of desired dates}
 
-\item{ptt}{is unique tag identifier}
+\item{filename}{is first part of the filename specified to the download 
+function. For example, if downloaded files were specific to a particular 
+dataset, you may want to identify that with a name like 'tuna' or 'shark1'.
+This results in a downloaded filename of, for example, 'tuna_date.nc'.}
 
 \item{type}{is a character string indicating whether you're after sea surface
-temperature 'sst', hybrid coordinate ocean model 'hycom', or world ocean atlas 'woa' data}
+temperature 'sst', hybrid coordinate ocean model 'hycom', or world ocean 
+atlas 'woa' data}
 
-\item{spatLim}{is a list of spatial limits as \code{list(xmin, xmax, ymin,
+\item{spatLim}{is a list of spatial limits as \code{list(xmin, xmax, ymin, 
 ymax)}}
 
-\item{resol}{is character describing the desired resolution in degrees if type = 'woa', otherwise NULL.}
+\item{resol}{is character describing the desired resolution in degrees if 
+type = 'woa', otherwise NULL.}
 
 \item{save.dir}{is the directory to save the downloaded data to}
+
+\item{sst.type}{is character indicating type of desired SST product. Choices
+are currently OI and GHR SST.}
 }
 \value{
 nothing, just downloads the data to your local machine
 }
 \description{
-\code{get.env} accesses oceanographic data like sea surface temperature from
+\code{get.env} accesses oceanographic data like sea surface temperature from 
 a remote server and downloads the temporal and spatial extent of interest for
 further use
 }

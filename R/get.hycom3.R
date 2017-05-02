@@ -24,8 +24,6 @@
 #' @param dir is local directory where ncdf files should be downloaded to.
 #'   default is current working directory. if enter a directory that doesn't
 #'   exist, it will be created.
-#' @param type indicates type of HYCOM product to download. 'r' is reanalysis
-#'   and 'a' is analysis. see \url{https://hycom.org/dataserver/} for details.
 #' @return The url used to extract the requested data from the NetCDF subset
 #'   service.
 #' @importFrom curl curl_download

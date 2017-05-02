@@ -2,35 +2,44 @@
 % Please edit documentation in R/calc.ohc.par.r
 \name{calc.ohc.par}
 \alias{calc.ohc.par}
-\title{OHC Parallel
-Calculate Ocean Heat Content (OHC) probability surface in parallel}
+\title{OHC Parallel Calculate Ocean Heat Content (OHC) probability surface in
+parallel}
 \usage{
-calc.ohc.par(pdt, ptt, isotherm = "", ohc.dir, dateVec, bathy = TRUE,
+calc.ohc.par(pdt, filename, isotherm = "", ohc.dir, dateVec, bathy = TRUE,
   use.se = TRUE, ncores = parallel::detectCores())
 }
 \arguments{
 \item{pdt}{input PAT data see \code{\link{extract.pdt}}}
 
-\item{ptt}{name of tag i.e. 123645}
+\item{filename}{is the first part of the filename specified to the download 
+function \code{\link{get.env}}. For example, if downloaded files were 
+specific to a particular dataset, you may want to identify that with a name
+like 'tuna' or 'shark1'. This results in a downloaded filename of, for 
+example, 'tuna_date.nc'. This filename is required here so the calc 
+function knows where to get the env data.}
 
-\item{isotherm}{if specifying a particular isotherm, otherwise leave blank. default value is}
+\item{isotherm}{if specifying a particular isotherm, otherwise leave blank.
+default value is}
 
 \item{ohc.dir}{directory of downloaded hycom (or other)data}
 
-\item{dateVec}{vector of complete dates for data range. This should be in 'Date' format}
+\item{dateVec}{vector of complete dates for data range. This should be in
+'Date' format}
 
 \item{bathy}{should the land be flagged out? defaults to TRUE}
 
-\item{use.se}{is logical indicating whether or not to use SE when using regression to predict temperature at specific depth levels.}
+\item{use.se}{is logical indicating whether or not to use SE when using
+regression to predict temperature at specific depth levels.}
 
-\item{ncores}{specify number of cores, or leave blank and use whatever you have!}
+\item{ncores}{specify number of cores, or leave blank and use whatever you
+have!}
 }
 \value{
 a raster brick of OHC likelihood
 }
 \description{
-OHC Parallel
-Calculate Ocean Heat Content (OHC) probability surface in parallel
+OHC Parallel Calculate Ocean Heat Content (OHC) probability surface in
+parallel
 }
 \examples{
 # load workspace
@@ -39,7 +48,9 @@ load('~/DATA/blue259.RData')
 # define ohc.dir
 ohc.dir = '~/hycom/'
 # run in parallel
-res = calc.ohc.par(pdt, ptt, isotherm = '', ohc.dir = ohc.dir, dateVec = dateVec, bathy = T)
+res = calc.ohc.par(pdt, filename='tuna', isotherm = '',
+                   ohc.dir = ohc.dir, dateVec = dateVec,
+                   bathy = T)
 }
 }
 \seealso{

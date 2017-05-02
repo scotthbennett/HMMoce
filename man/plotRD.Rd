@@ -4,16 +4,20 @@
 \alias{plotRD}
 \title{Plot RD results}
 \usage{
-plotRD(distr, track, known = NULL, xlims, ylims, save.plot = FALSE)
+plotRD(distr, track, ptt, known = NULL, g, xlims, ylims, save.plot = FALSE)
 }
 \arguments{
 \item{distr}{is output array from \code{hmm.smoother}}
 
 \item{track}{is output dataframe from \code{calc.track}}
 
-\item{known}{is 3 column data frame containing date, lat, lon of known 
-movement track. This is only useful for comparing HMMoce results to known 
+\item{ptt}{is individual identification number}
+
+\item{known}{is 3 column data frame containing date, lat, lon of known
+movement track. This is only useful for comparing HMMoce results to known
 track collected by SPOT or GPS, for example. Default is NULL.}
+
+\item{g}{grid from \code{\link{setup.grid}}}
 
 \item{xlims}{a vector of length 2 indicating longitude limits (-180 to 180).}
 

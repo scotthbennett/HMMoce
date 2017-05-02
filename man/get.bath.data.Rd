@@ -6,7 +6,7 @@
 res is either 30 second, one or two minute resolution (.5, 1)}
 \usage{
 get.bath.data(lonlow, lonhigh, latlow, lathigh, folder = tempdir(),
-  seaonly = T, res = c(0.5, 1), raster = TRUE)
+  seaonly = T, res = c(0.5), raster = TRUE)
 }
 \arguments{
 \item{lonlow}{numeric indicating minimum longitude extent of desired download (-180 to 180).}
@@ -21,7 +21,7 @@ get.bath.data(lonlow, lonhigh, latlow, lathigh, folder = tempdir(),
 
 \item{seaonly}{is logical indicating whether you want to mask out anything on land.}
 
-\item{res}{is numeric indicating resolution in minutes. Choices are 0.5 or 1.}
+\item{res}{is numeric indicating resolution in minutes. Choices currently limited to just 0.5.}
 
 \item{raster}{is logical indicating whether you want the function to return a raster or not (a list will be returned).}
 }

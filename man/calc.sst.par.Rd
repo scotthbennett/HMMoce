@@ -4,17 +4,26 @@
 \alias{calc.sst.par}
 \title{Calculate SST-based likelihood}
 \usage{
-calc.sst.par(tag.sst, ptt, sst.dir, dateVec, sens.err = 1,
-  ncores = parallel::detectCores())
+calc.sst.par(tag.sst, filename, sst.dir, dateVec, focalDim = NULL,
+  sens.err = 1, ncores = parallel::detectCores())
 }
 \arguments{
 \item{tag.sst}{variable containing tag-collected SST data}
 
-\item{ptt}{is unique tag identifier}
+\item{filename}{is the first part of the filename specified to the download 
+function \code{\link{get.env}}. For example, if downloaded files were 
+specific to a particular dataset, you may want to identify that with a name
+like 'tuna' or 'shark1'. This results in a downloaded filename of, for 
+example, 'tuna_date.nc'. This filename is required here so the calc
+function knows where to get the env data.}
 
 \item{sst.dir}{local directory where remote sensing SST downloads are stored}
 
 \item{dateVec}{is vector of dates from tag to pop-up in 1 day increments.}
+
+\item{focalDim}{is integer for dimensions of raster::focal used to calculate 
+sd() of env grid cell. If left to NULL (default), this dimension will
+approximately incorporate 0.25 degrees.}
 
 \item{sens.err}{is numeric indicating the percent sensor error in the tag sst sensor. Default is 1.}
 

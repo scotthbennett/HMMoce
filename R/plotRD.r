@@ -4,6 +4,7 @@
 #'
 #' @param distr is output array from \code{hmm.smoother}
 #' @param track is output dataframe from \code{calc.track}
+#' @param ptt is individual identification number
 #' @param known is 3 column data frame containing date, lat, lon of known
 #'   movement track. This is only useful for comparing HMMoce results to known
 #'   track collected by SPOT or GPS, for example. Default is NULL.
@@ -17,7 +18,7 @@
 #' @return a list of one raster layer for the combined RD and one raster brick (2 layers) for the individual behavior RDs.
 #' @export
 
-plotRD <- function(distr, track, known=NULL, g, xlims, ylims, save.plot=FALSE){
+plotRD <- function(distr, track, ptt, known=NULL, g, xlims, ylims, save.plot=FALSE){
   
   crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
   rd.cols <- colorRampPalette(rev(RColorBrewer::brewer.pal(11, 'RdYlGn')))

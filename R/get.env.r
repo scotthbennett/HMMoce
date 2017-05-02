@@ -5,18 +5,20 @@
 #' further use
 #' 
 #' @param uniqueDates is a POSIXct vector of desired dates
-#' @param filename is first part of the filename specified to the download
-#'   function. For example, if downloaded files were specific to a particular
+#' @param filename is first part of the filename specified to the download 
+#'   function. For example, if downloaded files were specific to a particular 
 #'   dataset, you may want to identify that with a name like 'tuna' or 'shark1'.
 #'   This results in a downloaded filename of, for example, 'tuna_date.nc'.
 #' @param type is a character string indicating whether you're after sea surface
-#'   temperature 'sst', hybrid coordinate ocean model 'hycom', or world ocean
+#'   temperature 'sst', hybrid coordinate ocean model 'hycom', or world ocean 
 #'   atlas 'woa' data
 #' @param spatLim is a list of spatial limits as \code{list(xmin, xmax, ymin, 
 #'   ymax)}
-#' @param resol is character describing the desired resolution in degrees if
+#' @param resol is character describing the desired resolution in degrees if 
 #'   type = 'woa', otherwise NULL.
 #' @param save.dir is the directory to save the downloaded data to
+#' @param sst.type is character indicating type of desired SST product. Choices
+#'   are currently OI and GHR SST.
 #'   
 #' @return nothing, just downloads the data to your local machine
 #' @export

@@ -1,6 +1,6 @@
 #' Calculate SST-based likelihood
 #' 
-#' \code{calc.sst} compares tag SST to remotely sensed SST and calculates
+#' \code{calc.sst} compares tag SST to remotely sensed SST and calculates 
 #' likelihoods
 #' 
 #' @param tag.sst variable containing tag-collected SST data
@@ -8,19 +8,23 @@
 #'   function \code{\link{get.env}}. For example, if downloaded files were 
 #'   specific to a particular dataset, you may want to identify that with a name
 #'   like 'tuna' or 'shark1'. This results in a downloaded filename of, for 
-#'   example, 'tuna_date.nc'. This filename is required here so the calc
+#'   example, 'tuna_date.nc'. This filename is required here so the calc 
 #'   function knows where to get the env data.
 #' @param sst.dir local directory where remote sensing SST downloads are stored
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
-#' @param sens.err is numeric indicating the percent sensor error in the tag sst sensor. Default is 1.
-#'
-#' @return likelihood is raster brick of likelihood surfaces representing matches
-#'   between tag-based sst and remotely sensed sst maps
-#' 
+#' @param focalDim is integer for dimensions of raster::focal used to calculate 
+#'   sd() of env grid cell. If left to NULL (default), this dimension will
+#'   approximately incorporate 0.25 degrees.
+#' @param sens.err is numeric indicating the percent sensor error in the tag sst
+#'   sensor. Default is 1.
+#'   
+#' @return likelihood is raster brick of likelihood surfaces representing
+#'   matches between tag-based sst and remotely sensed sst maps
+#'   
 #' @export
 #' 
 #' @seealso \code{\link{calc.ohc}}
-#' 
+#'   
 #' @examples
 #' \dontrun{
 #' 
@@ -99,8 +103,8 @@ calc.sst <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.
       # result will be array of likelihood surfaces
       L.sst <- array(0, dim = c(dim(lik.sst), length(dateVec)))
       
-      lon.agg <- seq(extent(r)[1], extent(r)[2], length.out=dim(r)[2])
-      lat.agg <- seq(extent(r)[3], extent(r)[4], length.out=dim(r)[1])
+      lon.agg <- seq(raster::extent(r)[1], raster::extent(r)[2], length.out=dim(r)[2])
+      lat.agg <- seq(raster::extent(r)[3], raster::extent(r)[4], length.out=dim(r)[1])
     }
     
     idx <- which(dateVec == as.Date(time))

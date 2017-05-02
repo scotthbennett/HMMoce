@@ -7,7 +7,7 @@
 #'   function \code{\link{get.env}}. For example, if downloaded files were 
 #'   specific to a particular dataset, you may want to identify that with a name
 #'   like 'tuna' or 'shark1'. This results in a downloaded filename of, for 
-#'   example, 'tuna_date.nc'. This filename is required here so the calc
+#'   example, 'tuna_date.nc'. This filename is required here so the calc 
 #'   function knows where to get the env data.
 #' @param hycom.dir directory of downloaded hycom (or other)data
 #' @param focalDim is integer for dimensions of raster::focal used to calculate 
@@ -32,7 +32,9 @@
 #' # define hycom.dir
 #' hycom.dir = '~/hycom/'
 #' # run in parallel
-#' res = calc.hycom.par(pdt, filename='tuna', isotherm = '', hycom.dir = hycom.dir, dateVec = dateVec, bathy = T)
+#' res = calc.hycom.par(pdt, filename='tuna', isotherm = '',
+#'                      hycom.dir = hycom.dir, dateVec = dateVec,
+#'                      bathy = T)
 #' }
 
 

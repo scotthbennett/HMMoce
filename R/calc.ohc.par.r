@@ -1,25 +1,29 @@
-#' OHC Parallel
-#' Calculate Ocean Heat Content (OHC) probability surface in parallel
-#'
+#' OHC Parallel Calculate Ocean Heat Content (OHC) probability surface in
+#' parallel
+#' 
 #' @param pdt input PAT data see \code{\link{extract.pdt}}
 #' @param filename is the first part of the filename specified to the download 
 #'   function \code{\link{get.env}}. For example, if downloaded files were 
 #'   specific to a particular dataset, you may want to identify that with a name
 #'   like 'tuna' or 'shark1'. This results in a downloaded filename of, for 
-#'   example, 'tuna_date.nc'. This filename is required here so the calc
+#'   example, 'tuna_date.nc'. This filename is required here so the calc 
 #'   function knows where to get the env data.
-#' @param isotherm if specifying a particular isotherm, otherwise leave blank. default value is 
+#' @param isotherm if specifying a particular isotherm, otherwise leave blank.
+#'   default value is
 #' @param ohc.dir directory of downloaded hycom (or other)data
-#' @param dateVec vector of complete dates for data range. This should be in 'Date' format
+#' @param dateVec vector of complete dates for data range. This should be in
+#'   'Date' format
 #' @param bathy should the land be flagged out? defaults to TRUE
-#' @param use.se is logical indicating whether or not to use SE when using regression to predict temperature at specific depth levels.
-#' @param ncores specify number of cores, or leave blank and use whatever you have!
-#'
+#' @param use.se is logical indicating whether or not to use SE when using
+#'   regression to predict temperature at specific depth levels.
+#' @param ncores specify number of cores, or leave blank and use whatever you
+#'   have!
+#'   
 #' @return a raster brick of OHC likelihood
 #' @seealso \code{\link{calc.ohc}}
 #' @export
 #' @importFrom foreach "%dopar%"
-#'
+#'   
 #' @examples
 #' # load workspace
 #' \dontrun{
@@ -28,7 +32,9 @@
 #' # define ohc.dir
 #' ohc.dir = '~/hycom/'
 #' # run in parallel
-#' res = calc.ohc.par(pdt, filename='tuna', isotherm = '', ohc.dir = ohc.dir, dateVec = dateVec, bathy = T)
+#' res = calc.ohc.par(pdt, filename='tuna', isotherm = '',
+#'                    ohc.dir = ohc.dir, dateVec = dateVec,
+#'                    bathy = T)
 #' }
 
 

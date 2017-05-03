@@ -43,7 +43,7 @@ getCtr <- function(distr, tr, g, threshold = 50, makePlot=FALSE){
   out <- list()
   
   for (i in 1:dim(pts)[3]){
-    #print(i)
+    print(i)
     ctr <- contourLines(lon, lat, pts[,,i])
     idx <- which.min(lapply(ctr, FUN=function(x) which(round(x$level,1) == round(threshold, 1))) == 1)
     ctr.i <- data.frame(ctr[[idx]])
@@ -82,8 +82,24 @@ getCtr <- function(distr, tr, g, threshold = 50, makePlot=FALSE){
         # get user input to proceed
         invisible(readline(prompt="Press [enter] to perform the next iteration and plot"))
       }
-      yDist <- sp::spDists(inY)[1,2] # Euclidean, in degrees
-      xDist <- sp::spDists(inX)[1,2] # Euclidean, in degrees
+  
+      if(dim(inY@coords)[1] == 1){
+        tr.i <- data.frame(matrix(c(tr$lon[i], tr$lat[i]),ncol=2))
+        names(tr.i) <- c('x','y')
+        sp::coordinates(tr.i) <- ~x+y
+        yDist <- sp::spDists(tr.i, inY)
+      } else{
+        yDist <- sp::spDists(inY)[1,2] / 2 # Euclidean, in degrees
+      }
+      
+      if(dim(inX@coords)[1] == 1){
+        tr.i <- data.frame(matrix(c(tr$lon[i], tr$lat[i]),ncol=2))
+        names(tr.i) <- c('x','y')
+        sp::coordinates(tr.i) <- ~x+y
+        xDist <- sp::spDists(tr.i, inX)
+      } else{
+        xDist <- sp::spDists(inX)[1,2] / 2 # Euclidean, in degrees
+      }
       
       out[[i]] <- list(ctr=l1, yDist=yDist, xDist=xDist, loc=tr[i,], inY=inY, inX=inX)
       

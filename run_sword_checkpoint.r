@@ -20,7 +20,7 @@ meta <- read.table(paste(dataDir, 'swords_meta.csv',sep=''), sep=',', header=T)
 likVec=c(1,2,3,5)
 
 #for (ii in 1:nrow(meta)){ #nextAnimal
-
+ii=2
 ptt <- meta$PTT[ii] #nextAnimal
 
 # set an area of interest for a particular individual in the resample.grid function using:
@@ -138,16 +138,16 @@ if (enterAt == 1){
   
   if (any(likVec == 3) & !exists('L.3')){
     if(length(pdt.udates[!(pdt.udates %in% as.Date(substr(list.files(hycom.dir), 7, 16)))]) > 0) stop('Not all hycom data is available!')
-    L.3 <- calc.ohc(pdt, filename='sword', ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = F)
+    L.3 <- calc.ohc.par(pdt, filename='sword', ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = F)
     # checkpoint each big L calculation step
     if (exists('L.3')){
       ohc.se <- F
-      aws.s3::s3save_image(bucket=paste(bucketDir, ptt, sep=''), object='check2.rda')
-      base::save.image('check2.rda')
+      aws.s3::s3save_image(bucket=paste(bucketDir, ptt, sep=''), object='check1.rda')
+      base::save.image('check1.rda')
     } else{
-      L.3 <- calc.ohc(pdt, filename='sword', ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = T)
-      aws.s3::s3save_image(bucket=paste(bucketDir, ptt, sep=''), object='check2.rda')
-      base::save.image('check2.rda')
+      L.3 <- calc.ohc.par(pdt, filename='sword', ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = T)
+      aws.s3::s3save_image(bucket=paste(bucketDir, ptt, sep=''), object='check1.rda')
+      base::save.image('check1.rda')
       if (!exists('L.3')){
         warning('Error: calc.ohc function failing for both standard error calculations.')
         statusVec <- c(statusVec, 'calc.ohc function failed for both standard error calculations')
@@ -162,8 +162,8 @@ if (enterAt == 1){
     # checkpoint each big L calculation step
     if (exists('L.4')){
       woa.se <- T
-      aws.s3::s3save_image(bucket=paste(bucketDir, ptt, sep=''), object='check2.rda')
-      base::save.image('check2.rda')
+      aws.s3::s3save_image(bucket=paste(bucketDir, ptt, sep=''), object='check1.rda')
+      base::save.image('check1.rda')
     } else{
       warning('Error: calc.woa function failed.')
       statusVec <- c(statusVec, 'calc.woa function failed')
@@ -174,8 +174,8 @@ if (enterAt == 1){
     L.5 <- calc.hycom.par(pdt, filename='sword', hycom.dir, focalDim = 9, dateVec = dateVec, use.se = T)
     if (exists('L.5')){
       hyc.se <- T
-      aws.s3::s3save_image(bucket=paste(bucketDir, ptt, sep=''), object='check2.rda')
-      base::save.image('check2.rda')
+      aws.s3::s3save_image(bucket=paste(bucketDir, ptt, sep=''), object='check1.rda')
+      base::save.image('check1.rda')
     } else{
       warning('Error: calc.hycom function failed.')
       statusVec <- c(statusVec, 'calc.hycom.par failed')
@@ -194,7 +194,7 @@ if (enterAt == 1){
   
   L.rasters <- mget(ls(pattern = 'L\\.'))
   resamp.idx <- which.max(lapply(L.rasters, FUN=function(x) raster::res(x)[1]))
-  L.res <- resample.grid(L.rasters, L.rasters[[resamp.idx]], bound=bnds)
+  L.res <- resample.grid(L.rasters, L.rasters[[resamp.idx]])
   
   # Figure out appropriate L combinations
   if (length(likVec) > 2){
@@ -245,7 +245,7 @@ if (enterAt == 1){
         
         # RUN THE FILTER STEP
         if(!is.na(bnd)){
-          f <- hmm.filter.ext(g, L, K1, K2, maskL=T, P.final, minBounds = bnd)
+          f <- hmm.filter(g, L, K1, K2, maskL=T, P.final, minBounds = bnd)
           maskL.logical <- TRUE
         } else{
           f <- hmm.filter(g, L, K1, K2, P.final, maskL=F)
@@ -258,19 +258,22 @@ if (enterAt == 1){
         
         # GET THE MOST PROBABLE TRACK
         tr <- calc.track(s, g, dateVec)
+        require(fields)
         plotHMM(s, tr, dateVec, ptt=runName, save.plot = T)
         
         # WRITE OUT RESULTS
-        outVec <- matrix(c(ptt=ptt, minBounds = bnd, migr.spd = i,
+        outVec <- unlist(c(ptt=ptt, minBounds = bnd, migr.spd = i,
                            Lidx = paste(L.idx[[tt]],collapse=''), P1 = P.final[1,1], P2 = P.final[2,2],
                            spLims = sp.lim[1:4], resol = raster::res(L.rasters[[resamp.idx]]),
-                           maskL = maskL.logical, NLL = nllf, name = runName), ncol=14)
-        write.table(outVec,paste(dataDir, 'outVec_results.csv', sep=''), sep=',', col.names=F, append=T)
+                           maskL = maskL.logical, NLL = nllf, name = runName))
+        write.table(outVec,paste(dataDir, 'outVec_results_new.csv', sep=''), sep=',', col.names=F, append=T)
         
         res <- list(outVec = outVec, s = s, g = g, tr = tr, dateVec = dateVec, iniloc = iniloc, grid = raster::res(L.res[[1]]$L.5)[1])
         save(res, file=paste(runName, '-HMMoce_res.rda', sep=''))
         #save.image(file=paste(ptt, '-HMMoce.RData', sep=''))
         aws.s3::s3save(res, bucket=bucketDir, object=paste(runName, '-HMMoce_res.rda', sep=''))
+        
+        print(runName)
         
       } # parVec loop
     } # bndVec loop

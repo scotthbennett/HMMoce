@@ -23,7 +23,7 @@ for (ii in 1:nrow(meta)){
   
   # READ IN DATA FROM WC FILES
   myDir <- paste(dataDir, ptt, '/', sep='')
-  load(paste(myDir, ptt,'_likelihoods2.RData', sep=''))
+  load(paste(myDir, ptt,'_likelihoods3.RData', sep=''))
   dataDir <- '~/Documents/WHOI/Data/Swordfish/batch/'
   myDir <- paste(dataDir, ptt, '/', sep='')
   
@@ -34,9 +34,10 @@ for (ii in 1:nrow(meta)){
   bathy <- raster::raster('~/Documents/WHOI/Data/Swordfish/batch/sword_bathy.grd')
   
   #L.rasters <- mget(ls(pattern = 'L\\.'))
-  L.rasters <- list(L.1=L.1, L.2=L.2, L.3=L.3f, L.4 = L.1 * 0, L.5=L.5t)
+  L.rasters <- list(L.1=L.1, L.2=L.2, L.3=L.3, L.4 = L.1 * 0, L.5=L.5)
   resamp.idx <- which.max(lapply(L.rasters, FUN=function(x) raster::res(x)[1]))
-  L.res <- resample.grid(L.rasters, L.rasters[[resamp.idx]])
+  bnds <- raster::extent(-70, -60, 15, 33)
+  L.res <- resample.grid(L.rasters, L.rasters[[resamp.idx]], bound=bnds)
   #save.image(paste(myDir, ptt, '_likelihoods.RData', sep=''))
   
   # Figure out appropriate L combinations
@@ -73,7 +74,7 @@ for (ii in 1:nrow(meta)){
         par0 <- makePar(migr.spd=i, grid=g.mle, L.arr=L.mle, calcP=T)
         #K1 <- par0$K1; K2 <- par0$K2; 
         P.final <- par0$P.final
-        #P.final[1,1] <- .885; P.final[2,2] <- .942
+        #P.final[1,1] <- .8; P.final[2,2] <- .9
         #P.final[1,2] <- 1-P.final[1,1]; P.final[2,1] <- 1-P.final[2,2]
         # GET MOVEMENT KERNELS AND SWITCH PROB FOR FINER GRID
         par0 <- makePar(migr.spd=i, grid=g, L.arr=L, calcP=F)
@@ -92,7 +93,7 @@ for (ii in 1:nrow(meta)){
         
         # GET THE MOST PROBABLE TRACK
         tr <- calc.track(s, g, dateVec)
-        #plotHMM(s, tr, dateVec, ptt, save.plot = F, behav.pts=T)
+        plotHMM(s, tr, dateVec, ptt, save.plot = F, behav.pts=T)
         
         # COMPARE HMM, GPE3, SPOT
         #setwd(myDir)
@@ -100,7 +101,10 @@ for (ii in 1:nrow(meta)){
         # WRITE OUT RESULTS
         outVec <- matrix(c(ptt=paste(ptt,'_nll',sep=''), minBounds = bnd, migr.spd = i, paste(L.idx[[tt]],collapse=''), P1 = P.final[1,1], P2 = P.final[2,2], NLL = nllf), ncol=7)
         write.table(outVec,paste(dataDir, 'outVec_results.csv', sep=''), sep=',', col.names=F, append=T)
-        #save.image(paste(ptt, '_knock_track.RData', sep=''))
+        res <- list(outVec = outVec, s = s, g = g, tr = tr, dateVec = dateVec, iniloc = iniloc, grid = raster::res(L.res[[1]]$L.5)[1])
+        save(res, file=paste(ptt, '-HMMoce_res.RData', sep=''))
+        save.image(file=paste(ptt, '-HMMoce.RData', sep=''))
+        save.image(paste(ptt, '_knock_track.RData', sep=''))
         
         print(outVec)
         

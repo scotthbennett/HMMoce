@@ -43,7 +43,7 @@ getCtr <- function(distr, tr, g, threshold = 50, makePlot=FALSE){
   out <- list()
   
   for (i in 1:dim(pts)[3]){
-    print(i)
+    #print(i)
     ctr <- contourLines(lon, lat, pts[,,i])
     idx <- which.min(lapply(ctr, FUN=function(x) which(round(x$level,1) == round(threshold, 1))) == 1)
     ctr.i <- data.frame(ctr[[idx]])

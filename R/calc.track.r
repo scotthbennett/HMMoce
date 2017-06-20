@@ -8,7 +8,7 @@
 #'   spatial scale and grid you're working on
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
 #' @param method is character indicating what method to use for track 
-#'   calculation. Currently only 'mean' is supported.
+#'   calculation. Currently only 'mean' and 'max' are supported.
 #'   
 #' @return calculated track
 #' @export
@@ -33,9 +33,30 @@ calc.track <- function(distr, g, dateVec, method = 'mean'){
     lat <- apply(apply(distr, c(2, 4), sum) * repmat(t(as.matrix(g$lat[,1])), T, 1), 1, sum)
     lon <- apply(apply(distr, c(2, 3), sum) * repmat(t(as.matrix(g$lon[1,])), T, 1), 1, sum)
     
+  } else if (method == 'max'){
+    warning('Max method is not recommended and can result in unrealistic movements. Use with caution.')
+    
+    lat.mx <- apply(apply(distr, c(2, 4), sum), 1, which.max)
+    #lat.mx <- apply(apply(distr, c(2, 4), sum) * repmat(t(as.matrix(g$lat[,1])), T, 1), 1, which.max)
+    lat.mx <- g$lat[,1][lat.mx]
+    lon.mx <- apply(apply(distr, c(2, 3), sum), 1, which.max)
+    #lon.mx <- apply(apply(distr, c(2, 3), sum) * repmat(t(as.matrix(g$lon[1,])), T, 1), 1, which.max)
+    lon.mx <- g$lon[1,][lon.mx]
+    
+    
   } else if (method == 'mode'){
     
     stop('Mode is currently unsupported.')
+    
+    Mode <- function(x) {
+      # function from SO at http://stackoverflow.com/questions/2547402/is-there-a-built-in-function-for-finding-the-mode
+      ux <- unique(x)
+      ux[which.max(tabulate(match(x, ux)))]
+    }
+    
+    lat.md <- apply(apply(distr, c(2, 4), sum) * repmat(t(as.matrix(g$lat[,1])), T, 1), 1, FUN=function(x) Mode(x))
+    lon.md <- apply(apply(distr, c(2, 3), sum) * repmat(t(as.matrix(g$lon[1,])), T, 1), 1,FUN=function(x) Mode(x))
+    
     
     # Track calculated from mode
     row <- dim(g$lon)[1]
@@ -54,8 +75,6 @@ calc.track <- function(distr, g, dateVec, method = 'mean'){
   } else if (method == 'Viterbi'){
     
     stop('Viterbi is currently unsupported.')
-    # Track calculated with Viterbi
-    # --- not included in this script
     
   }
   

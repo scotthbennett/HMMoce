@@ -5,6 +5,7 @@ envDir <- '~/EnvData/'
 sst.dir <- '~/EnvData/sst/Swordfish/'
 hycom.dir <- '~/EnvData/hycom3/Swordfish/'
 statusVec <- NA
+bucketDir <- 'gaube-data/braun/Data/Swordfish/batch/'
 
 # which of L.idx combinations do you want to run?
 run.idx <- c(1:4, 11:16)
@@ -13,7 +14,7 @@ run.idx <- c(1:4, 11:16)
 bndVec <- c(NA, 5, 10)
 
 # vector of appropriate migr kernel speed
-parVec <- c(1, 2, 4)
+parVec <- c(2, 4)
 
 meta <- read.table(paste(dataDir, 'swords_meta.csv',sep=''), sep=',', header=T)
 likVec=c(1,2,3,5)
@@ -22,11 +23,9 @@ likVec=c(1,2,3,5)
 
 ptt <- meta$PTT[ii] #nextAnimal
 
-bucketDir <- 'gaube-data/braun/Data/Swordfish/batch/'
-
 # set an area of interest for a particular individual in the resample.grid function using:
-bnds <- raster::extent(-70, -60, 15, 33)
-
+#bnds <- raster::extent(-70, -60, 15, 33)
+setwd(paste(dataDir, '/', ptt, sep=''))
 
 # check for status. which checkpoint to start at?
 tryCatch({
@@ -80,7 +79,7 @@ if (enterAt == 1){
   
   # READ IN DATA FROM WC FILES
   myDir <- paste(dataDir, ptt, '/', sep='')
-  load(paste(myDir, ptt,'_likelihoods2.RData', sep=''))
+  #load(paste(myDir, ptt,'_likelihoods2.RData', sep=''))
   
   # sst data
   tag.sst <- read.wc(ptt, wd = myDir, type = 'sst', tag=tag, pop=pop); 
@@ -107,11 +106,13 @@ if (enterAt == 1){
   #bathy <- get.bath.data(sp.lim$lonmin, sp.lim$lonmax, sp.lim$latmin, sp.lim$latmax, res = c(.5))
   #raster::writeRaster(bathy, '~/EnvData/bathy/Swordfish/sword_bathy.grd')
   #bathy <- raster::raster('~/EnvData/bathy/Swordfish/sword_bathy.grd')
-  aws.s3::save_object('sword_bathy.rda', file='sword_bathy.rda', bucket=paste(bucketDir, sep=''))
-  load('sword_bathy.rda')
+  #aws.s3::s3save(bathy, bucket=bucketDir, object='sword_bathy.rda')
+  #aws.s3::save_object('sword_bathy.rda', file='sword_bathy.rda', bucket=paste(bucketDir, sep=''))
+  load(paste(dataDir,'sword_bathy.rda',sep=''))
   
   # save workspace image to s3 as checkpoint
   aws.s3::s3save_image(bucket=paste(bucketDir, ptt, sep=''), object='check1.rda')
+  base::save.image('check1.rda')
   
   #================
   ## END STEP 1
@@ -142,9 +143,11 @@ if (enterAt == 1){
     if (exists('L.3')){
       ohc.se <- F
       aws.s3::s3save_image(bucket=paste(bucketDir, ptt, sep=''), object='check2.rda')
+      base::save.image('check2.rda')
     } else{
       L.3 <- calc.ohc(pdt, filename='sword', ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = T)
       aws.s3::s3save_image(bucket=paste(bucketDir, ptt, sep=''), object='check2.rda')
+      base::save.image('check2.rda')
       if (!exists('L.3')){
         warning('Error: calc.ohc function failing for both standard error calculations.')
         statusVec <- c(statusVec, 'calc.ohc function failed for both standard error calculations')
@@ -160,6 +163,7 @@ if (enterAt == 1){
     if (exists('L.4')){
       woa.se <- T
       aws.s3::s3save_image(bucket=paste(bucketDir, ptt, sep=''), object='check2.rda')
+      base::save.image('check2.rda')
     } else{
       warning('Error: calc.woa function failed.')
       statusVec <- c(statusVec, 'calc.woa function failed')
@@ -171,6 +175,7 @@ if (enterAt == 1){
     if (exists('L.5')){
       hyc.se <- T
       aws.s3::s3save_image(bucket=paste(bucketDir, ptt, sep=''), object='check2.rda')
+      base::save.image('check2.rda')
     } else{
       warning('Error: calc.hycom function failed.')
       statusVec <- c(statusVec, 'calc.hycom.par failed')
@@ -200,6 +205,7 @@ if (enterAt == 1){
   
   # save workspace image to s3 as checkpoint
   aws.s3::s3save_image(bucket=paste(bucketDir, ptt, sep=''), object='check2.rda')
+  base::save.image('check2.rda')
   
   #================
   ## END STEP 2
@@ -274,7 +280,7 @@ if (enterAt == 1){
 
 # save workspace image to s3 as checkpoint
 aws.s3::s3save_image(bucket=paste(bucketDir, ptt, sep=''), object='check3.rda')
-
+base::save.image('check3.rda')
 
 
 

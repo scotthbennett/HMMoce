@@ -13,17 +13,16 @@ str(bask.lims)
 # add this spec to meta
 
 # enter aws credentials for reading s3
-creds <- aws.creds()
-Sys.setenv("AWS_ACCESS_KEY_ID" = creds[[1]],
-           "AWS_SECRET_ACCESS_KEY" = creds[[2]],
-           "AWS_DEFAULT_REGION" = creds[[3]])
-
 aws.creds <- function(){ 
   n1 <- readline(prompt="Enter AWS ACCESS KEY ID: ")
   n2 <- readline(prompt = "Enter AWS SECRET ACCESS KEY: ")
   n3 <- readline(prompt = "Enter AWS DEFAULT REGION (e.g. us-west-2): ")
   return(list(id=n1, key=n2, region=n3))
 }
+creds <- aws.creds()
+Sys.setenv("AWS_ACCESS_KEY_ID" = creds[[1]],
+           "AWS_SECRET_ACCESS_KEY" = creds[[2]],
+           "AWS_DEFAULT_REGION" = creds[[3]])
 
 # which of L.idx combinations do you want to run?
 run.idx <- c(1:4, 11:16)
@@ -115,7 +114,7 @@ if (enterAt == 1){
   #light.udates <- light$udates; light <- light$data
   
   # use GPE2 locs for light-based likelihoods
-  locs <- read.table(paste(myDir, ptt, '-Locations.csv', sep = ''), sep = ',', header = T, blank.lines.skip = F)
+  locs <- read.table(paste(myDir, ptt, '-Locations-GPE2.csv', sep = ''), sep = ',', header = T, blank.lines.skip = F)
   locDates <- as.Date(as.POSIXct(locs$Date, format=HMMoce:::findDateFormat(locs$Date)))
   
   # SET SPATIAL LIMITS
@@ -124,6 +123,9 @@ if (enterAt == 1){
                    lonmax = bask.lims$small.bnds[2],
                    latmin = bask.lims$small.bnds[3],
                    latmax = bask.lims$small.bnds[4])
+    setwd('~/EnvData/bathy/BaskingSharks/')
+    aws.s3::save_object('bask_bathy_small.grd', file='bask_bathy_small.grd', bucket='gaube-data/braun/EnvData/bathy/BaskingSharks')
+    aws.s3::save_object('bask_bathy_small.gri', file='bask_bathy_small.gri', bucket='gaube-data/braun/EnvData/bathy/BaskingSharks')
     bathy <- raster::raster(paste(envDir,'bathy/BaskingSharks/bask_bathy_small.grd',sep=''))
     is.small <- TRUE
     
@@ -175,7 +177,7 @@ if (enterAt == 1){
       fname <- 'bask_big'
       sst.dir <- paste(sst.dir, 'big/', sep='')
     }
-    L.2 <- calc.sst.par(tag.sst, filename='sword', sst.dir = sst.dir, dateVec = dateVec, sens.err = 1)
+    L.2 <- calc.sst.par(tag.sst, filename=fname, sst.dir = sst.dir, dateVec = dateVec, sens.err = 1)
     #raster::cellStats(L.2, 'max')
   }
   

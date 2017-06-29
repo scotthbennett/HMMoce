@@ -20,6 +20,7 @@ aws.creds <- function(){
   return(list(id=n1, key=n2, region=n3))
 }
 creds <- aws.creds()
+
 Sys.setenv("AWS_ACCESS_KEY_ID" = creds[[1]],
            "AWS_SECRET_ACCESS_KEY" = creds[[2]],
            "AWS_DEFAULT_REGION" = creds[[3]])
@@ -39,7 +40,7 @@ meta <- read.table(paste(dataDir, 'bask_metadata.csv',sep=''), sep=',', header=T
 likVec=c(1,2,3,5)
 
 #for (ii in 1:nrow(meta)){ #nextAnimal
-
+ii = 34
 ptt <- meta$PTT[ii] #nextAnimal
 
 # set an area of interest for a particular individual in the resample.grid function using:
@@ -123,6 +124,7 @@ if (enterAt == 1){
                    lonmax = bask.lims$small.bnds[2],
                    latmin = bask.lims$small.bnds[3],
                    latmax = bask.lims$small.bnds[4])
+    dir.create('~/EnvData/bathy/BaskingSharks/')
     setwd('~/EnvData/bathy/BaskingSharks/')
     aws.s3::save_object('bask_bathy_small.grd', file='bask_bathy_small.grd', bucket='gaube-data/braun/EnvData/bathy/BaskingSharks')
     aws.s3::save_object('bask_bathy_small.gri', file='bask_bathy_small.gri', bucket='gaube-data/braun/EnvData/bathy/BaskingSharks')
@@ -172,7 +174,7 @@ if (enterAt == 1){
   if (any(likVec == 2) & !exists('L.2')){
     if(is.small){
       fname <- 'bask_small'
-      sst.dir <- paste(sst.dir, 'small/', sep='')
+      sst.dir <- paste(sst.dir, sep='')
     } else{
       fname <- 'bask_big'
       sst.dir <- paste(sst.dir, 'big/', sep='')
@@ -184,7 +186,7 @@ if (enterAt == 1){
   if (any(likVec == 3) & !exists('L.3')){
     if(is.small){
       fname <- 'bask'
-      hycom.dir <- paste(hycom.dir, 'small/', sep='')
+      #hycom.dir <- paste(hycom.dir, 'small/', sep='')
       if(length(pdt.udates[!(pdt.udates %in% as.Date(substr(list.files(hycom.dir), 6, 15)))]) > 0) stop('Not all hycom data is available!')
     } else{
       fname <- 'bask_big'
@@ -258,7 +260,7 @@ if (enterAt == 1){
   
   L.rasters <- mget(ls(pattern = 'L\\.'))
   resamp.idx <- which.max(lapply(L.rasters, FUN=function(x) raster::res(x)[1]))
-  L.res <- resample.grid(L.rasters, L.rasters[[resamp.idx]], bound=bnds)
+  L.res <- resample.grid(L.rasters, L.rasters[[resamp.idx]])
   
   # Figure out appropriate L combinations
   if (length(likVec) > 2){
@@ -328,7 +330,7 @@ if (enterAt == 1){
         outVec <- matrix(c(ptt=ptt, minBounds = bnd, migr.spd = i,
                            Lidx = paste(L.idx[[tt]],collapse=''), P1 = P.final[1,1], P2 = P.final[2,2],
                            spLims = sp.lim[1:4], resol = raster::res(L.rasters[[resamp.idx]]),
-                           maskL = maskL.logical, NLL = nllf, name = runName), ncol=14)
+                           maskL = maskL.logical, NLL = nllf, name = runName), ncol=15)
         write.table(outVec,paste(dataDir, 'outVec_results.csv', sep=''), sep=',', col.names=F, append=T)
         
         res <- list(outVec = outVec, s = s, g = g, tr = tr, dateVec = dateVec, iniloc = iniloc, grid = raster::res(L.res[[1]]$L.5)[1])

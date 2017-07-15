@@ -50,21 +50,24 @@ setwd(paste(dataDir, '/', ptt, sep=''))
 # check for status. which checkpoint to start at?
 tryCatch({
   err <- try(
-    aws.s3::save_object('check3.rda', file='check3.rda', bucket=paste(bucketDir, '/', ptt, sep='')),
+    #aws.s3::save_object('check3.rda', file='check3.rda', bucket=paste(bucketDir, '/', ptt, sep='')),
+    file.exists('check3.rda'),
     silent = T)
 }, error=function(e){print(paste('ERROR: Data does not exist for this checkpoint.', sep = ''))})
 
 if (class(err) == 'try-error'){
   tryCatch({
     err <- try(
-      aws.s3::save_object('check2.rda', file='check2.rda', bucket=paste(bucketDir, '/', ptt, sep='')),
+      #aws.s3::save_object('check2.rda', file='check2.rda', bucket=paste(bucketDir, '/', ptt, sep='')),
+      file.exists('check2.rda'),
       silent = T)
   }, error=function(e){print(paste('ERROR: Data does not exist for this checkpoint.', sep = ''))})
   
   if (class(err) == 'try-error'){
     tryCatch({
       err <- try(
-        aws.s3::save_object('check1.rda', file='check1.rda', bucket=paste(bucketDir, '/', ptt, sep='')),
+        #aws.s3::save_object('check1.rda', file='check1.rda', bucket=paste(bucketDir, '/', ptt, sep='')),
+        file.exists('check1.rda'),
         silent = T)
     }, error=function(e){print(paste('ERROR: Data does not exist for this checkpoint.', sep = ''))})
     
@@ -80,7 +83,7 @@ if (class(err) == 'try-error'){
   
 } else{
   # skip this one and go on to next animal
-  nextAnimal
+  stop(paste('PTT ', ptt, ' is complete at check3. Go to ii=', ii+1, '.', sep=''))
 }
 
 statusVec <- c(paste('Entered at ', enterAt, sep=''))
@@ -215,7 +218,7 @@ if (enterAt == 2){
   hycom.dir <- '~/ebs/EnvData/hycom3/BaskingSharks/'
   
   if (any(likVec == 4) & !exists('L.4')){
-    #woa.quarter <- '~/ebs/EnvData/woa/woa.quarter.rda'
+    load('~/ebs/EnvData/woa/woa.quarter.rda')
     L.4 <- calc.woa.par(pdt, filename='', woa.data = woa.quarter, focalDim = 9, dateVec = dateVec, use.se = T)
     # checkpoint each big L calculation step
     if (exists('L.4')){
@@ -306,67 +309,67 @@ if (enterAt == 3){
     setwd(myDir)
     #library(HMMoce)
     #for (tt in run.idx){
-      for (bnd in bndVec){
-        for (i in parVec){
-          
-          runName <- paste(ptt,'_idx',tt,'_bnd',bnd,'_par',i,sep='')
-          
-          #----------------------------------------------------------------------------------#
-          # COMBINE LIKELIHOOD MATRICES
-          #----------------------------------------------------------------------------------#
-          L <- HMMoce::make.L(L1 = L.res[[1]][L.idx[[tt]]],
-                      L.mle.res = L.res$L.mle.res, dateVec = dateVec,
-                      locs.grid = locs.grid, iniloc = iniloc, bathy = bathy,
-                      pdt = pdt)
-          L.mle <- L$L.mle
-          L <- L$L
-          g <- L.res$g
-          g.mle <- L.res$g.mle
-          lon <- g$lon[1,]
-          lat <- g$lat[,1]
-          
-          # GET MOVEMENT KERNELS AND SWITCH PROB FOR COARSE GRID
-          par0 <- HMMoce::makePar(migr.spd=i, grid=g.mle, L.arr=L.mle, p.guess=c(.9,.9), calcP=T)
-          #K1 <- par0$K1; K2 <- par0$K2; 
-          P.final <- par0$P.final
-          
-          # GET MOVEMENT KERNELS AND SWITCH PROB FOR FINER GRID
-          par0 <- HMMoce::makePar(migr.spd=i, grid=g, L.arr=L, p.guess=c(.9,.9), calcP=F)
-          K1 <- par0$K1; K2 <- par0$K2; #P.final <- par0$P.final
-          
-          # RUN THE FILTER STEP
-          if(!is.na(bnd)){
-            f <- HMMoce::hmm.filter(g, L, K1, K2, maskL=T, P.final, minBounds = bnd)
-            maskL.logical <- TRUE
-          } else{
-            f <- HMMoce::hmm.filter(g, L, K1, K2, P.final, maskL=F)
-            maskL.logical <- FALSE
-          }
-          nllf <- -sum(log(f$psi[f$psi>0]))
-          
-          # RUN THE SMOOTHING STEP
-          s <- HMMoce::hmm.smoother(f, K1, K2, L, P.final)
-          
-          # GET THE MOST PROBABLE TRACK
-          tr <- HMMoce::calc.track(s, g, dateVec)
-          setwd(myDir); HMMoce::plotHMM(s, tr, dateVec, ptt=runName, save.plot = T)
-          
-          # WRITE OUT RESULTS
-          outVec <- matrix(c(ptt=ptt, minBounds = bnd, migr.spd = i,
-                             Lidx = paste(L.idx[[tt]],collapse=''), P1 = P.final[1,1], P2 = P.final[2,2],
-                             spLims = sp.lim[1:4], resol = raster::res(L.rasters[[resamp.idx]]),
-                             maskL = maskL.logical, NLL = nllf, name = runName), ncol=15)
-          #write.table(outVec,paste(dataDir, 'outVec_results.csv', sep=''), sep=',', col.names=F, append=T)
-          #names(outVec) <- c('ptt','bnd','migr.spd','Lidx','P1','P2','spLims','resol','maskL','nll','name')
-          res <- list(outVec = outVec, s = s, g = g, tr = tr, dateVec = dateVec, iniloc = iniloc, grid = raster::res(L.res[[1]]$L.5)[1])
-          setwd(myDir); save(res, file=paste(runName, '-HMMoce_res.rda', sep=''))
-          #save.image(file=paste(ptt, '-HMMoce.RData', sep=''))
-          aws.s3::s3save(res, bucket=paste(bucketDir, '/', ptt, sep=''), object=paste(runName, '-HMMoce_res.rda', sep=''))
-          
-          outVec <- outVec
-          
-        } # parVec loop
-      } # bndVec loop
+    for (bnd in bndVec){
+      for (i in parVec){
+        
+        runName <- paste(ptt,'_idx',tt,'_bnd',bnd,'_par',i,sep='')
+        
+        #----------------------------------------------------------------------------------#
+        # COMBINE LIKELIHOOD MATRICES
+        #----------------------------------------------------------------------------------#
+        L <- HMMoce::make.L(L1 = L.res[[1]][L.idx[[tt]]],
+                            L.mle.res = L.res$L.mle.res, dateVec = dateVec,
+                            locs.grid = locs.grid, iniloc = iniloc, bathy = bathy,
+                            pdt = pdt)
+        L.mle <- L$L.mle
+        L <- L$L
+        g <- L.res$g
+        g.mle <- L.res$g.mle
+        lon <- g$lon[1,]
+        lat <- g$lat[,1]
+        
+        # GET MOVEMENT KERNELS AND SWITCH PROB FOR COARSE GRID
+        par0 <- HMMoce::makePar(migr.spd=i, grid=g.mle, L.arr=L.mle, p.guess=c(.9,.9), calcP=T)
+        #K1 <- par0$K1; K2 <- par0$K2; 
+        P.final <- par0$P.final
+        
+        # GET MOVEMENT KERNELS AND SWITCH PROB FOR FINER GRID
+        par0 <- HMMoce::makePar(migr.spd=i, grid=g, L.arr=L, p.guess=c(.9,.9), calcP=F)
+        K1 <- par0$K1; K2 <- par0$K2; #P.final <- par0$P.final
+        
+        # RUN THE FILTER STEP
+        if(!is.na(bnd)){
+          f <- HMMoce::hmm.filter(g, L, K1, K2, maskL=T, P.final, minBounds = bnd)
+          maskL.logical <- TRUE
+        } else{
+          f <- HMMoce::hmm.filter(g, L, K1, K2, P.final, maskL=F)
+          maskL.logical <- FALSE
+        }
+        nllf <- -sum(log(f$psi[f$psi>0]))
+        
+        # RUN THE SMOOTHING STEP
+        s <- HMMoce::hmm.smoother(f, K1, K2, L, P.final)
+        
+        # GET THE MOST PROBABLE TRACK
+        tr <- HMMoce::calc.track(s, g, dateVec)
+        setwd(myDir); HMMoce::plotHMM(s, tr, dateVec, ptt=runName, save.plot = T)
+        
+        # WRITE OUT RESULTS
+        outVec <- matrix(c(ptt=ptt, minBounds = bnd, migr.spd = i,
+                           Lidx = paste(L.idx[[tt]],collapse=''), P1 = P.final[1,1], P2 = P.final[2,2],
+                           spLims = sp.lim[1:4], resol = raster::res(L.rasters[[resamp.idx]]),
+                           maskL = maskL.logical, NLL = nllf, name = runName), ncol=15)
+        #write.table(outVec,paste(dataDir, 'outVec_results.csv', sep=''), sep=',', col.names=F, append=T)
+        #names(outVec) <- c('ptt','bnd','migr.spd','Lidx','P1','P2','spLims','resol','maskL','nll','name')
+        res <- list(outVec = outVec, s = s, g = g, tr = tr, dateVec = dateVec, iniloc = iniloc, grid = raster::res(L.res[[1]]$L.5)[1])
+        setwd(myDir); save(res, file=paste(runName, '-HMMoce_res.rda', sep=''))
+        #save.image(file=paste(ptt, '-HMMoce.RData', sep=''))
+        aws.s3::s3save(res, bucket=paste(bucketDir, '/', ptt, sep=''), object=paste(runName, '-HMMoce_res.rda', sep=''))
+        
+        outVec <- outVec
+        
+      } # parVec loop
+    } # bndVec loop
   } # L.idx loop
   
   

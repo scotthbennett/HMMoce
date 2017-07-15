@@ -305,7 +305,7 @@ if (enterAt == 1){
         
         # RUN THE FILTER STEP
         if(!is.na(bnd)){
-          f <- hmm.filter.ext(g, L, K1, K2, maskL=T, P.final, minBounds = bnd)
+          f <- hmm.filter(g, L, K1, K2, maskL=T, P.final, minBounds = bnd)
           maskL.logical <- TRUE
         } else{
           f <- hmm.filter(g, L, K1, K2, P.final, maskL=F)
@@ -330,7 +330,7 @@ if (enterAt == 1){
         res <- list(outVec = outVec, s = s, g = g, tr = tr, dateVec = dateVec, iniloc = iniloc, grid = raster::res(L.res[[1]]$L.5)[1])
         setwd(myDir); save(res, file=paste(runName, '-HMMoce_res.rda', sep=''))
         #save.image(file=paste(ptt, '-HMMoce.RData', sep=''))
-        aws.s3::s3save(res, bucket=bucketDir, object=paste(runName, '-HMMoce_res.rda', sep=''))
+        aws.s3::s3save(res, bucket=paste(bucketDir, '/', ptt, sep=''), object=paste(runName, '-HMMoce_res.rda', sep=''))
         
       } # parVec loop
     } # bndVec loop

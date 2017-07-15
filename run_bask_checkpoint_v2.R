@@ -26,7 +26,7 @@ Sys.setenv("AWS_ACCESS_KEY_ID" = creds[[1]],
            "AWS_DEFAULT_REGION" = creds[[3]])
 
 # which of L.idx combinations do you want to run?
-run.idx <- c(1:4, 11:16)
+run.idx <- c(1:4, 7:8)
 
 # vector of appropriate bounding in filter
 bndVec <- c(NA, 5, 10)
@@ -210,8 +210,9 @@ if (enterAt == 2){
         ohc.se <- T
       }
     }
-    hycom.dir <- '~/ebs/EnvData/hycom3/BaskingSharks/'
   }
+  
+  hycom.dir <- '~/ebs/EnvData/hycom3/BaskingSharks/'
   
   if (any(likVec == 4) & !exists('L.4')){
     #woa.quarter <- '~/ebs/EnvData/woa/woa.quarter.rda'
@@ -301,15 +302,19 @@ if (enterAt == 3){
   doParallel::registerDoParallel(cl, cores = ncores)
   
   ans = foreach::foreach(tt = run.idx) %dopar%{
+    setwd('~/HMMoce'); devtools::load_all()
+    setwd(myDir)
+    #library(HMMoce)
     #for (tt in run.idx){
       for (bnd in bndVec){
         for (i in parVec){
+          
           runName <- paste(ptt,'_idx',tt,'_bnd',bnd,'_par',i,sep='')
           
           #----------------------------------------------------------------------------------#
           # COMBINE LIKELIHOOD MATRICES
           #----------------------------------------------------------------------------------#
-          L <- make.L(L1 = L.res[[1]][L.idx[[tt]]],
+          L <- HMMoce::make.L(L1 = L.res[[1]][L.idx[[tt]]],
                       L.mle.res = L.res$L.mle.res, dateVec = dateVec,
                       locs.grid = locs.grid, iniloc = iniloc, bathy = bathy,
                       pdt = pdt)
@@ -321,30 +326,30 @@ if (enterAt == 3){
           lat <- g$lat[,1]
           
           # GET MOVEMENT KERNELS AND SWITCH PROB FOR COARSE GRID
-          par0 <- makePar(migr.spd=i, grid=g.mle, L.arr=L.mle, p.guess=c(.9,.9), calcP=T)
+          par0 <- HMMoce::makePar(migr.spd=i, grid=g.mle, L.arr=L.mle, p.guess=c(.9,.9), calcP=T)
           #K1 <- par0$K1; K2 <- par0$K2; 
           P.final <- par0$P.final
           
           # GET MOVEMENT KERNELS AND SWITCH PROB FOR FINER GRID
-          par0 <- makePar(migr.spd=i, grid=g, L.arr=L, p.guess=c(.9,.9), calcP=F)
+          par0 <- HMMoce::makePar(migr.spd=i, grid=g, L.arr=L, p.guess=c(.9,.9), calcP=F)
           K1 <- par0$K1; K2 <- par0$K2; #P.final <- par0$P.final
           
           # RUN THE FILTER STEP
           if(!is.na(bnd)){
-            f <- hmm.filter(g, L, K1, K2, maskL=T, P.final, minBounds = bnd)
+            f <- HMMoce::hmm.filter(g, L, K1, K2, maskL=T, P.final, minBounds = bnd)
             maskL.logical <- TRUE
           } else{
-            f <- hmm.filter(g, L, K1, K2, P.final, maskL=F)
+            f <- HMMoce::hmm.filter(g, L, K1, K2, P.final, maskL=F)
             maskL.logical <- FALSE
           }
           nllf <- -sum(log(f$psi[f$psi>0]))
           
           # RUN THE SMOOTHING STEP
-          s <- hmm.smoother(f, K1, K2, L, P.final)
+          s <- HMMoce::hmm.smoother(f, K1, K2, L, P.final)
           
           # GET THE MOST PROBABLE TRACK
-          tr <- calc.track(s, g, dateVec)
-          setwd(myDir); plotHMM(s, tr, dateVec, ptt=runName, save.plot = T)
+          tr <- HMMoce::calc.track(s, g, dateVec)
+          setwd(myDir); HMMoce::plotHMM(s, tr, dateVec, ptt=runName, save.plot = T)
           
           # WRITE OUT RESULTS
           outVec <- matrix(c(ptt=ptt, minBounds = bnd, migr.spd = i,

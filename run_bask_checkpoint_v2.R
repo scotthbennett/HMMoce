@@ -35,7 +35,7 @@ bndVec <- c(NA, 5, 10)
 parVec <- c(2, 4)
 
 setwd(dataDir)
-aws.s3::save_object('bask_metadata.csv', file='bask_metadata.csv', bucket=bucketDir)
+#aws.s3::save_object('bask_metadata.csv', file='bask_metadata.csv', bucket=bucketDir)
 meta <- read.table(paste(dataDir, 'bask_metadata.csv',sep=''), sep=',', header=T)
 likVec=c(1,2,3,4,5)
 
@@ -146,8 +146,8 @@ if (enterAt == 1){
   locs.grid <- setup.locs.grid(sp.lim)
   
   # save workspace image to s3 as checkpoint
-  aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check1.rda')
   base::save.image('check1.rda')
+  aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check1.rda')
   
   #================
   ## END STEP 1
@@ -181,7 +181,7 @@ if (enterAt == 2){
     }
     
     #raster::cellStats(L.2, 'max')
-    aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check1.rda')
+    #aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check1.rda')
     setwd(myDir); base::save.image('check1.rda')
   }
   
@@ -200,11 +200,11 @@ if (enterAt == 2){
     # checkpoint each big L calculation step
     if (exists('L.3')){
       ohc.se <- F
-      aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check1.rda')
+      #aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check1.rda')
       setwd(myDir); base::save.image('check1.rda')
     } else{
       L.3 <- calc.ohc(pdt, filename=fname, ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = T)
-      aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check1.rda')
+      #aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check1.rda')
       setwd(myDir); base::save.image('check1.rda')
       if (!exists('L.3')){
         warning('Error: calc.ohc function failing for both standard error calculations.')
@@ -223,7 +223,7 @@ if (enterAt == 2){
     # checkpoint each big L calculation step
     if (exists('L.4')){
       woa.se <- T
-      aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check1.rda')
+      #aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check1.rda')
       setwd(myDir); base::save.image('check1.rda')
     } else{
       warning('Error: calc.woa function failed.')
@@ -247,7 +247,7 @@ if (enterAt == 2){
     L.5 <- calc.hycom.par(pdt, filename=fname, hycom.dir, focalDim = 9, dateVec = dateVec, use.se = T)
     if (exists('L.5')){
       hyc.se <- T
-      aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check1.rda')
+      #aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check1.rda')
       setwd(myDir); base::save.image('check1.rda')
     } else{
       warning('Error: calc.hycom function failed.')
@@ -283,8 +283,8 @@ if (enterAt == 2){
   }
   
   # save workspace image to s3 as checkpoint
-  aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check2.rda')
   setwd(myDir); base::save.image('check2.rda')
+  aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check2.rda')
   
   #================
   ## END STEP 2
@@ -378,7 +378,7 @@ if (enterAt == 3){
 }
 
 # save workspace image to s3 as checkpoint
-aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check3.rda')
 setwd(myDir); base::save.image('check3.rda')
+aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check3.rda')
 
 

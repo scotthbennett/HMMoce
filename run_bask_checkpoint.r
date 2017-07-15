@@ -1,13 +1,13 @@
 #library(HMMoce)
 setwd('~/HMMoce/'); devtools::load_all()
-dataDir <- '~/Data/BaskingSharks/batch/'
-envDir <- '~/EnvData/'
-sst.dir <- '~/EnvData/sst/BaskingSharks/'
-hycom.dir <- '~/EnvData/hycom3/BaskingSharks/'
+dataDir <- '~/ebs/Data/BaskingSharks/batch/'
+envDir <- '~/ebs/EnvData/'
+sst.dir <- '~/ebs/EnvData/sst/BaskingSharks/'
+hycom.dir <- '~/ebs/EnvData/hycom3/BaskingSharks/'
 statusVec <- NA
 bucketDir <- 'gaube-data/braun/Data/BaskingSharks/batch'
 
-load('~/Data/BaskingSharks/batch/bask_lims.rda')
+load('~/ebs/Data/BaskingSharks/batch/bask_lims.rda')
 str(bask.lims)
 # i think 52556, 52562, 100975 are "big" bounds. may be a few more.
 # add this spec to meta
@@ -50,21 +50,21 @@ setwd(paste(dataDir, '/', ptt, sep=''))
 # check for status. which checkpoint to start at?
 tryCatch({
   err <- try(
-    aws.s3::save_object('check3.rda', file='check3.rda', bucket=paste(bucketDir, ptt, sep='')),
+    aws.s3::save_object('check3.rda', file='check3.rda', bucket=paste(bucketDir, '/', ptt, sep='')),
     silent = T)
 }, error=function(e){print(paste('ERROR: Data does not exist for this checkpoint.', sep = ''))})
 
 if (class(err) == 'try-error'){
   tryCatch({
     err <- try(
-      aws.s3::save_object('check2.rda', file='check2.rda', bucket=paste(bucketDir, ptt, sep='')),
+      aws.s3::save_object('check2.rda', file='check2.rda', bucket=paste(bucketDir, '/', ptt, sep='')),
       silent = T)
   }, error=function(e){print(paste('ERROR: Data does not exist for this checkpoint.', sep = ''))})
   
   if (class(err) == 'try-error'){
     tryCatch({
       err <- try(
-        aws.s3::save_object('check1.rda', file='check1.rda', bucket=paste(bucketDir, ptt, sep='')),
+        aws.s3::save_object('check1.rda', file='check1.rda', bucket=paste(bucketDir, '/', ptt, sep='')),
         silent = T)
     }, error=function(e){print(paste('ERROR: Data does not exist for this checkpoint.', sep = ''))})
     
@@ -119,19 +119,19 @@ if (enterAt == 1){
   locDates <- as.Date(as.POSIXct(locs$Date, format=HMMoce:::findDateFormat(locs$Date)))
   
   # SET SPATIAL LIMITS
-  if(meta$bnds == 'small'){
+  if(meta$bnds[ii] == 'small'){
     sp.lim <- list(lonmin = bask.lims$small.bnds[1],
                    lonmax = bask.lims$small.bnds[2],
                    latmin = bask.lims$small.bnds[3],
                    latmax = bask.lims$small.bnds[4])
-    dir.create('~/EnvData/bathy/BaskingSharks/')
-    setwd('~/EnvData/bathy/BaskingSharks/')
-    aws.s3::save_object('bask_bathy_small.grd', file='bask_bathy_small.grd', bucket='gaube-data/braun/EnvData/bathy/BaskingSharks')
-    aws.s3::save_object('bask_bathy_small.gri', file='bask_bathy_small.gri', bucket='gaube-data/braun/EnvData/bathy/BaskingSharks')
+    #dir.create('~/ebs/EnvData/bathy/BaskingSharks/')
+    #setwd('~/ebs/EnvData/bathy/BaskingSharks/')
+    #aws.s3::save_object('bask_bathy_small.grd', file='bask_bathy_small.grd', bucket='gaube-data/braun/EnvData/bathy/BaskingSharks')
+    #aws.s3::save_object('bask_bathy_small.gri', file='bask_bathy_small.gri', bucket='gaube-data/braun/EnvData/bathy/BaskingSharks')
     bathy <- raster::raster(paste(envDir,'bathy/BaskingSharks/bask_bathy_small.grd',sep=''))
     is.small <- TRUE
     
-  } else if(meta$bnds == 'big'){
+  } else if(meta$bnds[ii] == 'big'){
     sp.lim <- list(lonmin = bask.lims$big.bnds[1],
                    lonmax = bask.lims$big.bnds[2],
                    latmin = bask.lims$big.bnds[3],
@@ -142,16 +142,8 @@ if (enterAt == 1){
   
   locs.grid <- setup.locs.grid(sp.lim)
   
-  # GET BATHYMETRY
-  #bathy.big <- get.bath.data(sp.lim$lonmin, sp.lim$lonmax, sp.lim$latmin, sp.lim$latmax, res = c(1))
-  #raster::writeRaster(bathy.big, '~/EnvData/bathy/BaskingSharks/bask_bathy_big.grd')
-  #bathy <- raster::raster('~/EnvData/bathy/Swordfish/sword_bathy.grd')
-  #aws.s3::s3save(bathy, bucket=bucketDir, object='sword_bathy.rda')
-  #aws.s3::save_object('sword_bathy.rda', file='sword_bathy.rda', bucket=paste(bucketDir, sep=''))
-  #load(paste(envDir,'bask_bathy_small.rda',sep=''))
-  
   # save workspace image to s3 as checkpoint
-  aws.s3::s3save_image(bucket=paste(bucketDir, ptt, sep=''), object='check1.rda')
+  aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check1.rda')
   base::save.image('check1.rda')
   
   #================
@@ -181,6 +173,8 @@ if (enterAt == 1){
     }
     L.2 <- calc.sst.par(tag.sst, filename=fname, sst.dir = sst.dir, dateVec = dateVec, sens.err = 1)
     #raster::cellStats(L.2, 'max')
+    aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check1.rda')
+    setwd(myDir); base::save.image('check1.rda')
   }
   
   if (any(likVec == 3) & !exists('L.3')){
@@ -198,12 +192,12 @@ if (enterAt == 1){
     # checkpoint each big L calculation step
     if (exists('L.3')){
       ohc.se <- F
-      aws.s3::s3save_image(bucket=paste(bucketDir, ptt, sep=''), object='check2.rda')
-      setwd(myDir); base::save.image('check2.rda')
+      aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check1.rda')
+      setwd(myDir); base::save.image('check1.rda')
     } else{
       L.3 <- calc.ohc(pdt, filename=fname, ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = T)
-      aws.s3::s3save_image(bucket=paste(bucketDir, ptt, sep=''), object='check2.rda')
-      setwd(myDir); base::save.image('check2.rda')
+      aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check1.rda')
+      setwd(myDir); base::save.image('check1.rda')
       if (!exists('L.3')){
         warning('Error: calc.ohc function failing for both standard error calculations.')
         statusVec <- c(statusVec, 'calc.ohc function failed for both standard error calculations')
@@ -218,8 +212,8 @@ if (enterAt == 1){
     # checkpoint each big L calculation step
     if (exists('L.4')){
       woa.se <- T
-      aws.s3::s3save_image(bucket=paste(bucketDir, ptt, sep=''), object='check2.rda')
-      setwd(myDir); base::save.image('check2.rda')
+      aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check1.rda')
+      setwd(myDir); base::save.image('check1.rda')
     } else{
       warning('Error: calc.woa function failed.')
       statusVec <- c(statusVec, 'calc.woa function failed')
@@ -240,8 +234,8 @@ if (enterAt == 1){
     L.5 <- calc.hycom.par(pdt, filename=fname, hycom.dir, focalDim = 9, dateVec = dateVec, use.se = T)
     if (exists('L.5')){
       hyc.se <- T
-      aws.s3::s3save_image(bucket=paste(bucketDir, ptt, sep=''), object='check2.rda')
-      setwd(myDir); base::save.image('check2.rda')
+      aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check1.rda')
+      setwd(myDir); base::save.image('check1.rda')
     } else{
       warning('Error: calc.hycom function failed.')
       statusVec <- c(statusVec, 'calc.hycom.par failed')
@@ -270,7 +264,7 @@ if (enterAt == 1){
   }
   
   # save workspace image to s3 as checkpoint
-  aws.s3::s3save_image(bucket=paste(bucketDir, ptt, sep=''), object='check2.rda')
+  aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check2.rda')
   setwd(myDir); base::save.image('check2.rda')
   
   #================
@@ -345,7 +339,7 @@ if (enterAt == 1){
 }
 
 # save workspace image to s3 as checkpoint
-aws.s3::s3save_image(bucket=paste(bucketDir, ptt, sep=''), object='check3.rda')
+aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check3.rda')
 setwd(myDir); base::save.image('check3.rda')
 
 

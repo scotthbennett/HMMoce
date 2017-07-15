@@ -357,7 +357,7 @@ if (enterAt == 3){
                              spLims = sp.lim[1:4], resol = raster::res(L.rasters[[resamp.idx]]),
                              maskL = maskL.logical, NLL = nllf, name = runName), ncol=15)
           #write.table(outVec,paste(dataDir, 'outVec_results.csv', sep=''), sep=',', col.names=F, append=T)
-          
+          #names(outVec) <- c('ptt','bnd','migr.spd','Lidx','P1','P2','spLims','resol','maskL','nll','name')
           res <- list(outVec = outVec, s = s, g = g, tr = tr, dateVec = dateVec, iniloc = iniloc, grid = raster::res(L.res[[1]]$L.5)[1])
           setwd(myDir); save(res, file=paste(runName, '-HMMoce_res.rda', sep=''))
           #save.image(file=paste(ptt, '-HMMoce.RData', sep=''))

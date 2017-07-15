@@ -37,7 +37,7 @@ parVec <- c(2, 4)
 setwd(dataDir)
 aws.s3::save_object('bask_metadata.csv', file='bask_metadata.csv', bucket=bucketDir)
 meta <- read.table(paste(dataDir, 'bask_metadata.csv',sep=''), sep=',', header=T)
-likVec=c(1,2,3,5)
+likVec=c(1,2,3,4,5)
 
 #for (ii in 1:nrow(meta)){ #nextAnimal
 ii = 34
@@ -150,7 +150,10 @@ if (enterAt == 1){
   ## END STEP 1
   #================
   
-} else if (enterAt == 2){
+  enterAt <- 2
+}
+
+if (enterAt == 2){
   
   load('check1.rda')
   
@@ -166,12 +169,14 @@ if (enterAt == 1){
   if (any(likVec == 2) & !exists('L.2')){
     if(is.small){
       fname <- 'bask_small'
-      sst.dir <- paste(sst.dir, 'small/', sep='')
+      sst.dir.small <- paste(sst.dir, 'small/', sep='')
+      L.2 <- calc.sst.par(tag.sst, filename=fname, sst.dir = sst.dir.small, dateVec = dateVec, sens.err = 1)
     } else{
       fname <- 'bask_big'
-      sst.dir <- paste(sst.dir, 'big/', sep='')
+      sst.dir.big <- paste(sst.dir, 'big/', sep='')
+      L.2 <- calc.sst.par(tag.sst, filename=fname, sst.dir = sst.dir.big, dateVec = dateVec, sens.err = 1)
     }
-    L.2 <- calc.sst.par(tag.sst, filename=fname, sst.dir = sst.dir, dateVec = dateVec, sens.err = 1)
+    
     #raster::cellStats(L.2, 'max')
     aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check1.rda')
     setwd(myDir); base::save.image('check1.rda')
@@ -205,9 +210,11 @@ if (enterAt == 1){
         ohc.se <- T
       }
     }
+    hycom.dir <- '~/ebs/EnvData/hycom3/BaskingSharks/'
   }
   
   if (any(likVec == 4) & !exists('L.4')){
+    #woa.quarter <- '~/ebs/EnvData/woa/woa.quarter.rda'
     L.4 <- calc.woa.par(pdt, filename='', woa.data = woa.quarter, focalDim = 9, dateVec = dateVec, use.se = T)
     # checkpoint each big L calculation step
     if (exists('L.4')){
@@ -218,12 +225,14 @@ if (enterAt == 1){
       warning('Error: calc.woa function failed.')
       statusVec <- c(statusVec, 'calc.woa function failed')
     }
+  } else{
+    L.4 <- L.1 * 0
   }
   
   if (any(likVec == 5) & !exists('L.5')){
     if(is.small){
       fname <- 'bask'
-      #hycom.dir <- paste(hycom.dir, 'small/', sep='')
+      hycom.dir <- paste(hycom.dir, 'small/', sep='')
       if(length(pdt.udates[!(pdt.udates %in% as.Date(substr(list.files(hycom.dir), 6, 15)))]) > 0) stop('Not all hycom data is available!')
     } else{
       fname <- 'bask_big'
@@ -252,6 +261,12 @@ if (enterAt == 1){
     } 
   }
   
+  # eventually can be used to fill any empty L in L.res
+  #rvec <- list()
+  #for (iii in 1:5){
+  #  rvec[[iii]] <- exists(paste('L.',iii,sep=''))
+  #}
+  
   L.rasters <- mget(ls(pattern = 'L\\.'))
   resamp.idx <- which.max(lapply(L.rasters, FUN=function(x) raster::res(x)[1]))
   L.res <- resample.grid(L.rasters, L.rasters[[resamp.idx]])
@@ -270,8 +285,10 @@ if (enterAt == 1){
   #================
   ## END STEP 2
   #================
-  
-} else if (enterAt == 3){
+  enterAt <- 3
+} 
+
+if (enterAt == 3){
   
   setwd(myDir); load('check2.rda')
   
@@ -342,27 +359,4 @@ if (enterAt == 1){
 aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check3.rda')
 setwd(myDir); base::save.image('check3.rda')
 
-
-
-t1 <- Sys.time()
-setwd('~/EnvData/tryhycom/')
-system('aws s3 cp s3://gaube-data/braun/EnvData/hycom3/BaskingSharks/small/ ./ --recursive')
-t2 <- Sys.time()
-t2-t1
-
-## NEED TO ATTACH/MOUNT EBS DATA DRIVE ON STARTUP
-# need a CLI tool for this
-inst.id <- 'i-09ac38e8105b83c33'
-# attach the drive
-system(paste('aws ec2 attach-volume --device /dev/sdf --volume-id vol-0ee130b0813625388 --instance-id ', inst.id, sep=''))
-# make the directory for the data drive
-dir.create()
-# mount the drive
-system(paste('sudo mount /dev/xvdf Braun_Data_EBS', sep=''))
-
-
-
-#aws ec2 describe-volumes
-
-#aws ec2 attach-volume --volume-id vol-1234567890abcdef0 --instance-id i-01474ef662b89480 --device /dev/sdf
 

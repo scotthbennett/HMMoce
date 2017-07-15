@@ -166,7 +166,7 @@ if (enterAt == 1){
   if (any(likVec == 2) & !exists('L.2')){
     if(is.small){
       fname <- 'bask_small'
-      sst.dir <- paste(sst.dir, sep='')
+      sst.dir <- paste(sst.dir, 'small/', sep='')
     } else{
       fname <- 'bask_big'
       sst.dir <- paste(sst.dir, 'big/', sep='')
@@ -180,7 +180,7 @@ if (enterAt == 1){
   if (any(likVec == 3) & !exists('L.3')){
     if(is.small){
       fname <- 'bask'
-      #hycom.dir <- paste(hycom.dir, 'small/', sep='')
+      hycom.dir <- paste(hycom.dir, 'small/', sep='')
       if(length(pdt.udates[!(pdt.udates %in% as.Date(substr(list.files(hycom.dir), 6, 15)))]) > 0) stop('Not all hycom data is available!')
     } else{
       fname <- 'bask_big'
@@ -188,7 +188,7 @@ if (enterAt == 1){
       if(length(pdt.udates[!(pdt.udates %in% as.Date(substr(list.files(hycom.dir), 10, 19)))]) > 0) stop('Not all hycom data is available!')
     }
     
-    L.3 <- calc.ohc(pdt, filename=fname, ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = F)
+    L.3 <- calc.ohc.par(pdt, filename=fname, ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = F)
     # checkpoint each big L calculation step
     if (exists('L.3')){
       ohc.se <- F
@@ -223,7 +223,7 @@ if (enterAt == 1){
   if (any(likVec == 5) & !exists('L.5')){
     if(is.small){
       fname <- 'bask'
-      hycom.dir <- paste(hycom.dir, 'small/', sep='')
+      #hycom.dir <- paste(hycom.dir, 'small/', sep='')
       if(length(pdt.udates[!(pdt.udates %in% as.Date(substr(list.files(hycom.dir), 6, 15)))]) > 0) stop('Not all hycom data is available!')
     } else{
       fname <- 'bask_big'

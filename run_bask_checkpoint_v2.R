@@ -1,5 +1,5 @@
-#library(HMMoce)
-setwd('~/HMMoce/'); devtools::load_all()
+library(HMMoce)
+#setwd('~/HMMoce/'); devtools::load_all()
 dataDir <- '~/ebs/Data/BaskingSharks/batch/'
 envDir <- '~/ebs/EnvData/'
 sst.dir <- '~/ebs/EnvData/sst/BaskingSharks/'
@@ -40,7 +40,7 @@ meta <- read.table(paste(dataDir, 'bask_metadata.csv',sep=''), sep=',', header=T
 likVec=c(1,2,3,4,5)
 
 #for (ii in 1:nrow(meta)){ #nextAnimal
-ii = 1
+ii = 19
 ptt <- meta$PTT[ii] #nextAnimal
 
 # set an area of interest for a particular individual in the resample.grid function using:
@@ -86,7 +86,7 @@ if (err == FALSE){
   stop(paste('PTT ', ptt, ' is complete at check3. Go to ii=', ii+1, '.', sep=''))
 }
 
-statusVec <- c(paste('Entered at ', enterAt, sep=''))
+statusVec <- c(paste('Entered at ', enterAt, sep='')); print(statusVec)
 
 if (enterAt == 1){
   
@@ -203,7 +203,7 @@ if (enterAt == 2){
       #aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check1.rda')
       setwd(myDir); base::save.image('check1.rda')
     } else{
-      L.3 <- calc.ohc(pdt, filename=fname, ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = T)
+      L.3 <- calc.ohc.par(pdt, filename=fname, ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = T)
       #aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check1.rda')
       setwd(myDir); base::save.image('check1.rda')
       if (!exists('L.3')){
@@ -219,7 +219,7 @@ if (enterAt == 2){
   
   if (any(likVec == 4) & !exists('L.4')){
     load('~/ebs/EnvData/woa/woa.quarter.rda')
-    L.4 <- calc.woa.par(pdt, filename='', woa.data = woa.quarter, focalDim = 9, dateVec = dateVec, use.se = T)
+    L.4 <- calc.woa.par(pdt, ptt=ptt, woa.data = woa.quarter, focalDim = 9, dateVec = dateVec, use.se = T)
     # checkpoint each big L calculation step
     if (exists('L.4')){
       woa.se <- T

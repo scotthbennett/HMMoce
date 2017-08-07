@@ -55,7 +55,7 @@ tryCatch({
     silent = T)
 }, error=function(e){print(paste('ERROR: Data does not exist for this checkpoint.', sep = ''))})
 
-if (class(err) == 'try-error'){
+if (err == FALSE){
   tryCatch({
     err <- try(
       #aws.s3::save_object('check2.rda', file='check2.rda', bucket=paste(bucketDir, '/', ptt, sep='')),
@@ -63,7 +63,7 @@ if (class(err) == 'try-error'){
       silent = T)
   }, error=function(e){print(paste('ERROR: Data does not exist for this checkpoint.', sep = ''))})
   
-  if (class(err) == 'try-error'){
+  if (err == FALSE){
     tryCatch({
       err <- try(
         #aws.s3::save_object('check1.rda', file='check1.rda', bucket=paste(bucketDir, '/', ptt, sep='')),
@@ -71,7 +71,7 @@ if (class(err) == 'try-error'){
         silent = T)
     }, error=function(e){print(paste('ERROR: Data does not exist for this checkpoint.', sep = ''))})
     
-    if (class(err) == 'try-error'){
+    if (err == FALSE){
       enterAt <- 1
     } else{
       enterAt <- 2
@@ -146,7 +146,7 @@ if (enterAt == 1){
   locs.grid <- setup.locs.grid(sp.lim)
   
   # save workspace image to s3 as checkpoint
-  base::save.image('check1.rda')
+  base::save.image(file='check1.rda')
   aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check1.rda')
   
   #================

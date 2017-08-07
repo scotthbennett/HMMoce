@@ -5,7 +5,7 @@ envDir <- '~/ebs/EnvData/'
 sst.dir <- '~/ebs/EnvData/sst/BaskingSharks/'
 hycom.dir <- '~/ebs/EnvData/hycom3/BaskingSharks/'
 statusVec <- NA
-bucketDir <- 'gaube-data/braun/Data/BaskingSharks/batch'
+bucketDir <- 'braun-data/braun/Data/BaskingSharks/batch'
 
 load('~/ebs/Data/BaskingSharks/batch/bask_lims.rda')
 str(bask.lims)
@@ -40,7 +40,7 @@ meta <- read.table(paste(dataDir, 'bask_metadata.csv',sep=''), sep=',', header=T
 likVec=c(1,2,3,4,5)
 
 #for (ii in 1:nrow(meta)){ #nextAnimal
-ii = 34
+ii = 1
 ptt <- meta$PTT[ii] #nextAnimal
 
 # set an area of interest for a particular individual in the resample.grid function using:

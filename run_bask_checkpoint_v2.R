@@ -13,6 +13,9 @@ str(bask.lims)
 # add this spec to meta
 
 # enter aws credentials for reading s3
+aws.signature::locate_credentials()
+library(aws.s3)
+#bucketlist()
 aws.creds <- function(){ 
   n1 <- readline(prompt="Enter AWS ACCESS KEY ID: ")
   n2 <- readline(prompt = "Enter AWS SECRET ACCESS KEY: ")
@@ -40,7 +43,7 @@ meta <- read.table(paste(dataDir, 'bask_metadata.csv',sep=''), sep=',', header=T
 likVec=c(1,2,3,4,5)
 
 #for (ii in 1:nrow(meta)){ #nextAnimal
-ii = 19
+ii = 20
 ptt <- meta$PTT[ii] #nextAnimal
 
 # set an area of interest for a particular individual in the resample.grid function using:
@@ -196,7 +199,7 @@ if (enterAt == 2){
       if(length(pdt.udates[!(pdt.udates %in% as.Date(substr(list.files(hycom.dir), 10, 19)))]) > 0) stop('Not all hycom data is available!')
     }
     
-    L.3 <- calc.ohc.par(pdt, filename=fname, ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = F)
+    L.3 <- calc.ohc.par(pdt, filename=fname, ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = F, ncores=parallel::detectCores()-2)
     # checkpoint each big L calculation step
     if (exists('L.3')){
       ohc.se <- F
@@ -219,7 +222,7 @@ if (enterAt == 2){
   
   if (any(likVec == 4) & !exists('L.4')){
     load('~/ebs/EnvData/woa/woa.quarter.rda')
-    L.4 <- calc.woa.par(pdt, ptt=ptt, woa.data = woa.quarter, focalDim = 9, dateVec = dateVec, use.se = T, ncores=12)
+    L.4 <- calc.woa.par(pdt, ptt=ptt, woa.data = woa.quarter, focalDim = 9, dateVec = dateVec, use.se = T, ncores=parallel::detectCores()-2)
     # checkpoint each big L calculation step
     if (exists('L.4')){
       woa.se <- T
@@ -307,9 +310,9 @@ if (enterAt == 3){
   doParallel::registerDoParallel(cl, cores = ncores)
   
   ans = foreach::foreach(tt = run.idx) %dopar%{
-    setwd('~/HMMoce'); devtools::load_all()
+    #setwd('~/HMMoce'); devtools::load_all()
     setwd(myDir)
-    #library(HMMoce)
+    library(HMMoce)
     #for (tt in run.idx){
     for (bnd in bndVec){
       for (i in parVec){
@@ -380,7 +383,7 @@ if (enterAt == 3){
 }
 
 # save workspace image to s3 as checkpoint
-setwd(myDir); base::save.image('check3.rda')
-aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check3.rda')
+#setwd(myDir); base::save.image('check3.rda')
+#aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check3.rda')
 
 

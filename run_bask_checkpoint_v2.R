@@ -26,7 +26,7 @@ Sys.setenv("AWS_ACCESS_KEY_ID" = creds[[1]],
            "AWS_DEFAULT_REGION" = creds[[3]])
 
 # which of L.idx combinations do you want to run?
-run.idx <- c(1:4, 7:8)
+run.idx <- c(1,2,4,7,11,13)
 
 # vector of appropriate bounding in filter
 bndVec <- c(NA, 5, 10)
@@ -219,7 +219,7 @@ if (enterAt == 2){
   
   if (any(likVec == 4) & !exists('L.4')){
     load('~/ebs/EnvData/woa/woa.quarter.rda')
-    L.4 <- calc.woa.par(pdt, ptt=ptt, woa.data = woa.quarter, focalDim = 9, dateVec = dateVec, use.se = T)
+    L.4 <- calc.woa.par(pdt, ptt=ptt, woa.data = woa.quarter, focalDim = 9, dateVec = dateVec, use.se = T, ncores=12)
     # checkpoint each big L calculation step
     if (exists('L.4')){
       woa.se <- T
@@ -228,6 +228,8 @@ if (enterAt == 2){
     } else{
       warning('Error: calc.woa function failed.')
       statusVec <- c(statusVec, 'calc.woa function failed')
+      L.4 <- L.1 * 0
+      
     }
   } else{
     L.4 <- L.1 * 0

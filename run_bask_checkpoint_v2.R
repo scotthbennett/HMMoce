@@ -289,7 +289,7 @@ if (enterAt == 2){
   
   # save workspace image to s3 as checkpoint
   setwd(myDir); base::save.image('check2.rda')
-  aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check2.rda')
+  #aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check2.rda')
   
   #================
   ## END STEP 2

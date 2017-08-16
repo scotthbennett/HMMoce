@@ -9,8 +9,6 @@
 #' @param locs is -Locations file output from DAP/Tag Portal for WC tags and 
 #'   contains GPS, Argos, and GPE locations as applicable.
 #' @param locDates is vector of dates from locs dataframe
-#' @param iniloc is 2 x 5 dataframe containing day, month, year, lat, lon for 
-#'   both tag and pop locations
 #' @param locs.grid is list output from \code{setup.locs.grid}
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
 #' @param errEll is logical indicating whether error ellipses should be 
@@ -35,7 +33,7 @@
 #'                      dateVec = dateVec, errEll = TRUE, gpeOnly = TRUE)
 #' }
 
-calc.gpe2 <- function(locs, locDates, iniloc, locs.grid, dateVec, errEll = TRUE, gpeOnly = TRUE){
+calc.gpe2 <- function(locs, locDates, locs.grid, dateVec, errEll = TRUE, gpeOnly = TRUE){
   
   print(paste('Starting light likelihood calculation...'))
   t0 <- Sys.time()
@@ -65,15 +63,6 @@ calc.gpe2 <- function(locs, locDates, iniloc, locs.grid, dateVec, errEll = TRUE,
   lat <- locs.grid$lat[,1]
   lon <- locs.grid$lon[1,]
   L.gpe2 <- array(0, dim = c(col, row, length(dateVec)))
-  
-  # add tag/pop locations as known
-  #ilo <- which.min(abs(locs.grid$lon[1,] - iniloc$lon[1]))
-  #ila <- which.min(abs(locs.grid$lat[,1] - iniloc$lat[1]))
-  #L.gpe2[ilo, ila, 1] <- 1   # Initial location is known
-  
-  #elo <- which.min(abs(locs.grid$lon[1,] - iniloc$lon[2]))
-  #ela <- which.min(abs(locs.grid$lat[,1] - iniloc$lat[2]))
-  #L.gpe2[elo, ela, length(dateVec)] <- 1  # End location is known
   
   print(paste('Starting iterations through deployment period...'))
   

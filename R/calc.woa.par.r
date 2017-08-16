@@ -20,6 +20,7 @@
 #'   sd() of temperature grid cell. Recommend focalDim = 3 if woa.data = woa.one
 #'   and 9 if using woa.quarter.
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
+#' @param sp.lim is list of limits as \code{list(xmin, xmax, ymin, ymax)}
 #' @param use.se is logical indicating whether or not to use SE when using regression to predict temperature at specific depth levels.
 #' @param ncores is integer indicating number of cores used in this parallel computation. Defaults to using a detection function that chooses cores for you.
 #'
@@ -45,7 +46,7 @@
 #' }
 #' 
 
-calc.woa.par <- function(pdt, ptt, woa.data = NULL, dateVec, focalDim = NULL, use.se = TRUE, ncores = parallel::detectCores()){
+calc.woa.par <- function(pdt, ptt, woa.data = NULL, dateVec, sp.lim = NULL, focalDim = NULL, use.se = TRUE, ncores = parallel::detectCores()){
   
   options(warn=-1)
 
@@ -60,8 +61,19 @@ calc.woa.par <- function(pdt, ptt, woa.data = NULL, dateVec, focalDim = NULL, us
     stop('Error: focalDim must be specified.')
   }
   
+  if (!is.null(sp.lim)){
+    lon.idx <- c(which.min(abs(woa.data$lon - sp.lim[[1]])):
+                   which.min(abs(woa.data$lon - sp.lim[[2]])))
+    lat.idx <- c(which.min(abs(woa.data$lat - sp.lim[[3]])):
+                   which.min(abs(woa.data$lat - sp.lim[[4]])))
+    
+    woa.data[[1]] <- woa.data[[1]][lon.idx, lat.idx,,]
+    woa.data$lon <- woa.data$lon[lon.idx]
+    woa.data$lat <- woa.data$lat[lat.idx]
+    
+  }
+  
   depth <- c(0, seq(2.5, 97.5, by=5), seq(112.5, 487.5, by=25), seq(525, 1475, by=50))
-
   
   # get unique time points
   dateVec = lubridate::parse_date_time(dateVec, '%Y-%m-%d')
@@ -174,8 +186,14 @@ ans = foreach::foreach(i = 1:T) %dopar%{
     
   }
   
+  # control for full surfaces of NA vals
+  lik.pdt0 <- lik.pdt
+  lik.pdt0[is.na(lik.pdt0)] <- 0
+  use.idx <- unique(which(lik.pdt0 != 0, arr.ind=T)[,3])
+  lik.pdt[lik.pdt == 1] <- NA
+  
   # multiply likelihood across depth levels for each day
-  lik.pdt <- apply(lik.pdt, 1:2, prod, na.rm = F)
+  lik.pdt <- apply(lik.pdt[,,use.idx], 1:2, FUN=function(x) prod(x, na.rm=F))
   
 }
 

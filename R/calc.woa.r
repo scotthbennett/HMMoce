@@ -20,6 +20,7 @@
 #'   sd() of temperature grid cell. Recommend focalDim = 3 if woa.data = woa.one
 #'   and 9 if using woa.quarter.
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
+#' @param sp.lim is list of limits as \code{list(xmin, xmax, ymin, ymax)}
 #' @param use.se is logical indicating whether or not to use SE when using regression to predict temperature at specific depth levels.
 #'
 #' @export
@@ -44,7 +45,7 @@
 #' }
 #' 
 
-calc.woa <- function(pdt, ptt, woa.data = NULL, dateVec, focalDim = NULL, use.se = TRUE){
+calc.woa <- function(pdt, ptt, woa.data = NULL, dateVec, sp.lim = NULL, focalDim = NULL, use.se = TRUE){
   
   options(warn=-1)
   
@@ -57,6 +58,18 @@ calc.woa <- function(pdt, ptt, woa.data = NULL, dateVec, focalDim = NULL, use.se
   
   if (is.null(focalDim)){
     stop('Error: focalDim must be specified.')
+  }
+  
+  if (!is.null(sp.lim)){
+    lon.idx <- c(which.min(abs(woa.data$lon - sp.lim[[1]])):
+                 which.min(abs(woa.data$lon - sp.lim[[2]])))
+    lat.idx <- c(which.min(abs(woa.data$lat - sp.lim[[3]])):
+                   which.min(abs(woa.data$lat - sp.lim[[4]])))
+    
+    woa.data[[1]] <- woa.data[[1]][lon.idx, lat.idx,,]
+    woa.data$lon <- woa.data$lon[lon.idx]
+    woa.data$lat <- woa.data$lat[lat.idx]
+    
   }
   
   depth <- c(0, seq(2.5, 97.5, by=5), seq(112.5, 487.5, by=25), seq(525, 1475, by=50))
@@ -124,6 +137,7 @@ calc.woa <- function(pdt, ptt, woa.data = NULL, dateVec, focalDim = NULL, use.se
     # calculate sd using Le Bris neighbor method and focal()
     sd.i = array(NA, dim = c(dim(dat.i)[1:2], length(depIdx)))
     
+    t1 <- Sys.time()
     for(ii in 1:length(depIdx)){
       r = raster::flip(raster::raster(t(dat.i[,,depIdx[ii]])), 2)
       f1 = raster::focal(r, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = T))
@@ -161,8 +175,13 @@ calc.woa <- function(pdt, ptt, woa.data = NULL, dateVec, focalDim = NULL, use.se
       
     }
     
+    lik.pdt0 <- lik.pdt
+    lik.pdt0[is.na(lik.pdt0)] <- 0
+    use.idx <- unique(which(lik.pdt0 != 0, arr.ind=T)[,3])
+    lik.pdt[lik.pdt == 1] <- NA
+    
     # multiply likelihood across depth levels for each day
-    lik.pdt <- apply(lik.pdt, 1:2, prod, na.rm = T)
+    lik.pdt <- apply(lik.pdt[,,use.idx], 1:2, FUN=function(x) prod(x, na.rm=F))
     
     # identify date index and add completed likelihood to L.pdt array    
     idx <- which(dateVec == as.Date(time))

@@ -27,12 +27,19 @@ read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst'){
     # READ IN PDT DATA FROM WC FILES
     data <- utils::read.table(paste(wd, ptt,'-PDTs.csv', sep=''), sep=',',header=T,blank.lines.skip=F, skip = 0)
     print(paste('If read.wc() fails for type=pdt, check the number of column headers in the PDTs.csv file.'))
-    data <- extract.pdt(data)
+    data <- HMMoce:::extract.pdt(data)
     dts <- as.POSIXct(data$Date, format = findDateFormat(data$Date))
     d1 <- as.POSIXct('1900-01-02') - as.POSIXct('1900-01-01')
     didx <- dts >= (tag + d1) & dts <= (pop - d1)
-    data <- data[didx,]
+    data <- data[didx,]; dts <- dts[didx]
     udates <- unique(as.Date(data$Date))
+    
+    # check for days with not enough data for locfit
+    data1 <- data
+    data1$dts <- as.Date(dts)
+    dt.cut <- data.frame(group_by(data1, dts) %>% summarise(n=n()))
+    dt.cut <- dt.cut[which(dt.cut[,2] < 3),1]
+    data <- data1[-which(data1$dts %in% dt.cut),]
     
   } else if(type == 'sst'){
     # READ IN TAG SST FROM WC FILES

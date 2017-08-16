@@ -278,9 +278,12 @@ if (enterAt == 2){
     L.idx <- utils::combn(likVec, 2, simplify=F)
   }
   
+  rm(list=c('L.1','L.2','L.3','L.4','L.5', 'woa.quarter'))
+  
   # save workspace image to s3 as checkpoint
   setwd(myDir); base::save.image('check2.rda')
   #aws.s3::s3save_image(bucket=paste(bucketDir, '/', ptt, sep=''), object='check2.rda')
+  if(file.exists('check2.rda')) file.remove('check1.rda')
   
   #================
   ## END STEP 2

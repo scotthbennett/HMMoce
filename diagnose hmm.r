@@ -26,10 +26,11 @@ all <- all[order(all$nll),]
 
 # once we have the "best" model fit, we can look at diagnostics
 fileList <- list.files()
-load(fileList[grep(all$name[nrow(all)], fileList)[1]])
+load(fileList[grep('100979_idx7_bndNA_par4', fileList)[1]])
+#load(fileList[grep(all$name[nrow(all)], fileList)[1]])
 load('check2.rda')
 
-hmm.diagnose(res){
+hmm.diagnose(res, minT=NULL, maxT=NULL){
   require(raster)
   # collapse L.idx so we can get the tt run.idx of interest
   L.idx.coll <- L.idx
@@ -73,13 +74,15 @@ hmm.diagnose(res){
   nllf <- -sum(log(f$psi[f$psi>0]))
   
   # RUN THE SMOOTHING STEP
-  s <- HMMoce::hmm.smoother(f, K1, K2, L, P.final)
+  #s <- HMMoce::hmm.smoother(f, K1, K2, L, P.final)
+  s <- res$s
   
   # GET THE MOST PROBABLE TRACK
   tr <- HMMoce::calc.track(s, g, dateVec)
 
   ## NEED TO WORK ON THE PLOTTING
   if(plot){
+    require(fields)
     fname <- paste(runName, '-DIAG.pdf', sep='')
     
     # page 1 is a data summary
@@ -166,7 +169,7 @@ hmm.diagnose(res){
       
     }
     
-    for (t in 1:2){#length(dateVec)){
+    for (t in 1:5){#length(dateVec)){
       
       # plot L.x, first one
       plot(L.res[[1]][plot.ras.idx[1]][[1]][[t]])
@@ -182,6 +185,11 @@ hmm.diagnose(res){
         plot(0,0, type='n')
         
       } else if(length(L.idx[[tt]]) == 3){
+        # plot L.x, second
+        plot(L.res[[1]][plot.ras.idx[2]][[1]][[t]])
+        world(add=T, fill=T, col='black')
+        title(paste(names(L.res[[1]][plot.ras.idx[2]])))
+        
         # plot L.x, third
         plot(L.res[[1]][plot.ras.idx[3]][[1]][[t]])
         world(add=T, fill=T, col='black')

@@ -5,28 +5,19 @@ envDir <- '~/ebs/EnvData/'
 sst.dir <- '~/ebs/EnvData/sst/BaskingSharks/'
 hycom.dir <- '~/ebs/EnvData/hycom3/BaskingSharks/'
 statusVec <- NA
-bucketDir <- 'braun-data/braun/Data/BaskingSharks/batch'
+bucketDir <- 'braun-data/Data/BaskingSharks/batch'
 
 load('~/ebs/Data/BaskingSharks/batch/bask_lims.rda')
 str(bask.lims)
 # i think 52556, 52562, 100975 are "big" bounds. may be a few more.
 # add this spec to meta
 
-# enter aws credentials for reading s3
-aws.signature::locate_credentials()
+# aws credentials for reading s3
+Sys.setenv("AWS_ACCESS_KEY_ID" = aws.signature::locate_credentials()[[1]],
+           "AWS_SECRET_ACCESS_KEY" = aws.signature::locate_credentials()[[2]],
+           "AWS_DEFAULT_REGION" = aws.signature::locate_credentials()[[4]])
 library(aws.s3)
 #bucketlist()
-aws.creds <- function(){ 
-  n1 <- readline(prompt="Enter AWS ACCESS KEY ID: ")
-  n2 <- readline(prompt = "Enter AWS SECRET ACCESS KEY: ")
-  n3 <- readline(prompt = "Enter AWS DEFAULT REGION (e.g. us-west-2): ")
-  return(list(id=n1, key=n2, region=n3))
-}
-creds <- aws.creds()
-
-Sys.setenv("AWS_ACCESS_KEY_ID" = creds[[1]],
-           "AWS_SECRET_ACCESS_KEY" = creds[[2]],
-           "AWS_DEFAULT_REGION" = creds[[3]])
 
 # which of L.idx combinations do you want to run?
 run.idx <- c(1,2,4,7,11,13)
@@ -43,7 +34,7 @@ meta <- read.table(paste(dataDir, 'bask_metadata.csv',sep=''), sep=',', header=T
 likVec=c(1,2,3,4,5)
 
 #for (ii in 1:nrow(meta)){ #nextAnimal
-ii = 20
+ii = 37
 ptt <- meta$PTT[ii] #nextAnimal
 
 # set an area of interest for a particular individual in the resample.grid function using:
@@ -357,7 +348,7 @@ if (enterAt == 3){
         
         # GET THE MOST PROBABLE TRACK
         tr <- HMMoce::calc.track(s, g, dateVec)
-        setwd(myDir); HMMoce::plotHMM(s, tr, dateVec, ptt=runName, save.plot = T)
+        setwd(myDir)
         
         # WRITE OUT RESULTS
         outVec <- matrix(c(ptt=ptt, minBounds = bnd, migr.spd = i,
@@ -370,6 +361,8 @@ if (enterAt == 3){
         setwd(myDir); save(res, file=paste(runName, '-HMMoce_res.rda', sep=''))
         #save.image(file=paste(ptt, '-HMMoce.RData', sep=''))
         aws.s3::s3save(res, bucket=paste(bucketDir, '/', ptt, sep=''), object=paste(runName, '-HMMoce_res.rda', sep=''))
+        source('~/HMMoce/R/hmm.diagnose.r')
+        hmm.diagnose(res, L.idx, L.res, dateVec, locs.grid, iniloc, bathy, pdt, plot=T)
         
         outVec <- outVec
         

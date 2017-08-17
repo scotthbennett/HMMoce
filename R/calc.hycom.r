@@ -92,15 +92,8 @@ calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se =
   # result will be array of likelihood surfaces
   L.hycom <- array(0, dim = c(length(lon), length(lat), length(dateVec)))
   
-  # BEGIN PARALLEL STUFF  
+  print(paste('Starting iterations through deployment period ', '...'))
   
-  #print('Processing in parallel... ')
-  
-  # ncores = detectCores()  # should be an input argument
-  #cl = parallel::makeCluster(ncores)
-  #doParallel::registerDoParallel(cl, cores = ncores)
-  
-  #ans = foreach::foreach(i = 1:T) %dopar%{
   for(i in 1:T){ 
     time <- as.Date(udates[i])
     pdt.i <- pdt[which(pdt$Date == time),]

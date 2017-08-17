@@ -4,7 +4,7 @@
 \alias{calc.track}
 \title{Calculate movement track from state estimates}
 \usage{
-calc.track(distr, g, dateVec, method = "mean")
+calc.track(distr, g, dateVec, iniloc, method = "mean")
 }
 \arguments{
 \item{distr}{is output array from \code{hmm.smoother}}
@@ -14,8 +14,10 @@ spatial scale and grid you're working on}
 
 \item{dateVec}{is vector of dates from tag to pop-up in 1 day increments.}
 
+\item{iniloc}{is matrix of tag and pop locations. Default is NULL because this should be taken care of elsewhere.}
+
 \item{method}{is character indicating what method to use for track 
-calculation. Currently only 'mean' is supported.}
+calculation. Currently only 'mean' and 'max' are supported.}
 }
 \value{
 calculated track

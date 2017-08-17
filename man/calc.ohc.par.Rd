@@ -6,7 +6,7 @@
 parallel}
 \usage{
 calc.ohc.par(pdt, filename, isotherm = "", ohc.dir, dateVec, bathy = TRUE,
-  use.se = TRUE, ncores = parallel::detectCores())
+  use.se = TRUE, ncores = NULL)
 }
 \arguments{
 \item{pdt}{input PAT data see \code{\link{extract.pdt}}}

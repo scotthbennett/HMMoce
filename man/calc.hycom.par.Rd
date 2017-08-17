@@ -5,7 +5,7 @@
 \title{Hycom Profile LIkelihood in Parallel}
 \usage{
 calc.hycom.par(pdt, filename, hycom.dir, focalDim = 9, dateVec,
-  use.se = TRUE, ncores = parallel::detectCores())
+  use.se = TRUE, ncores = NULL)
 }
 \arguments{
 \item{pdt}{input PAT data see \code{\link{extract.pdt}}}

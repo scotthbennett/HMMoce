@@ -4,7 +4,8 @@
 \alias{plotRD}
 \title{Plot RD results}
 \usage{
-plotRD(distr, track, ptt, known = NULL, g, xlims, ylims, save.plot = FALSE)
+plotRD(distr, track, ptt, known = NULL, g, xlims, ylims, makePlot = TRUE,
+  save.plot = FALSE)
 }
 \arguments{
 \item{distr}{is output array from \code{hmm.smoother}}
@@ -22,6 +23,8 @@ track collected by SPOT or GPS, for example. Default is NULL.}
 \item{xlims}{a vector of length 2 indicating longitude limits (-180 to 180).}
 
 \item{ylims}{a vector of length 2 indicating latitude limits}
+
+\item{makePlot}{is logical indicating whether to make a plot of the RD}
 
 \item{save.plot}{is logical indicating whether you want the plot written to
 disk using \code{pdf}.}

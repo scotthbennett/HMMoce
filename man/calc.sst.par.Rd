@@ -5,7 +5,7 @@
 \title{Calculate SST-based likelihood}
 \usage{
 calc.sst.par(tag.sst, filename, sst.dir, dateVec, focalDim = NULL,
-  sens.err = 1, ncores = parallel::detectCores())
+  sens.err = 1, ncores = NULL)
 }
 \arguments{
 \item{tag.sst}{variable containing tag-collected SST data}

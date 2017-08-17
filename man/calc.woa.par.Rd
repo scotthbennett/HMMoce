@@ -4,8 +4,8 @@
 \alias{calc.woa.par}
 \title{Calculate WOA profile in parallel}
 \usage{
-calc.woa.par(pdt, ptt, woa.data = NULL, dateVec, focalDim = NULL,
-  use.se = TRUE, ncores = parallel::detectCores())
+calc.woa.par(pdt, ptt, woa.data = NULL, dateVec, sp.lim = NULL,
+  focalDim = NULL, use.se = TRUE, ncores = NULL)
 }
 \arguments{
 \item{pdt}{is PDT data from WC psat tag summarizing depth/temperature data 
@@ -16,6 +16,8 @@ over a programmed time interval}
 \item{woa.data}{is monthly global 1/4deg climatology data from WOA13}
 
 \item{dateVec}{is vector of dates from tag to pop-up in 1 day increments.}
+
+\item{sp.lim}{is list of limits as \code{list(xmin, xmax, ymin, ymax)}}
 
 \item{focalDim}{is integer for dimensions of raster::focal used to calculate
 sd() of temperature grid cell. Recommend focalDim = 3 if woa.data = woa.one

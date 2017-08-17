@@ -24,7 +24,7 @@
 #' }
 #' 
 
-calc.track <- function(distr, g, dateVec, method = 'mean'){
+calc.track <- function(distr, g, dateVec, iniloc, method = 'mean'){
   ## Calculate track from probability distribution of location
   
   if (method == 'mean'){
@@ -83,7 +83,12 @@ calc.track <- function(distr, g, dateVec, method = 'mean'){
   
   track <- data.frame(cbind(date = dateVec, lon = lon, lat = lat, p = p.resid))
   track$date <- dateVec
-
+  
+  if (any(!c(iniloc$lon[1] - 1 < round(tr$lon[1],0) & iniloc$lon[1] + 1 > round(tr$lon[1],0),
+  iniloc$lat[1] - 1 < round(tr$lat[1],0) & iniloc$lat[1] + 1 > round(tr$lat[1],0),
+  iniloc$lon[2] - 1 < round(tr$lon[nrow(tr)],0) & iniloc$lon[2] + 1 > round(tr$lon[nrow(tr)],0),
+  iniloc$lat[2] - 1 < round(tr$lat[nrow(tr)],0) & iniloc$lat[2] + 1 > round(tr$lat[nrow(tr)],0)))) warning('Known tag and pop-up locations are not within +/- 1deg of final calculated start/stop positions of the track. This usually means the input likelihoods were too far from the known locations for the filter/smoother process to realistically get the tag from the likely location(s) to the known location given the movement kernels specified. Try a different likelihood input.')
+  
   return(track)
 
 }

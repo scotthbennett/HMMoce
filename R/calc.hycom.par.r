@@ -38,13 +38,16 @@
 #' }
 
 
-calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se = TRUE, ncores = parallel::detectCores()){
+calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se = TRUE, ncores = NULL){
   
   options(warn=-1)
   
   t0 <- Sys.time()
   print(paste('Starting Hycom profile likelihood calculation...'))
   
+  if (is.null(ncores)) ncores <- ceiling(parallel::detectCores() * .9)
+  if (is.na(ncores) | ncores < 0) ncores <- ceiling(as.numeric(system('nproc', intern=T)) * .9)
+    
   # calculate midpoint of tag-based min/max temps
   pdt$MidTemp <- (pdt$MaxTemp + pdt$MinTemp) / 2
   

@@ -41,9 +41,12 @@
 #' 
 #' }
 
-calc.sst.par <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.err = 1, ncores = parallel::detectCores()){
+calc.sst.par <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.err = 1, ncores = NULL){
   
   print(paste('Starting SST likelihood calculation...'))
+  
+  if (is.null(ncores)) ncores <- ceiling(parallel::detectCores() * .9)
+  if (is.na(ncores) | ncores < 0) ncores <- ceiling(as.numeric(system('nproc', intern=T)) * .9)
   
   t0 <- Sys.time()
   

@@ -38,9 +38,12 @@
 #' }
 
 
-calc.ohc.par <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRUE, use.se = TRUE, ncores = parallel::detectCores()){
+calc.ohc.par <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRUE, use.se = TRUE, ncores = NULL){
   
   options(warn=1)
+  
+  if (is.null(ncores)) ncores <- ceiling(parallel::detectCores() * .9)
+  if (is.na(ncores) | ncores < 0) ncores <- ceiling(as.numeric(system('nproc', intern=T)) * .9)
   
   t0 <- Sys.time()
   print(paste('Starting OHC likelihood calculation...'))

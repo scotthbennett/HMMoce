@@ -10,12 +10,15 @@
 #' @export
 #' 
 
-resample.grid.par <- function(L.rasters, L.resol, ncores = parallel::detectCores()){
+resample.grid.par <- function(L.rasters, L.resol, ncores = NULL){
   
   L.rasters.old <- L.rasters
   n <- length(L.rasters)
   
   # BEGIN PARALLEL STUFF  
+  
+  if (is.null(ncores)) ncores <- ceiling(parallel::detectCores() * .9)
+  if (is.na(ncores) | ncores < 0) ncores <- ceiling(as.numeric(system('nproc', intern=T)) * .9)
   
   print('processing in parallel... ')
   

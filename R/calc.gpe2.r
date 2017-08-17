@@ -51,15 +51,6 @@ calc.gpe2 <- function(locs, locDates, locs.grid, dateVec, errEll = TRUE, gpeOnly
     stop('Error: Currently gpeOnly must be set to TRUE otherwise duplicate dates are handled improperly.')
   }
   
-  #if(any(duplicated(locDates))){
-    # run a simplify function
-  #  locList <- simplifyLocs(locs, locDates)
-  #  locs <- locList$locs; locDates <- locList$locDates
-  #}
-  
-  print(paste(length(which(dateVec %in% locDates)), ' of ', length(dateVec), ' deployment days have GPE data...', sep=''))
-  print(paste('Data gaps are ', paste(diff(dateVec[which((dateVec %in% locDates))], units='days'), collapse=', '), ' days...'))
-  
   # set up results array
   row <- dim(locs.grid$lon)[1]
   col <- dim(locs.grid$lon)[2]

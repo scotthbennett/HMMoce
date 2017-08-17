@@ -13,8 +13,7 @@
 #' @note Be patient! The download can take a few minutes!
 
 get.bath.data <- function(lonlow, lonhigh, latlow, lathigh, folder = tempdir(), seaonly = T, res = c(.5), raster=TRUE){
-  #require(RNetCDF)
-  
+
   #rot90 <- function(A) {
   #  n <- dim(A)[2]
   #  A <- t(A)

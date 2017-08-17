@@ -9,6 +9,7 @@
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
 #' @param method is character indicating what method to use for track 
 #'   calculation. Currently only 'mean' and 'max' are supported.
+#' @param iniloc is matrix of tag and pop locations. Default is NULL because this should be taken care of elsewhere.
 #'   
 #' @return calculated track
 #' @export
@@ -84,10 +85,10 @@ calc.track <- function(distr, g, dateVec, iniloc, method = 'mean'){
   track <- data.frame(cbind(date = dateVec, lon = lon, lat = lat, p = p.resid))
   track$date <- dateVec
   
-  if (any(!c(iniloc$lon[1] - 1 < round(tr$lon[1],0) & iniloc$lon[1] + 1 > round(tr$lon[1],0),
-  iniloc$lat[1] - 1 < round(tr$lat[1],0) & iniloc$lat[1] + 1 > round(tr$lat[1],0),
-  iniloc$lon[2] - 1 < round(tr$lon[nrow(tr)],0) & iniloc$lon[2] + 1 > round(tr$lon[nrow(tr)],0),
-  iniloc$lat[2] - 1 < round(tr$lat[nrow(tr)],0) & iniloc$lat[2] + 1 > round(tr$lat[nrow(tr)],0)))) warning('Known tag and pop-up locations are not within +/- 1deg of final calculated start/stop positions of the track. This usually means the input likelihoods were too far from the known locations for the filter/smoother process to realistically get the tag from the likely location(s) to the known location given the movement kernels specified. Try a different likelihood input.')
+  if (any(!c(iniloc$lon[1] - 1 < round(track$lon[1],0) & iniloc$lon[1] + 1 > round(track$lon[1],0),
+  iniloc$lat[1] - 1 < round(track$lat[1],0) & iniloc$lat[1] + 1 > round(track$lat[1],0),
+  iniloc$lon[2] - 1 < round(track$lon[nrow(track)],0) & iniloc$lon[2] + 1 > round(track$lon[nrow(track)],0),
+  iniloc$lat[2] - 1 < round(track$lat[nrow(track)],0) & iniloc$lat[2] + 1 > round(track$lat[nrow(track)],0)))) warning('Known tag and pop-up locations are not within +/- 1deg of final calculated start/stop positions of the trackack. This usually means the input likelihoods were too far from the known locations for the filter/smoother process to realistically get the tag from the likely location(s) to the known location given the movement kernels specified. tracky a different likelihood input.')
   
   return(track)
 

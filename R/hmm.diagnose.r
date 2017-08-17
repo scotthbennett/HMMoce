@@ -1,6 +1,6 @@
 hmm.diagnose <- function(res, L.idx, L.res, dateVec, locs.grid, iniloc, bathy, pdt, minT=NULL, maxT=NULL, plot=TRUE){
   #res, L.idx, L.res, dateVec, locs.grid, iniloc, bathy, pdt
-  require(raster)
+  
   # collapse L.idx so we can get the tt run.idx of interest
   L.idx.coll <- L.idx
   for (ii in 1:length(L.idx)) L.idx.coll[[ii]] <- paste(L.idx[[ii]], collapse='')
@@ -9,10 +9,13 @@ hmm.diagnose <- function(res, L.idx, L.res, dateVec, locs.grid, iniloc, bathy, p
   ptt <- res$outVec[[1]]
   runName <- paste(ptt,'_idx',tt,'_bnd',bnd,'_par',i,sep='')
   
+  tag <- as.POSIXct(paste(iniloc[1,1], '/', iniloc[1,2], '/', iniloc[1,3], sep=''), format = '%d/%m/%Y', tz='UTC')
+  pop <- as.POSIXct(paste(iniloc[2,1], '/', iniloc[2,2], '/', iniloc[2,3], sep=''), format = '%d/%m/%Y', tz='UTC')
+  
   #----------------------------------------------------------------------------------#
   # COMBINE LIKELIHOOD MATRICES
   #----------------------------------------------------------------------------------#
-  L <- HMMoce::make.L(L1 = L.res[[1]][L.idx[[tt]]],
+  L <- make.L(L1 = L.res[[1]][L.idx[[tt]]],
                       L.mle.res = L.res$L.mle.res, dateVec = dateVec,
                       locs.grid = locs.grid, iniloc = iniloc, bathy = bathy,
                       pdt = pdt)
@@ -24,20 +27,20 @@ hmm.diagnose <- function(res, L.idx, L.res, dateVec, locs.grid, iniloc, bathy, p
   lat <- g$lat[,1]
   
   # GET MOVEMENT KERNELS AND SWITCH PROB FOR COARSE GRID
-  par0 <- HMMoce::makePar(migr.spd=i, grid=g.mle, L.arr=L.mle, p.guess=c(.9,.9), calcP=T)
+  par0 <- makePar(migr.spd=i, grid=g.mle, L.arr=L.mle, p.guess=c(.9,.9), calcP=T)
   #K1 <- par0$K1; K2 <- par0$K2; 
   P.final <- par0$P.final
   
   # GET MOVEMENT KERNELS AND SWITCH PROB FOR FINER GRID
-  par0 <- HMMoce::makePar(migr.spd=i, grid=g, L.arr=L, p.guess=c(.9,.9), calcP=F)
+  par0 <- makePar(migr.spd=i, grid=g, L.arr=L, p.guess=c(.9,.9), calcP=F)
   K1 <- par0$K1; K2 <- par0$K2; #P.final <- par0$P.final
   
   # RUN THE FILTER STEP
   if(!is.na(bnd)){
-    f <- HMMoce::hmm.filter(g, L, K1, K2, maskL=T, P.final, minBounds = bnd)
+    f <- hmm.filter(g, L, K1, K2, maskL=T, P.final, minBounds = bnd)
     maskL.logical <- TRUE
   } else{
-    f <- HMMoce::hmm.filter(g, L, K1, K2, P.final, maskL=F)
+    f <- hmm.filter(g, L, K1, K2, P.final, maskL=F)
     maskL.logical <- FALSE
   }
   nllf <- -sum(log(f$psi[f$psi>0]))
@@ -47,11 +50,11 @@ hmm.diagnose <- function(res, L.idx, L.res, dateVec, locs.grid, iniloc, bathy, p
   s <- res$s
   
   # GET THE MOST PROBABLE TRACK
-  tr <- HMMoce::calc.track(s, g, dateVec)
+  tr <- calc.track(s, g, dateVec)
   
   ## NEED TO WORK ON THE PLOTTING
   if(plot){
-    require(fields)
+
     fname <- paste(runName, '-DIAG.pdf', sep='')
     
     # page 1 is a data summary
@@ -83,7 +86,7 @@ hmm.diagnose <- function(res, L.idx, L.res, dateVec, locs.grid, iniloc, bathy, p
     ymax <- max(pdt$Depth, na.rm=T) + max(pdt$Depth, na.rm=T)*.15
     
     if (length(L.idx[[tt]]) == 1){
-      pdf(fname, width=8, height=8)
+      grDevices::pdf(fname, width=8, height=8)
       
       plot(dateVec, rep(0, length.out=length(dateVec)), type='n',
            ylim=c(ymax, -25), ylab='Depth (m)', xlab='')
@@ -101,7 +104,7 @@ hmm.diagnose <- function(res, L.idx, L.res, dateVec, locs.grid, iniloc, bathy, p
       plot.ras.idx <- which(names(L.res[[1]]) %in% paste('L.', L.idx[[tt]], sep=''))
       
     } else if(length(L.idx[[tt]]) == 2){
-      pdf(fname, width=8, height=12)
+      grDevices::pdf(fname, width=8, height=12)
       
       plot(dateVec, rep(0, length.out=length(dateVec)), type='n',
            ylim=c(ymax, -25), ylab='Depth (m)', xlab='')
@@ -119,7 +122,7 @@ hmm.diagnose <- function(res, L.idx, L.res, dateVec, locs.grid, iniloc, bathy, p
       plot.ras.idx <- which(names(L.res[[1]]) %in% paste('L.', L.idx[[tt]], sep=''))
       
     } else if(length(L.idx[[tt]]) == 3){
-      pdf(fname, width=8, height=12)
+      grDevices::pdf(fname, width=8, height=12)
       
       plot(dateVec, rep(0, length.out=length(dateVec)), type='n',
            ylim=c(ymax, -25), ylab='Depth (m)', xlab='')
@@ -143,47 +146,47 @@ hmm.diagnose <- function(res, L.idx, L.res, dateVec, locs.grid, iniloc, bathy, p
       # plot L.x, first one
       plot(L.res[[1]][plot.ras.idx[1]][[1]][[t]])
       world(add=T, fill=T, col='black')
-      title(paste(dateVec[t], ' - ', names(L.res[[1]][plot.ras.idx[1]])))
+      graphics::title(paste(dateVec[t], ' - ', names(L.res[[1]][plot.ras.idx[1]])))
       
       if(length(L.idx[[tt]]) == 2){
         # plot L.x, second
-        plot(L.res[[1]][plot.ras.idx[2]][[1]][[t]])
+        raster::plot(L.res[[1]][plot.ras.idx[2]][[1]][[t]])
         world(add=T, fill=T, col='black')
-        title(paste(names(L.res[[1]][plot.ras.idx[2]])))
+        graphics::title(paste(names(L.res[[1]][plot.ras.idx[2]])))
         
         plot(0,0, type='n')
         
       } else if(length(L.idx[[tt]]) == 3){
         # plot L.x, second
-        plot(L.res[[1]][plot.ras.idx[2]][[1]][[t]])
+        raster::plot(L.res[[1]][plot.ras.idx[2]][[1]][[t]])
         world(add=T, fill=T, col='black')
-        title(paste(names(L.res[[1]][plot.ras.idx[2]])))
+        graphics::title(paste(names(L.res[[1]][plot.ras.idx[2]])))
         
         # plot L.x, third
-        plot(L.res[[1]][plot.ras.idx[3]][[1]][[t]])
+        raster::plot(L.res[[1]][plot.ras.idx[3]][[1]][[t]])
         world(add=T, fill=T, col='black')
-        title(paste(names(L.res[[1]][plot.ras.idx[3]])))
+        graphics::title(paste(names(L.res[[1]][plot.ras.idx[3]])))
         
       }
       
       # plot L
-      image.plot(lon, lat, L[t,,], zlim=c(.01, .81))
+      fields::image.plot(lon, lat, L[t,,], zlim=c(.01, .81))
       world(add=T, fill=T, col='black')
-      title('overall L')
+      graphics::title('overall L')
       
       # plot f
-      image.plot(lon, lat, f$phi[1,t,,])
+      fields::image.plot(lon, lat, f$phi[1,t,,])
       world(add=T, fill=T, col='black')
-      title('filter output')
+      graphics::title('filter output')
       
       # plot s
-      image.plot(lon, lat, s[1,t,,])
+      fields::image.plot(lon, lat, s[1,t,,])
       world(add=T, fill=T, col='black')
-      title('smoother output')
+      graphics::title('smoother output')
       
     }
     
-    dev.off()
+    grDevices::dev.off()
     
     
     

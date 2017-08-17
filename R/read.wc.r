@@ -10,6 +10,10 @@
 #' @param type is character indicating which type of data to read. Choices are 
 #'   'sst', 'pdt', 'light' corresponding to those data files output from WC Data
 #'   Portal
+#' @importFrom dplyr %>%
+#' @importFrom dplyr group_by
+#' @importFrom dplyr summarise
+#' @importFrom dplyr n
 #'   
 #' @return a list containing: the data read as a data.frame and a date vector of
 #'   unique dates in that data
@@ -27,7 +31,7 @@ read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst'){
     # READ IN PDT DATA FROM WC FILES
     data <- utils::read.table(paste(wd, ptt,'-PDTs.csv', sep=''), sep=',',header=T,blank.lines.skip=F, skip = 0)
     print(paste('If read.wc() fails for type=pdt, check the number of column headers in the PDTs.csv file.'))
-    data <- HMMoce:::extract.pdt(data)
+    data <- extract.pdt(data)
     dts <- as.POSIXct(data$Date, format = findDateFormat(data$Date))
     d1 <- as.POSIXct('1900-01-02') - as.POSIXct('1900-01-01')
     didx <- dts >= (tag + d1) & dts <= (pop - d1)

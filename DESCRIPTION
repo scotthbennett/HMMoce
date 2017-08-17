@@ -27,6 +27,8 @@ Imports:
     lubridate,
     maptools,
     raster,
+    RColorBrewer,
+    rgeos,
     RNetCDF,
     rworldmap,
     sp,

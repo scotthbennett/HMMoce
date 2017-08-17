@@ -30,7 +30,6 @@ Imports:
     RColorBrewer,
     rgeos,
     RNetCDF,
-    rworldmap,
     sp,
     parallel,
     doParallel,

@@ -32,7 +32,6 @@ read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst'){
     d1 <- as.POSIXct('1900-01-02') - as.POSIXct('1900-01-01')
     didx <- dts >= (tag + d1) & dts <= (pop - d1)
     data <- data[didx,]; dts <- dts[didx]
-    udates <- unique(as.Date(data$Date))
     
     # check for days with not enough data for locfit
     data1 <- data
@@ -40,6 +39,14 @@ read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst'){
     dt.cut <- data.frame(group_by(data1, dts) %>% summarise(n=n()))
     dt.cut <- dt.cut[which(dt.cut[,2] < 3),1]
     data <- data1[-which(data1$dts %in% dt.cut),]
+    
+    # get unique dates
+    udates <- unique(as.Date(data$Date))
+
+    # get data gaps
+    print(paste(length(which(as.Date(seq(tag, pop, 'day')) %in% udates)), ' of ', length(seq(tag, pop, 'day')), ' deployment days have GPE data...', sep=''))
+    gaps <- diff(c(as.Date(tag), udates, as.Date(pop)), units='days')
+    print(paste('Data gaps are ', paste(gaps[gaps > 1], collapse=', '), ' days...'))
     
   } else if(type == 'sst'){
     # READ IN TAG SST FROM WC FILES
@@ -54,6 +61,11 @@ read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst'){
     dts <- as.Date(as.POSIXct(data$Date, format = findDateFormat(data$Date)))
     udates <- unique(dts)
     data <- data[,c(1:11)]
+    
+    # get data gaps
+    print(paste(length(which(as.Date(seq(tag, pop, 'day')) %in% udates)), ' of ', length(seq(tag, pop, 'day')), ' deployment days have GPE data...', sep=''))
+    gaps <- diff(c(as.Date(tag), udates, as.Date(pop)), units='days')
+    print(paste('Data gaps are ', paste(gaps[gaps > 1], collapse=', '), ' days...'))
     
   } else if(type == 'light'){
     # READ IN LIGHT DATA FROM WC FILES
@@ -74,6 +86,11 @@ read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst'){
     data <- data[didx,]
     data$dts <- as.Date(dts[didx])
     udates <- unique(as.Date(dts))
+    
+    # get data gaps
+    print(paste(length(which(as.Date(seq(tag, pop, 'day')) %in% udates)), ' of ', length(seq(tag, pop, 'day')), ' deployment days have GPE data...', sep=''))
+    gaps <- diff(c(as.Date(tag), udates, as.Date(pop)), units='days')
+    print(paste('Data gaps are ', paste(gaps[gaps > 1], collapse=', '), ' days...'))
     
   }
   

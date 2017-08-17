@@ -22,7 +22,7 @@
 #'   between tag-based sst and remotely sensed sst maps
 #' 
 #' @export
-#' 
+#'@importFrom foreach "%dopar%"
 #' @seealso \code{\link{calc.ohc}}
 #' 
 #' @examples

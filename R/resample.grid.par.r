@@ -9,6 +9,9 @@
 #' @return a list of all resampled likelihood rasters and g, the common grid
 #' @export
 #' 
+#' @importFrom foreach "%dopar%"
+#' 
+
 
 resample.grid.par <- function(L.rasters, L.resol, ncores = NULL){
   

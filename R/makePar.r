@@ -36,6 +36,9 @@ makePar <- function(migr.spd, grid, L.arr, p.guess = c(0.7, 0.8), calcP=FALSE){
   if(calcP){
     P.final <- expmax(p.init=p.guess, g = grid, L = L.arr, K1, K2, save = T)
     save.p <- P.final[[2]]; P.final <- P.final[[1]]
+    
+    if (any(P.final == 1)) warning('Calculated switching probabilities equal 1. This usually indicates problems with this specification of the model. Try using a different set of likelihoods as input.')
+    
   } else{
     P.final <- matrix(c(p.guess[1], 1 - p.guess[1], 1 - p.guess[2], p.guess[2]), 2, 2, byrow = TRUE)
 

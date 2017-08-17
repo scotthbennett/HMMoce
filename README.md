@@ -21,3 +21,5 @@ Examples
 --------
 
 For an example use of the package, please see the vignette using `vignette('HMMoce')`.
+
+[![Travis-CI Build Status](https://travis-ci.org/camrinbraun/HMMoce.svg?branch=master)](https://travis-ci.org/camrinbraun/HMMoce)

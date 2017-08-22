@@ -48,7 +48,7 @@ resample.grid <- function(L.rasters, L.res, mle.res=0.75, bound=NULL){
   agg <- round(mle.res / raster::res(L.mle.res)[1])
   is.odd <- function(x) x %% 2 != 0
   if(!is.odd(agg)) agg <- agg + 1
-  L.mle.res <- raster::aggregate(L.mle.res, agg)
+  if(agg != 1) L.mle.res <- raster::aggregate(L.mle.res, agg)
   
   g <- setup.grid.raster(L.rasters[[1]])
   g.mle <- setup.grid.raster(L.mle.res)

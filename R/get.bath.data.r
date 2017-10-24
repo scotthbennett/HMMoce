@@ -28,12 +28,12 @@ get.bath.data <- function(lonlow, lonhigh, latlow, lathigh, folder = tempdir(), 
   fname = paste(folder, "request.nc", sep = "/")
   if(res==1){
     cat('ERDDAP downloading: Topography, Smith & Sandwell v11.1, 1/60-degree \n UCSD   (Dataset ID: usgsCeSS111)')
-    opt = "http://coastwatch.pfeg.noaa.gov/erddap/griddap/usgsCeSS111.nc?topo[(LATHIGH):(LATLOW)][(LONLOW):(LONHIGH)]&.draw=surface&.vars=longitude|latitude|topo&.colorBar=|||||&.land=over"
+    opt = "https://coastwatch.pfeg.noaa.gov/erddap/griddap/usgsCeSS111.nc?topo[(LATHIGH):(LATLOW)][(LONLOW):(LONHIGH)]"
     bathid = 'topo'
   }
   if(res==.5){
     cat('ERDDAP downloading: Topography, SRTM30+ Version 1.0, 30 arc second, Global \n 	Scripps   (Dataset ID: usgsCeSrtm30v1)')
-    opt ="http://coastwatch.pfeg.noaa.gov/erddap/griddap/usgsCeSrtm30v1.nc?topo[(LATHIGH):(LATLOW)][(LONLOW):(LONHIGH)]&.draw=surface&.vars=longitude|latitude|topo&.colorBar=|||||"
+    opt ="http://coastwatch.pfeg.noaa.gov/erddap/griddap/usgsCeSrtm30v1.nc?topo[(LATHIGH):(LATLOW)][(LONLOW):(LONHIGH)]"
     #opt = 'http://coastwatch.pfeg.noaa.gov/erddap/griddap/etopo180.nc?altitude[(LATLOW):1:(LATHIGH)][(LONLOW):1:(LONHIGH)]'
     bathid = 'topo'
   }
@@ -42,7 +42,7 @@ get.bath.data <- function(lonlow, lonhigh, latlow, lathigh, folder = tempdir(), 
   opt <- sub("LONLOW", lonlow, opt)
   opt <- sub("LONHIGH", lonhigh, opt)
   
-  curl_download(opt, fname, quiet=FALSE)
+  curl::curl_download(opt, fname, quiet=FALSE)
   #utils::download.file(opt, fname)
   
   nc <- RNetCDF::open.nc(fname)

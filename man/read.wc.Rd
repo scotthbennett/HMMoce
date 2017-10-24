@@ -4,7 +4,7 @@
 \alias{read.wc}
 \title{Read and format tag data}
 \usage{
-read.wc(ptt, wd = getwd(), tag, pop, type = "sst", verbose = TRUE)
+read.wc(ptt, wd = getwd(), tag, pop, type = "sst", verbose = FALSE)
 }
 \arguments{
 \item{ptt}{is individual ID number}
@@ -18,6 +18,8 @@ read.wc(ptt, wd = getwd(), tag, pop, type = "sst", verbose = TRUE)
 \item{type}{is character indicating which type of data to read. Choices are 
 'sst', 'pdt', 'light' corresponding to those data files output from WC Data
 Portal}
+
+\item{verbose}{is logical indicating whether a verbose output with more details on the loaded files is desired. Default is FALSE.}
 }
 \value{
 a list containing: the data read as a data.frame and a date vector of

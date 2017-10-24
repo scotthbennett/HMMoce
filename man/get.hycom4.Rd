@@ -31,6 +31,8 @@ may need to use \code{curl} in order to get this to work.}
 \item{dir}{is local directory where ncdf files should be downloaded to.
 default is current working directory. if enter a directory that doesn't
 exist, it will be created.}
+
+\item{depLevels}{is an integer describing which depth levels to download from Hycom (e.g. 1=surface). Default is NULL and all levels are downloaded.}
 }
 \value{
 The url used to extract the requested data from the NetCDF subset

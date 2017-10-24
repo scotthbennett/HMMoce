@@ -6,7 +6,7 @@
 \usage{
 get.env(uniqueDates = NULL, filename = NULL, type = NULL,
   spatLim = NULL, resol = NULL, save.dir = getwd(), sst.type = NULL,
-  ...)
+  depLevels = NULL)
 }
 \arguments{
 \item{uniqueDates}{is a POSIXct vector of desired dates}
@@ -30,6 +30,8 @@ type = 'woa', otherwise NULL.}
 
 \item{sst.type}{is character indicating type of desired SST product. Choices
 are currently OI and GHR SST.}
+
+\item{depLevels}{is an integer describing which depth levels to download from Hycom (e.g. 1=surface). Default is NULL and all levels are downloaded.}
 }
 \value{
 nothing, just downloads the data to your local machine

@@ -19,11 +19,12 @@
 #' @param save.dir is the directory to save the downloaded data to
 #' @param sst.type is character indicating type of desired SST product. Choices
 #'   are currently OI and GHR SST.
+#' @param depLevels is an integer describing which depth levels to download from Hycom (e.g. 1=surface). Default is NULL and all levels are downloaded.
 #'   
 #' @return nothing, just downloads the data to your local machine
 #' @export
 
-get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = NULL, resol = NULL, save.dir = getwd(), sst.type=NULL,...){
+get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = NULL, resol = NULL, save.dir = getwd(), sst.type=NULL, depLevels=NULL){
   
   if(is.null(type)){
     

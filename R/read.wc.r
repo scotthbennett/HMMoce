@@ -10,6 +10,7 @@
 #' @param type is character indicating which type of data to read. Choices are 
 #'   'sst', 'pdt', 'light' corresponding to those data files output from WC Data
 #'   Portal
+#' @param verbose is logical indicating whether a verbose output with more details on the loaded files is desired. Default is FALSE.
 #' @importFrom dplyr %>%
 #' @importFrom dplyr group_by
 #' @importFrom dplyr summarise
@@ -19,7 +20,7 @@
 #'   unique dates in that data
 #' @export
 
-read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst', verbose=TRUE){
+read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst', verbose=FALSE){
   
   if(substr(wd, nchar(wd), nchar(wd)) == '/'){
     

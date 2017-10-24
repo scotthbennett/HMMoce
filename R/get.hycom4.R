@@ -24,6 +24,7 @@
 #' @param dir is local directory where ncdf files should be downloaded to.
 #'   default is current working directory. if enter a directory that doesn't
 #'   exist, it will be created.
+#' @param depLevels is an integer describing which depth levels to download from Hycom (e.g. 1=surface). Default is NULL and all levels are downloaded.
 #' @return The url used to extract the requested data from the NetCDF subset
 #'   service.
 #' @importFrom curl curl_download

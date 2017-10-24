@@ -19,7 +19,7 @@
 #'   unique dates in that data
 #' @export
 
-read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst'){
+read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst', verbose=TRUE){
   
   if(substr(wd, nchar(wd), nchar(wd)) == '/'){
     
@@ -30,7 +30,7 @@ read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst'){
   if(type == 'pdt'){
     # READ IN PDT DATA FROM WC FILES
     data <- utils::read.table(paste(wd, ptt,'-PDTs.csv', sep=''), sep=',',header=T,blank.lines.skip=F, skip = 0)
-    print(paste('If read.wc() fails for type=pdt, check the number of column headers in the PDTs.csv file.'))
+    if (verbose) print(paste('If read.wc() fails for type=pdt, check the number of column headers in the PDTs.csv file.'))
     data <- extract.pdt(data)
     dts <- as.POSIXct(data$Date, format = findDateFormat(data$Date))
     d1 <- as.POSIXct('1900-01-02') - as.POSIXct('1900-01-01')
@@ -52,9 +52,11 @@ read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst'){
     udates <- unique(as.Date(data$Date))
     
     # get data gaps
-    print(paste(length(which(as.Date(seq(tag, pop, 'day')) %in% udates)), ' of ', length(seq(tag, pop, 'day')), ' deployment days have PDT data...', sep=''))
     gaps <- diff(c(as.Date(tag), udates, as.Date(pop)), units='days')
-    print(paste('Data gaps are ', paste(gaps[gaps > 1], collapse=', '), ' days in PDT...'))
+    if(verbose){
+      print(paste(length(which(as.Date(seq(tag, pop, 'day')) %in% udates)), ' of ', length(seq(tag, pop, 'day')), ' deployment days have PDT data...', sep=''))
+      print(paste('Data gaps are ', paste(gaps[gaps > 1], collapse=', '), ' days in PDT...'))
+    }
     
   } else if(type == 'sst'){
     # READ IN TAG SST FROM WC FILES
@@ -71,9 +73,11 @@ read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst'){
     data <- data[,c(1:11)]
     
     # get data gaps
-    print(paste(length(which(as.Date(seq(tag, pop, 'day')) %in% udates)), ' of ', length(seq(tag, pop, 'day')), ' deployment days have GPE data...', sep=''))
     gaps <- diff(c(as.Date(tag), udates, as.Date(pop)), units='days')
-    print(paste('Data gaps are ', paste(gaps[gaps > 1], collapse=', '), ' days...'))
+    if (verbose){
+      print(paste(length(which(as.Date(seq(tag, pop, 'day')) %in% udates)), ' of ', length(seq(tag, pop, 'day')), ' deployment days have GPE data...', sep=''))
+      print(paste('Data gaps are ', paste(gaps[gaps > 1], collapse=', '), ' days...'))
+    }
     
   } else if(type == 'light'){
     # READ IN LIGHT DATA FROM WC FILES
@@ -96,9 +100,11 @@ read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst'){
     udates <- unique(as.Date(dts))
     
     # get data gaps
-    print(paste(length(which(as.Date(seq(tag, pop, 'day')) %in% udates)), ' of ', length(seq(tag, pop, 'day')), ' deployment days have GPE data...', sep=''))
     gaps <- diff(c(as.Date(tag), udates, as.Date(pop)), units='days')
-    print(paste('Data gaps are ', paste(gaps[gaps > 1], collapse=', '), ' days...'))
+    if (verbose){
+      print(paste(length(which(as.Date(seq(tag, pop, 'day')) %in% udates)), ' of ', length(seq(tag, pop, 'day')), ' deployment days have GPE data...', sep=''))
+      print(paste('Data gaps are ', paste(gaps[gaps > 1], collapse=', '), ' days...'))
+    }
     
   }
   

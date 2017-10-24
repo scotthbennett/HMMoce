@@ -52,18 +52,15 @@ read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst', verbose=TRUE){
     udates <- unique(as.Date(data$Date))
     
     # get data gaps
-<<<<<<< HEAD
     print(paste(length(which(as.Date(seq(tag, pop, 'day')) %in% udates)), ' of ', length(seq(tag, pop, 'day')), ' deployment days have PDT data...', sep=''))
     gaps <- diff(c(as.Date(tag), udates, as.Date(pop)), units='days')
     print(paste('Data gaps are ', paste(gaps[gaps > 1], collapse=', '), ' days in PDT...'))
-=======
     gaps <- diff(c(as.Date(tag), udates, as.Date(pop)), units='days')
     if(verbose){
       print(paste(length(which(as.Date(seq(tag, pop, 'day')) %in% udates)), ' of ', length(seq(tag, pop, 'day')), ' deployment days have PDT data...', sep=''))
       print(paste('Data gaps are ', paste(gaps[gaps > 1], collapse=', '), ' days in PDT...'))
     }
->>>>>>> new-version
-    
+
   } else if(type == 'sst'){
     # READ IN TAG SST FROM WC FILES
     data <- utils::read.table(paste(wd, ptt, '-SST.csv', sep=''), sep=',',header=T, blank.lines.skip=F)

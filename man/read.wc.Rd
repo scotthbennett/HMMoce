@@ -4,7 +4,7 @@
 \alias{read.wc}
 \title{Read and format tag data}
 \usage{
-read.wc(ptt, wd = getwd(), tag, pop, type = "sst")
+read.wc(ptt, wd = getwd(), tag, pop, type = "sst", verbose = TRUE)
 }
 \arguments{
 \item{ptt}{is individual ID number}

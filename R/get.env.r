@@ -23,7 +23,7 @@
 #' @return nothing, just downloads the data to your local machine
 #' @export
 
-get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = NULL, resol = NULL, save.dir = getwd(), sst.type=NULL){
+get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = NULL, resol = NULL, save.dir = getwd(), sst.type=NULL,...){
   
   if(is.null(type)){
     
@@ -65,8 +65,8 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
     for(i in 1:length(uniqueDates)){
       time <- as.Date(uniqueDates[i])
       repeat{
-        get.hycom3(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''),
-                  download.file = TRUE, dir = save.dir) 
+        get.hycom4(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''),
+                  download.file = TRUE, dir = save.dir, depLevels=1) 
         tryCatch({
           err <- try(RNetCDF::open.nc(paste(save.dir,'/', filename, '_', time, '.nc', sep = '')), silent = T)
         }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})

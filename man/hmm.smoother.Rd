@@ -28,3 +28,10 @@ an array of the final state estimates of dim(state, time, lon, lat)
 filtered state estimates as output from \code{hmm.filter}. The product of 
 this function an array containing final state estimates.
 }
+\examples{
+\dontrun{
+# RUN THE SMOOTHING STEP
+s <- hmm.smoother(f, K1, K2, L, P.final)
+}
+
+}

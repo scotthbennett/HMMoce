@@ -18,7 +18,8 @@
 #' @examples
 #' \dontrun{
 #' sp.lim <- list(lonmin = -82, lonmax = -25, latmin = 15, latmax = 50)
-#' bathy <- get.bath.data(sp.lim$lonmin, sp.lim$lonmax, sp.lim$latmin, sp.lim$latmax, folder = tempdir())
+#' bathy <- get.bath.data(sp.lim$lonmin, sp.lim$lonmax, sp.lim$latmin, 
+#' sp.lim$latmax, folder = tempdir())
 #' }
 #' @export
 #' @importFrom curl curl_download

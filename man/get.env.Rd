@@ -24,14 +24,15 @@ atlas 'woa' data}
 ymax)}}
 
 \item{resol}{is character describing the desired resolution in degrees if 
-type = 'woa', otherwise NULL.}
+type = 'woa', otherwise NULL. Choices are 'one' or 'quarter'.}
 
 \item{save.dir}{is the directory to save the downloaded data to}
 
-\item{sst.type}{is character indicating type of desired SST product. Choices
+\item{sst.type}{is character indicating type of desired SST product. Choices 
 are currently OI and GHR SST.}
 
-\item{depLevels}{is an integer describing which depth levels to download from Hycom (e.g. 1=surface). Default is NULL and all levels are downloaded.}
+\item{depLevels}{is an integer describing which depth levels to download from
+Hycom (e.g. 1=surface). Default is NULL and all levels are downloaded.}
 }
 \value{
 nothing, just downloads the data to your local machine
@@ -40,4 +41,19 @@ nothing, just downloads the data to your local machine
 \code{get.env} accesses oceanographic data like sea surface temperature from 
 a remote server and downloads the temporal and spatial extent of interest for
 further use
+}
+\examples{
+\dontrun{
+sp.lim <- list(lonmin = -82, lonmax = -25, latmin = 15, latmax = 50)
+# FOR OI SST DATA
+get.env(as.Date('2015-10-01'), filename='oisst', type = 'sst', 
+sst.type='oi', spatLim = sp.lim, save.dir = tempdir())
+
+# FOR HYCOM DATA
+get.env(as.Date('2015-10-01'), filename='hycom', type = 'hycom', 
+spatLim = sp.lim, save.dir = tempdir())
+
+# FOR WORLD OCEAN ATLAS DATA
+get.env(type = 'woa', resol = 'quarter', save.dir = woa.dir)
+}
 }

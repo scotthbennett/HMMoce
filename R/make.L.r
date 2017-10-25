@@ -24,7 +24,9 @@
 #'   coarse version of L used later for parameter estimation
 #' @examples
 #' \dontrun{
-#' L <- make.L(L1 = L.res[[1]][L.idx[[tt]]], L.mle.res = L.res$L.mle.res, dateVec = dateVec, locs.grid = locs.grid, iniloc = iniloc, bathy = bathy, pdt = pdt)
+#' L <- make.L(L1 = L.res[[1]][L.idx[[tt]]], L.mle.res = L.res$L.mle.res,
+#'  dateVec = dateVec, locs.grid = locs.grid, iniloc = iniloc, 
+#'  bathy = bathy, pdt = pdt)
 #' }
 #' @export
 #' @note This function currently only supports the use of 3 input likelihood 

@@ -41,7 +41,8 @@ HMM filter functions
 \dontrun{
 
 # RUN THE FILTER STEP
-f <- hmm.filter(g, L, K1, K2, P.final)
+f <- hmm.filter(g, L, K1, K2, maskL=T, P.final, minBounds = bnd)
+nllf <- -sum(log(f$psi[f$psi>0])) # negative log-likelihood
 
 }
 

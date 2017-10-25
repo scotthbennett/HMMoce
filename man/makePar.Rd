@@ -32,3 +32,9 @@ Function builds movement kernels for 2 different behavior states and
 calculates, if desired, switching probability using an expectation
 maximization routine
 }
+\examples{
+\dontrun{
+par0 <- makePar(migr.spd=2, grid=g.mle, L.arr=L.mle, p.guess=c(.9,.9), calcP=T)
+}
+      
+}

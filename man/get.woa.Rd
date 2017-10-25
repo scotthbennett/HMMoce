@@ -9,7 +9,7 @@ get.woa(save.dir = getwd(), resol = "one")
 \arguments{
 \item{save.dir}{is the directory to save the downloaded data to}
 
-\item{resol}{is character describing the desired resolution in degrees}
+\item{resol}{is character describing the desired resolution in degrees. Choices are 'one' or 'quarter'.}
 }
 \value{
 name and directory of the downloaded data

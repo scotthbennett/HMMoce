@@ -15,19 +15,23 @@ make.L(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res,
 
 \item{L3}{a likelihood array}
 
-\item{known.locs}{is data frame of known locations containing named columns
+\item{known.locs}{is data frame of known locations containing named columns 
 of date, lon, lat. Default is NULL.}
 
 \item{L.mle.res}{is a coarse resolution array of dim(L1) that speeds up the 
 parameter estimation step later on}
 
-\item{dateVec}{is vector of dates from tag to pop-up date by day. Only required if known.locs is not NULL.}
+\item{dateVec}{is vector of dates from tag to pop-up date by day. Only
+required if known.locs is not NULL.}
 
-\item{locs.grid}{is output grid from \code{setup.locs.grid}. Only required if known.locs is not NULL.}
+\item{locs.grid}{is output grid from \code{setup.locs.grid}. Only required if
+known.locs is not NULL.}
 
-\item{iniloc}{is matrix of tag and pop locations. Default is NULL because this should be taken care of elsewhere.}
+\item{iniloc}{is matrix of tag and pop locations. Default is NULL because
+this should be taken care of elsewhere.}
 
-\item{bathy}{is bathymetry raster (likely from ETOPO1) as acquired by \code{get.bath.data}}
+\item{bathy}{is bathymetry raster (likely from ETOPO1) as acquired by
+\code{get.bath.data}}
 
 \item{pdt}{is data frame output from read.wc(type='pdt')}
 }
@@ -42,4 +46,11 @@ SST, OHC) to make overall combined likelihoods for each time point
 \note{
 This function currently only supports the use of 3 input likelihood 
   data sources. This will be expanded in the future based on user needs.
+}
+\examples{
+\dontrun{
+L <- make.L(L1 = L.res[[1]][L.idx[[tt]]], L.mle.res = L.res$L.mle.res,
+ dateVec = dateVec, locs.grid = locs.grid, iniloc = iniloc, 
+ bathy = bathy, pdt = pdt)
+}
 }

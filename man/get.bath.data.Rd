@@ -2,14 +2,15 @@
 % Please edit documentation in R/get.bath.data.r
 \name{get.bath.data}
 \alias{get.bath.data}
-\title{Download bathymetry
-res is either 30 second, one or two minute resolution (.5, 1)}
+\title{Download bathymetry res is either 30 second, one or two minute resolution
+(.5, 1)}
 \usage{
 get.bath.data(lonlow, lonhigh, latlow, lathigh, folder = tempdir(),
   seaonly = T, res = c(0.5), raster = TRUE)
 }
 \arguments{
-\item{lonlow}{numeric indicating minimum longitude extent of desired download (-180 to 180).}
+\item{lonlow}{numeric indicating minimum longitude extent of desired download
+(-180 to 180).}
 
 \item{lonhigh}{see lonlow}
 
@@ -19,16 +20,31 @@ get.bath.data(lonlow, lonhigh, latlow, lathigh, folder = tempdir(),
 
 \item{folder}{is destination folder. Default is a temporary directory.}
 
-\item{seaonly}{is logical indicating whether you want to mask out anything on land.}
+\item{seaonly}{is logical indicating whether you want to mask out anything on
+land.}
 
-\item{res}{is numeric indicating resolution in minutes. Choices currently limited to just 0.5.}
+\item{res}{is numeric indicating resolution in minutes. Choices currently
+limited to just 0.5.}
 
-\item{raster}{is logical indicating whether you want the function to return a raster or not (a list will be returned).}
+\item{raster}{is logical indicating whether you want the function to return a
+raster or not (a list will be returned).}
+}
+\value{
+Downloads a NetCDF file containing ETopo bathymetry. If raster=TRUE,
+a raster is generated from the downloaded NetCDF. Otherwise, the file is just
+downloaded.
 }
 \description{
-Download bathymetry
-res is either 30 second, one or two minute resolution (.5, 1)
+Download bathymetry res is either 30 second, one or two minute resolution
+(.5, 1)
 }
 \note{
 Be patient! The download can take a few minutes!
+}
+\examples{
+\dontrun{
+sp.lim <- list(lonmin = -82, lonmax = -25, latmin = 15, latmax = 50)
+bathy <- get.bath.data(sp.lim$lonmin, sp.lim$lonmax, sp.lim$latmin, 
+sp.lim$latmax, folder = tempdir())
+}
 }

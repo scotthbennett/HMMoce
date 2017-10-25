@@ -14,10 +14,10 @@ or a pre-determined list of limits as \code{list(xmin, xmax, ymin, ymax)}}
 hycom reanalysis res. 'quarter' and 'one' are .25 and 1 deg, respectively.}
 }
 \value{
-a list
+a list of spatial bounds
 }
 \description{
-#' \code{setup.locs.grid} sets up a discrete spatial grid for the HMM
+\code{setup.locs.grid} sets up a discrete spatial grid for the HMM
  
 If input limits is a data.frame, longitude limits become +/- 5 degrees and
 latitude becomes +/- 10 degrees. You may also input your own list of limits.
@@ -26,7 +26,7 @@ latitude becomes +/- 10 degrees. You may also input your own list of limits.
 \dontrun{
 # SET SPATIAL LIMITS
 sp.lim <- list(lonmin = -95, lonmax = -52, latmin = 10, latmax = 55)
-locs.grid <- setup.locs.grid(sp.lim, res = 'one')
+locs.grid <- setup.locs.grid(sp.lim)
 }
 }
 \references{

@@ -49,10 +49,10 @@ sst.dir <- paste('my_sst_dir')
 get.env(sst.udates, type = 'sst', spatLim = sp.lim, save.dir = sst.dir)
 
 # GENERATE DAILY SST LIKELIHOODS
-L.sst <- calc.sst(tag.sst, sst.dir = sst.dir, dateVec = dateVec)
+L.sst <- calc.sst.par(tag.sst, sst.dir = sst.dir, dateVec = dateVec)
 
 }
 }
 \seealso{
-\code{\link{calc.ohc}}
+\code{\link{calc.sst}}
 }

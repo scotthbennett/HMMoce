@@ -36,3 +36,8 @@ NULL. A plot is rendered on screen or written to disk.
 \code{plotHMM} uses HMM output via \code{calc.track} to make simple plots of 
 calculated track and behavior state
 }
+\examples{
+\dontrun{
+plotHMM(s, tr, dateVec, ptt=runName, save.plot = T)
+}
+}

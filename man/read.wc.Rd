@@ -4,12 +4,12 @@
 \alias{read.wc}
 \title{Read and format tag data}
 \usage{
-read.wc(ptt, wd = getwd(), tag, pop, type = "sst", verbose = FALSE)
+read.wc(ptt, filename, tag, pop, type = "sst", verbose = FALSE)
 }
 \arguments{
 \item{ptt}{is individual ID number}
 
-\item{wd}{is the directory where your data lives}
+\item{filename}{is path to the file where your data lives}
 
 \item{tag}{is POSIXct object of the tagging date}
 
@@ -28,4 +28,11 @@ a list containing: the data read as a data.frame and a date vector of
 \description{
 \code{read.wc} reads and formats tag data output from Wildlife Computers Data
 Portal
+}
+\examples{
+\dontrun{
+# example data loading using example data in the package
+sstFile <- system.file("extdata", "141259-SST.csv", package = "HMMoce")
+tag.sst <- read.wc(ptt, sstFile, type = 'sst', tag=tag, pop=pop)
+}
 }

@@ -24,13 +24,15 @@
 #'   
 #' @return nothing, just downloads the data to your local machine
 #' @examples
-#' /dontrun{
+#' \dontrun{
 #' sp.lim <- list(lonmin = -82, lonmax = -25, latmin = 15, latmax = 50)
 #' # FOR OI SST DATA
-#' get.env(as.Date('2015-10-01'), filename='oisst', type = 'sst', sst.type='oi', spatLim = sp.lim, save.dir = tempdir())
+#' get.env(as.Date('2015-10-01'), filename='oisst', type = 'sst', 
+#' sst.type='oi', spatLim = sp.lim, save.dir = tempdir())
 #' 
 #' # FOR HYCOM DATA
-#' get.env(as.Date('2015-10-01'), filename='hycom', type = 'hycom', spatLim = sp.lim, save.dir = tempdir())
+#' get.env(as.Date('2015-10-01'), filename='hycom', type = 'hycom', 
+#' spatLim = sp.lim, save.dir = tempdir())
 #' 
 #' # FOR WORLD OCEAN ATLAS DATA
 #' get.env(type = 'woa', resol = 'quarter', save.dir = woa.dir)

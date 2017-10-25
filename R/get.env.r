@@ -82,7 +82,7 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
       time <- as.Date(uniqueDates[i])
       repeat{
         get.hycom4(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''),
-                  download.file = TRUE, dir = save.dir, depLevels=1) 
+                  download.file = TRUE, dir = save.dir, depLevels=depLevels) 
         tryCatch({
           err <- try(RNetCDF::open.nc(paste(save.dir,'/', filename, '_', time, '.nc', sep = '')), silent = T)
         }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})

@@ -37,11 +37,11 @@ TBD
 
 ## Package Structure
 The package is structured as follows:
-1) Load the relevant tag data and establish a study area of interest.
-2) Get the environmental data to base the likelihood calculations on.
-3) Calculate the desired likelihoods (e.g. depth-temperature profiles, SST, etc)
-4) Estimate parameters and run the model. Results are written out along the way.
-5) Perform model checking and choose a final model.
+* Load the relevant tag data and establish a study area of interest.
+* Get the environmental data to base the likelihood calculations on.
+* Calculate the desired likelihoods (e.g. depth-temperature profiles, SST, etc)
+* Estimate parameters and run the model. Results are written out along the way.
+* Perform model checking and choose a final model.
  
 ## Installation Instructions
 `HMMoce` can be installed from CRAN from within `R` using `install.packages('HMMoce')`. To get the latest developments, get it from GitHub using `devtools::install_github('camrinbraun/HMMoce')`

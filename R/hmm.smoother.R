@@ -14,6 +14,12 @@
 #' @param L is likelihood array output from \code{make.L}
 #'   
 #' @return an array of the final state estimates of dim(state, time, lon, lat)
+#' @examples 
+#' \dontrun{
+#' # RUN THE SMOOTHING STEP
+#' s <- hmm.smoother(f, K1, K2, L, P.final)
+#' }
+#' 
 #' @export
 #' 
 

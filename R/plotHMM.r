@@ -19,6 +19,10 @@
 #' @importFrom fields "world"
 #'   
 #' @return NULL. A plot is rendered on screen or written to disk.
+#' @examples 
+#' \dontrun{
+#' plotHMM(s, tr, dateVec, ptt=runName, save.plot = T)
+#' }
 #' @export
 
 plotHMM <- function(distr, track, dateVec, ptt, known = NULL, resid = FALSE, behav.pts = F, save.plot = FALSE){

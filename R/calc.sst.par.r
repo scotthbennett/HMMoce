@@ -23,7 +23,7 @@
 #' 
 #' @export
 #'@importFrom foreach "%dopar%"
-#' @seealso \code{\link{calc.ohc}}
+#' @seealso \code{\link{calc.sst}}
 #' 
 #' @examples
 #' \dontrun{
@@ -37,7 +37,7 @@
 #' get.env(sst.udates, type = 'sst', spatLim = sp.lim, save.dir = sst.dir)
 #' 
 #' # GENERATE DAILY SST LIKELIHOODS
-#' L.sst <- calc.sst(tag.sst, sst.dir = sst.dir, dateVec = dateVec)
+#' L.sst <- calc.sst.par(tag.sst, sst.dir = sst.dir, dateVec = dateVec)
 #' 
 #' }
 

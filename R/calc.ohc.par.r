@@ -23,18 +23,16 @@
 #' @seealso \code{\link{calc.ohc}}
 #' @export
 #' @importFrom foreach "%dopar%"
-#'   
-#' @examples
-#' # load workspace
+#'  
+#' @examples 
 #' \dontrun{
-#' load('~/DATA/blue259.RData')
-
-#' # define ohc.dir
-#' ohc.dir = '~/hycom/'
-#' # run in parallel
-#' res = calc.ohc.par(pdt, filename='tuna', isotherm = '',
-#'                    ohc.dir = ohc.dir, dateVec = dateVec,
-#'                    bathy = T)
+#' # depth-temp profile data
+#' pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop); 
+#' pdt.udates <- pdt$udates; pdt <- pdt$data
+#' 
+#' # GENERATE DAILY OCEAN HEAT CONTENT (OHC) LIKELIHOODS
+#' L.ohc <- calc.ohc.par(pdt, filename='tuna', ohc.dir = hycom.dir, dateVec = dateVec,
+#'                   isotherm = '')
 #' }
 
 

@@ -4,7 +4,7 @@
 #' Portal
 #' 
 #' @param ptt is individual ID number
-#' @param wd is the directory where your data lives
+#' @param filename is path to the file where your data lives
 #' @param tag is POSIXct object of the tagging date
 #' @param pop is POSIXct object of the pop-up date
 #' @param type is character indicating which type of data to read. Choices are 
@@ -18,19 +18,25 @@
 #'   
 #' @return a list containing: the data read as a data.frame and a date vector of
 #'   unique dates in that data
+#' @examples
+#' \dontrun{
+#' # example data loading using example data in the package
+#' sstFile <- system.file("extdata", "141259-SST.csv", package = "HMMoce")
+#' tag.sst <- read.wc(ptt, sstFile, type = 'sst', tag=tag, pop=pop)
+#' }
 #' @export
 
-read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst', verbose=FALSE){
+read.wc <- function(ptt, filename, tag, pop, type = 'sst', verbose=FALSE){
   
-  if(substr(wd, nchar(wd), nchar(wd)) == '/'){
-    
-  } else{
-    wd <- paste(wd, '/', sep='')
-  }
+  #if(substr(wd, nchar(wd), nchar(wd)) == '/'){
+  #} else{
+  #  wd <- paste(wd, '/', sep='')
+  #}
   
   if(type == 'pdt'){
     # READ IN PDT DATA FROM WC FILES
-    data <- utils::read.table(paste(wd, ptt,'-PDTs.csv', sep=''), sep=',',header=T,blank.lines.skip=F, skip = 0)
+    #data <- utils::read.table(paste(wd, ptt,'-PDTs.csv', sep=''), sep=',',header=T,blank.lines.skip=F, skip = 0)
+    data <- utils::read.table(filename, sep=',', header=T, blank.lines.skip=F, skip = 0)
     if (verbose) print(paste('If read.wc() fails for type=pdt, check the number of column headers in the PDTs.csv file.'))
     data <- extract.pdt(data)
     dts <- as.POSIXct(data$Date, format = findDateFormat(data$Date))
@@ -64,7 +70,8 @@ read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst', verbose=FALSE){
 
   } else if(type == 'sst'){
     # READ IN TAG SST FROM WC FILES
-    data <- utils::read.table(paste(wd, ptt, '-SST.csv', sep=''), sep=',',header=T, blank.lines.skip=F)
+    #data <- utils::read.table(paste(wd, ptt, '-SST.csv', sep=''), sep=',',header=T, blank.lines.skip=F)
+    data <- utils::read.table(filename, sep=',',header=T, blank.lines.skip=F)
     dts <- as.POSIXct(data$Date, format = findDateFormat(data$Date))
     d1 <- as.POSIXct('1900-01-02') - as.POSIXct('1900-01-01')
     didx <- dts >= (tag + d1) & dts <= (pop - d1)
@@ -85,7 +92,8 @@ read.wc <- function(ptt, wd = getwd(), tag, pop, type = 'sst', verbose=FALSE){
     
   } else if(type == 'light'){
     # READ IN LIGHT DATA FROM WC FILES
-    data <- utils::read.table(paste(wd,'/', ptt, '-LightLoc.csv', sep=''), sep=',',header=T, blank.lines.skip=F,skip=2)
+    #data <- utils::read.table(paste(wd,'/', ptt, '-LightLoc.csv', sep=''), sep=',',header=T, blank.lines.skip=F,skip=2)
+    data <- utils::read.table(filename, sep=',',header=T, blank.lines.skip=F,skip=2)
     if(!any(grep('depth', names(data), ignore.case=T))) data <- utils::read.table(paste(wd,'/', ptt, '-LightLoc.csv', sep=''), sep=',',header=T, blank.lines.skip=F,skip=1)
     if(!any(grep('depth', names(data), ignore.case=T))) data <- utils::read.table(paste(wd,'/', ptt, '-LightLoc.csv', sep=''), sep=',',header=T, blank.lines.skip=F,skip=0)
     data <- data[which(!is.na(data[,1])),]

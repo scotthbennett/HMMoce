@@ -4,7 +4,7 @@
 #' temperature data from GitHub
 #' 
 #' @param save.dir is the directory to save the downloaded data to
-#' @param resol is character describing the desired resolution in degrees
+#' @param resol is character describing the desired resolution in degrees. Choices are 'one' or 'quarter'.
 #'   
 #' @return name and directory of the downloaded data
 

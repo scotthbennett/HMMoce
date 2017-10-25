@@ -18,6 +18,11 @@
 #'   
 #' @return list of parameters including movement kernels (K1, K2) and switch
 #'   probability (P.final)
+#' @examples 
+#' \dontrun{
+#' par0 <- makePar(migr.spd=2, grid=g.mle, L.arr=L.mle, p.guess=c(.9,.9), calcP=T)
+#' }
+#'       
 #' @export
 #' 
 

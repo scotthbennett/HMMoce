@@ -1,47 +1,49 @@
-#' Download bathymetry
-#' res is either 30 second, one or two minute resolution (.5, 1)
-#' @param lonlow numeric indicating minimum longitude extent of desired download (-180 to 180).
+#' Download bathymetry res is either 30 second, one or two minute resolution
+#' (.5, 1)
+#' @param lonlow numeric indicating minimum longitude extent of desired download
+#'   (-180 to 180).
 #' @param lonhigh see lonlow
 #' @param latlow see lonlow
 #' @param lathigh see lonlow
 #' @param folder is destination folder. Default is a temporary directory.
-#' @param seaonly is logical indicating whether you want to mask out anything on land.
-#' @param res is numeric indicating resolution in minutes. Choices currently limited to just 0.5.
-#' @param raster is logical indicating whether you want the function to return a raster or not (a list will be returned).
+#' @param seaonly is logical indicating whether you want to mask out anything on
+#'   land.
+#' @param res is numeric indicating resolution in minutes. Choices currently
+#'   limited to just 0.5.
+#' @param raster is logical indicating whether you want the function to return a
+#'   raster or not (a list will be returned).
+#' @return Downloads a NetCDF file containing ETopo bathymetry. If raster=TRUE,
+#' a raster is generated from the downloaded NetCDF. Otherwise, the file is just
+#' downloaded.
+#' @examples
+#' \dontrun{
+#' sp.lim <- list(lonmin = -82, lonmax = -25, latmin = 15, latmax = 50)
+#' bathy <- get.bath.data(sp.lim$lonmin, sp.lim$lonmax, sp.lim$latmin, sp.lim$latmax, folder = tempdir())
+#' }
 #' @export
 #' @importFrom curl curl_download
 #' @note Be patient! The download can take a few minutes!
 
 get.bath.data <- function(lonlow, lonhigh, latlow, lathigh, folder = tempdir(), seaonly = T, res = c(.5), raster=TRUE){
 
-  #rot90 <- function(A) {
-  #  n <- dim(A)[2]
-  #  A <- t(A)
-  #  A[n:1, ]
-  #}
-  
-  #fliplr <- function(A){
-  #  A = (A)[(ncol(A)):1,]
-  #  A
-  #}
-  
-  fname = paste(folder, "request.nc", sep = "/")
+  fname = paste(folder, "bathy.nc", sep = "/")
   if(res==1){
     cat('ERDDAP downloading: Topography, Smith & Sandwell v11.1, 1/60-degree \n UCSD   (Dataset ID: usgsCeSS111)')
     opt = "https://coastwatch.pfeg.noaa.gov/erddap/griddap/usgsCeSS111.nc?topo[(LATHIGH):(LATLOW)][(LONLOW):(LONHIGH)]"
     bathid = 'topo'
-  }
-  if(res==.5){
+  } else if(res == 0.5){
     cat('ERDDAP downloading: Topography, SRTM30+ Version 1.0, 30 arc second, Global \n 	Scripps   (Dataset ID: usgsCeSrtm30v1)')
     opt ="http://coastwatch.pfeg.noaa.gov/erddap/griddap/usgsCeSrtm30v1.nc?topo[(LATHIGH):(LATLOW)][(LONLOW):(LONHIGH)]"
     #opt = 'http://coastwatch.pfeg.noaa.gov/erddap/griddap/etopo180.nc?altitude[(LATLOW):1:(LATHIGH)][(LONLOW):1:(LONHIGH)]'
     bathid = 'topo'
   }
+  
   opt <- sub("LATLOW", latlow, opt)
   opt <- sub("LATHIGH", lathigh, opt)
   opt <- sub("LONLOW", lonlow, opt)
   opt <- sub("LONHIGH", lonhigh, opt)
   
+  cat(opt)
   curl::curl_download(opt, fname, quiet=FALSE)
   #utils::download.file(opt, fname)
   

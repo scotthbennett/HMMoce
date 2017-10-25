@@ -23,18 +23,15 @@
 #' @importFrom foreach %dopar%
 #'   
 #' @examples
-#' # load workspace
 #' \dontrun{
-#' load('~/DATA/blue259.RData')
-
-#' # define hycom.dir
-#' hycom.dir = '~/hycom/'
-#' # run in parallel
-#' res = calc.hycom.par(pdt, filename='tuna', isotherm = '',
-#'                      hycom.dir = hycom.dir, dateVec = dateVec,
-#'                      bathy = T)
+#' # pdt data
+#' pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop); 
+#' pdt.udates <- pdt$udates; pdt <- pdt$data
+#' 
+#' # GENERATE DAILY PDT LIKELIHOODS USING HYCOM
+#' L.pdt <- calc.hycom(pdt, hycom.dir = hycom.dir, dateVec = dateVec)
+#' 
 #' }
-
 
 calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se = TRUE){
   

@@ -19,10 +19,10 @@
 #' @param par0 is vector of movement parameter values, likely output from
 #'   \code{calc.param}.
 #' @param bound.thr is numeric indicating the percent threshold that is added 
-#'   and substracted from the bounding box of the filter output from the 
+#'   and subtracted from the bounding box of the filter output from the 
 #'   previous day before masking. Default is .05 (5 percent).
 #' @param minBounds is size (in degrees) of the minimum bounding box around the 
-#'   previous days filter prediction that L data wtihin that box will be 
+#'   previous days filter prediction that L data within that box will be 
 #'   included. Outside this box (centered on t-1 filter prediction), L will be 
 #'   masked out.
 #' @importFrom methods as

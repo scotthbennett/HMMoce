@@ -1,6 +1,6 @@
 #' Negative Log likelihood of parameters
 #' 
-#' @param parvec vector of length 6 contianing * kernel 1 * kernel 2 * diagonal
+#' @param parvec vector of length 6 containing * kernel 1 * kernel 2 * diagonal
 #'   of 2x2 matrix
 #' @param g grid from \code{\link{setup.grid}}
 #' @param L final likelihood (2D)

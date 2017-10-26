@@ -4,8 +4,8 @@ language: R
 sudo: false
 cache: packages
 
- addons:
-   apt:
-     packages:
-       - udunits-bin # for RNetCDF
-       - libudunits2-dev # for RNetCDF
+addons:
+  apt:
+    packages:
+      - udunits-bin # for RNetCDF
+      - libudunits2-dev # for RNetCDF

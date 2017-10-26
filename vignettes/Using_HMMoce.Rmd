@@ -1,19 +1,17 @@
 ---
-title: "A user's guide to improved analysis of marine animal movement data using HMMoce"
+title: "A users guide to improved analysis of marine animal movement data using HMMoce"
 author: "Camrin Braun, Benjamin Galuardi, Simon Thorrold"
 date: "`r Sys.Date()`"
-output: 
-  rmarkdown::html_vignette:
-    fig_caption: yes
+output: rmarkdown::html_vignette:
 bibliography: '/Users/Cam/Documents/Mendeley_bibs/hmm_ms.bib'
 biblio-style: apalike
 link-citations: yes
 vignette: >
-  %\VignetteIndexEntry{A user's guide to improved analysis of marine animal movement data using HMMoce}
+  %\VignetteIndexEntry{Using HMMoce}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  \usepackage[utf8]{inputenc}
 ---
-
+  
 # Summary
 While the number of marine animals being tagged and tracked continues to grow, current satellite tracking techniques largely constrain meaninful inference to largescale movements of surface-dwelling species and are inherently prone to significant error. Hidden Markov models (HMMs) have become increasingly common in the analysis of animal movement data by incorporating underlying behavioral states into movement data. This discretized approach also provides efficient handling of grid-based oceanographic data and likelihood surfaces generated within the package. We present an open-source `R` package, `HMMoce`, that uses a state-space HMM approach to improve position estimates derived from electronic tags using three-dimensional oceanographic data. We demonstrate `HMMoce` with example blue shark (*Prionace glauca*) data that is included in the package. Our findings illustrate how our software leverages all available tag data, along with oceanographic information, to improve position estimates of tagged marine species. For more details on these methods, including thorough references to the literature `HMMoce` is based on, please refer to @Braun2017.
 

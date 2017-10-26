@@ -2,7 +2,7 @@
 title: "A users guide to improved analysis of marine animal movement data using HMMoce"
 author: "Camrin Braun, Benjamin Galuardi, Simon Thorrold"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette:
+output: rmarkdown::html_vignette
 bibliography: '/Users/Cam/Documents/Mendeley_bibs/hmm_ms.bib'
 biblio-style: apalike
 link-citations: yes

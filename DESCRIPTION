@@ -3,7 +3,7 @@ Type: Package
 Title: Improved Analysis of Marine Animal Movement Data Using Hidden Markov
     Models
 Version: 0.2.0
-Date: 2017-08-17
+Date: 2017-10-26
 Authors@R: c(
               person("Camrin", "Braun", email = "camrin.braun@gmail.com", role = c("aut","cre")),
               person("Benjamin", "Galuardi", email = "drdrumfish@gmail.com", role = c("aut"))

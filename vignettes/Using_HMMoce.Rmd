@@ -308,7 +308,7 @@ plotRD(s, tr, xlims, ylims, save.plot=F)
 ```
 
 # An example script
-Here we put all of the above logic into a full working example script using the example blue shark data included with the package. Please file any issues or suggestions for improvement of `HMMoce` on the GitHub [site](https://github.com/camrinbraun/HMMoce) at https://github.com/camrinbraun/HMMoce.
+Here we put all of the above logic into a full working example script using the example blue shark data included with the package. Please file any issues or suggestions for improvement of `HMMoce` on the GitHub [site](https://github.com/camrinbraun/HMMoce).
 
 ```{r, eval=F}
 #========================

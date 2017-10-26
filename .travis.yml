@@ -9,5 +9,7 @@ addons:
     packages:
       - udunits-bin # for RNetCDF
       - libudunits2-dev # for RNetCDF
-      - libcairo2-dev # for RNetCDF
-      - libxt-dev # for RNetCDF
+      - libcairo2-dev # for imager
+      - libxt-dev # for imager
+      - libnetcdf-dev # for RNetCDF
+      - netcdf-bin # for RNetCDF

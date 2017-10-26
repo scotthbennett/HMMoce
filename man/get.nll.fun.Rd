@@ -7,7 +7,7 @@
 get.nll.fun(parvec = c(10, 30, 5, 2, 0.707, 0.8), g, L)
 }
 \arguments{
-\item{parvec}{vector of length 6 contianing * kernel 1 * kernel 2 * diagonal
+\item{parvec}{vector of length 6 containing * kernel 1 * kernel 2 * diagonal
 of 2x2 matrix}
 
 \item{g}{grid from \code{\link{setup.grid}}}

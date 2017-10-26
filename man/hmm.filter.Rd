@@ -15,23 +15,23 @@ hmm.filter(g, L, K1, K2, P, maskL = T, bound.thr = 0.1, minBounds = 10)
 
 \item{K2}{second movement (diffusion) kernel see \code{\link{gausskern}}}
 
-\item{P}{2x2 probability matrix for tranisitons between states (K1 and K2)}
+\item{P}{2x2 probability matrix for transitions between states (K1 and K2)}
 
 \item{maskL}{is logical indicating whether to mask the input L layer. See
 \code{mask.L} for details.}
 
 \item{bound.thr}{is numeric indicating the percent threshold that is added 
-and substracted from the bounding box of the filter output from the 
+and subtracted from the bounding box of the filter output from the 
 previous day before masking. Default is .05 (5 percent).}
 
 \item{minBounds}{is size (in degrees) of the minimum bounding box around the 
-previous days filter prediction that L data wtihin that box will be 
+previous days filter prediction that L data within that box will be 
 included. Outside this box (centered on t-1 filter prediction), L will be 
 masked out.}
 }
 \value{
 a list: list(phi = phi, pred = pred, psi = psi) where \itemize{ \item
-  phi. is the probability for each state at each trime step \item pred. is
+  phi. is the probability for each state at each time step \item pred. is
   .... \item psi. is.... }
 }
 \description{

@@ -22,7 +22,7 @@ query the server and download or use the optional \code{curl}. Some users
 may need to use \code{curl} in order to get this to work.}
 
 \item{dir}{is local directory where ncdf files should be downloaded to. 
-default is current working directory. if enter a directory that doesn't 
+default is current working directory. if enter a directory that doesnt 
 exist, it will be created.}
 }
 \value{

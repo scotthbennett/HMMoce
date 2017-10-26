@@ -363,8 +363,8 @@ sp.lim <- list(lonmin = -82,
                latmin = 15,
                latmax = 50)
 
-#------------
-# GET ENVIRONMENTAL DATA
+#------------ 
+##  GET ENVIRONMENTAL DATA 
 #------------ 
 # env data downloads can be
 #large, depending on application for 180 days of data spanning the NW Atlantic
@@ -423,23 +423,24 @@ L.1 <- calc.gpe2(locs, locDates, locs.grid = locs.grid, dateVec = dateVec, errEl
 #L.2 <- calc.sst(tag.sst, filename='oisst', sst.dir = sst.dir, dateVec = dateVec, sens.err = 1)
 L.2 <- calc.sst.par(tag.sst, filename='oisst', sst.dir = sst.dir, dateVec = dateVec, sens.err = 1)
 # save.image() # good idea to save after these larger calculations in case the next one causes problems
-# gc(); closeAllConnections() # also good to do garbage collection and kill any straggling processes that are running
+ gc(); closeAllConnections() # also good to do garbage collection and kill any straggling processes that are running
 
 # PDT LIKELIHOODS
 # OCEAN HEAT CONTENT (INTEGRATED PDTS)
 L.3 <- calc.ohc.par(pdt, filename='hycom', ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = F)
 # save.image() # good idea to save after these larger calculations in case the next one causes problems
-# gc(); closeAllConnections() # also good to do garbage collection and kill any straggling processes that are running
+ gc(); closeAllConnections() # also good to do garbage collection and kill any straggling processes that are running
 
 # WORLD OCEAN ATLAS-BASED LIKELIHOODS
 L.4 <- calc.woa.par(pdt, ptt=ptt, woa.data = woa.quarter, sp.lim=sp.lim, focalDim = 9, dateVec = dateVec, use.se = T)
 # save.image() # good idea to save after these larger calculations in case the next one causes problems
-# gc(); closeAllConnections() # also good to do garbage collection and kill any straggling processes that are running
+ gc(); closeAllConnections() # also good to do garbage collection and kill any straggling processes that are running
 
 # HYCOM PROFILE BASED LIKELIHOODS
 L.5 <- calc.hycom.par(pdt, filename='hycom', hycom.dir, focalDim = 9, dateVec = dateVec, use.se = T)
 # save.image() # good idea to save after these larger calculations in case the next one causes problems
-# gc(); closeAllConnections() # also good to do garbage collection and kill any straggling processes that are running
+ gc(); closeAllConnections() # also good to do garbage collection and kill any straggling processes that are running
+#save.image('~/ebs/example.rda')
 
 #------------
 # PREPARE TO RUN THE MODEL
@@ -485,6 +486,7 @@ for (tt in run.idx){
   for (bnd in bndVec){
     for (i in parVec){
       
+      ptt=141259
       runName <- paste(ptt,'_idx',tt,'_bnd',bnd,'_par',i,sep='')
       
       # COMBINE LIKELIHOOD MATRICES
@@ -534,7 +536,8 @@ for (tt in run.idx){
       #write.table(outVec,paste(dataDir, 'outVec_results.csv', sep=''), sep=',', col.names=F, append=T)
       #names(outVec) <- c('ptt','bnd','migr.spd','Lidx','P1','P2','spLims','resol','maskL','nll','name')
       res <- list(outVec = outVec, s = s, g = g, tr = tr, dateVec = dateVec, iniloc = iniloc, grid = raster::res(L.res[[1]]$L.5)[1])
-      setwd(myDir); save(res, file=paste(runName, '-HMMoce_res.rda', sep=''))
+      #setwd()
+      save(res, file=paste(runName, '-HMMoce_res.rda', sep=''))
       #save.image(file=paste(ptt, '-HMMoce.RData', sep=''))
       #source('~/HMMoce/R/hmm.diagnose.r') # not yet functional
       #hmm.diagnose(res, L.idx, L.res, dateVec, locs.grid, iniloc, bathy, pdt, plot=T)

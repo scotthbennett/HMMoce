@@ -44,7 +44,7 @@ The package is structured as follows:
 * Perform model checking and choose a final model.
  
 ## Installation Instructions
-`HMMoce` can be installed from CRAN from within `R` using `install.packages('HMMoce')`. To get the latest developments, get it from GitHub using `devtools::install_github('camrinbraun/HMMoce')`
+`HMMoce` can be installed from CRAN from within `R` using `install.packages('HMMoce')`. To get the latest developments, get it from GitHub using `devtools::install_github('camrinbraun/HMMoce', ref='dev')`
 
 ## Examples
 For an example use of the package, please see the vignette using `vignette('HMMoce')`.

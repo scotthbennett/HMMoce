@@ -6,6 +6,7 @@ output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Using HMMoce}
   %\VignetteEngine{knitr::rmarkdown}
+  % \VignetteDepends{png, grid}
   \usepackage[utf8]{inputenc}
 ---
   
@@ -17,10 +18,8 @@ Navigate to https://aws.amazon.com and follow the prompts to get an account setu
 
 Once you are all setup, navigate to your dashboard. It should look like this:
 ```{r fig.width=8, fig.height=6,echo=FALSE}
-library(png)
-library(grid)
-img <- readPNG("dashboard.png")
-grid.raster(img)
+img <- png::readPNG("dashboard.png")
+grid::grid.raster(img)
 ```
 
 
@@ -31,10 +30,8 @@ We will be running a type of compute environment on AWS that can terminate with 
 
 From your AWS Dashboard, choose the "Services"" dropdown menu and "EC2". On the left, under "Elastic Block Storage", choose "Volumes" and "Create Volume". The default setup is close to what we want, however you may want to change the size of the volume depending on your needs. 100GB should be enough for most applications. We like to include "Tags" to keep track of which resources belong to which individual, how much different resources cost, etc. Also, the "Availability Zone" is very important so keep track of that as we go forward. You *MUST* ensure that your compute instances are in the same availability zone as your volume!!! It should look something like this:
 ```{r fig.width=8, fig.height=6,echo=FALSE}
-library(png)
-library(grid)
-img <- readPNG("volume.png")
-grid.raster(img)
+img <- png::readPNG("volume.png")
+grid::grid.raster(img)
 ```
 
 Once created, the volume will be listed in "Volumes" on the EC2 page and will show "Available" in the "State" column. This means it is ready to be mounted to a compute instance and used.
@@ -44,10 +41,8 @@ Now you are ready to get a compute instance running. There are many different fl
 
 On the EC2 page choose "Instances" and "Launch Instance". An Amazon Machine Image is like a snapshot of what you want the compute instance to look like, including the OS, necessary software, etc. We have built one specifically for `HMMoce` based on an RStudio server build by [Louis Aslett](http://www.louisaslett.com/RStudio_AMI/). On the left choose "Community AMIs" and enter xxxx to locate the `HMMoce` AMI. Next choose the instance type (t2.micro will suffice for now) and choose "Configure Instance Details". Under "Subnet", make sure you choose the availability zone to match the volume you created previously. Click "Next" until you get to "Security Group Settings". Feel free to customize other options along the way. You need to allow at least HTTP and SSH access so your settings should look something like this:
 ```{r fig.width=8, fig.height=2,echo=FALSE}
-library(png)
-library(grid)
-img <- readPNG("security.png")
-grid.raster(img)
+img <- png::readPNG("security.png")
+grid::grid.raster(img)
 ```
 
 
@@ -58,20 +53,16 @@ Now on the EC2 page, you should see your instance initializing and eventually ru
 ## SSH and mount volume
 The easiest way we have found to get up and running with your volume on an EC2 instance is to connect via SSH and do everything via the Linux command line. To connect to your instance via SSH, open Terminal (on Mac) or CygWin (on Windows). Navigate to the folder where your key pair file (.pem) is stored and type:
 ```{r fig.width=8, fig.height=2,echo=FALSE}
-library(png)
-library(grid)
-img <- readPNG("ssh.png")
-grid.raster(img)
+img <- png::readPNG("ssh.png")
+grid::grid.raster(img)
 ```
 
 The second command indicates the name of my key pair file (cam-aws.pem) and where to connect. Your connection will reflect the public DNS of your EC2 instance and will instead read *ubuntu@ec2-xx-xxx-xx-xxx.us-xxxx-x.compute.amazonaws.com*. 
 
 Once connected, click back to the "Instances" page from the AWS EC2 site, click on your instance and copy the Instance-ID at the bottom. Then navigate to "Volumes" from the EC2 site, click on your volume and in the "Actions" menu choose "Attach Volume". Paste the Instance-ID you just copied into the Instance box and choose "Attach". Now back in the command line type the following:
 ```{r fig.width=8, fig.height=1,echo=FALSE}
-library(png)
-library(grid)
-img <- readPNG("mount.png")
-grid.raster(img)
+img <- png::readPNG("mount.png")
+grid::grid.raster(img)
 ```
 
 Replace *my_dir_name* with whatever you want to call the directory where your volume will be mounted. If your volume is not attached at */dev/xvdf*, type *lsblk* and look for the attached volume. Once you have made the directory and mounted the volume there, you should also see it from the RStudio "Files" tab in your browser.
@@ -81,10 +72,8 @@ Carefully read through the 2 open R scripts to familiarize yourself with the set
 # Getting your data onto EC2
 The most simple way to get some tag data onto EC2 would be to host it somewhere accessible with `curl` like an FTP site. You can also integrate [Dropbox](http://ged.msu.edu/angus/tutorials-2011/installing-dropbox.html) into an EC2 instance. The best long term solution for us has been to use AWS [S3](http://docs.aws.amazon.com/AmazonS3/latest/dev/Welcome.html). You should spend some time reading about S3 and how it works. To get it up and running on your EC2 instance, navigate to S3 from your AWS dashboard and create a new bucket. In practice, the S3 bucket behaves similarly to a folder on Dropbox. We have already installed the AWS command line tools on the AMI you are running, but you need to configure the setup. Go to your command line and make sure the SSH connection to your EC2 instance is running. To use the command line tools, you first need to configure an IAM user. Follow these [instructions](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html) to get started. Once you have your access keys setup, it is as simple as typing *aws configure* from the command line when connected to your EC2 instance via SSH. Paste your key information into the configure prompts and you are ready to access your S3 buckets. Now follow these [instructions](http://docs.aws.amazon.com/cli/latest/userguide/using-s3-commands.html) to manipulate your data. The *aws s3 cp* command is one of the most useful for moving data. For example, you might type the following in your command line:
 ```{r fig.width=8, fig.height=6,echo=FALSE}
-library(png)
-library(grid)
-img <- readPNG("s3.png")
-grid.raster(img)
+img <- png::readPNG("s3.png")
+grid::grid.raster(img)
 ```
 
 You can see the *aws configure* command (I have blacked out my credentials but you would see yours there). This is followed by a command that says we want to copy (*cp*) the "BlueSharks" folder from S3 to the directory where we mounted the volume. The recursive option copies the folder and all of its contents, while the dryrun option means we test the command but do not actually copy anything. This is a great way to move data back and forth from an EC2 instance, a volume attached to an instance, and S3. S3 is also cheaper to store data than a volume so is good for longer-term storage (see AWS Glacier for even longer-term, cheaper storage).

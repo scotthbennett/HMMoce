@@ -37,9 +37,11 @@ Imports:
     methods
 Suggests:
     knitr,
-    rmarkdown
+    rmarkdown,
+    png,
+    grid
 RoxygenNote: 6.0.1
-URL: http://www.camrinbraun.com/HMMoce/
+URL: http://www.camrinbraun.com/
 BugReports: https://github.com/camrinbraun/HMMoce/issues
 LazyData: true
 VignetteBuilder: knitr

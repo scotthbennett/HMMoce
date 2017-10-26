@@ -39,7 +39,7 @@ hidden Markov framework originally developed by Pedersen et al. 2008.
 \seealso{
 Useful links:
 \itemize{
-  \item \url{http://www.camrinbraun.com/HMMoce/}
+  \item \url{http://www.camrinbraun.com/}
   \item Report bugs at \url{https://github.com/camrinbraun/HMMoce/issues}
 }
 

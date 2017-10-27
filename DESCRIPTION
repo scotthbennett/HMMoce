@@ -10,8 +10,6 @@ Authors@R: c(
               person("Benjamin", "Jones", role = c("ctb"), comment = 'Contributed to earlier version of some of the download functions.'),
               person("Martin", "Pedersen", role = c("ctb"), comment = 'Developed an earlier version of some of the HMM framework and helper functions.')
               )
-Author: Camrin Braun [aut, cre],
-    Benjamin Galuardi [aut]
 Maintainer: Camrin Braun <camrin.braun@gmail.com>
 Description: Improved analysis of marine animal movement data by implementing
     a state-space hidden Markov model (HMM) to improve position estimates. Position

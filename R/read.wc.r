@@ -10,7 +10,8 @@
 #' @param type is character indicating which type of data to read. Choices are 
 #'   'sst', 'pdt', 'light' corresponding to those data files output from WC Data
 #'   Portal
-#' @param verbose is logical indicating whether a verbose output with more details on the loaded files is desired. Default is FALSE.
+#' @param verbose is logical indicating whether a verbose output with more
+#'   details on the loaded files is desired. Default is FALSE.
 #' @importFrom dplyr %>%
 #' @importFrom dplyr group_by
 #' @importFrom dplyr summarise

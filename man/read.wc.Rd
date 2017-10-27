@@ -19,7 +19,8 @@ read.wc(ptt, filename, tag, pop, type = "sst", verbose = FALSE)
 'sst', 'pdt', 'light' corresponding to those data files output from WC Data
 Portal}
 
-\item{verbose}{is logical indicating whether a verbose output with more details on the loaded files is desired. Default is FALSE.}
+\item{verbose}{is logical indicating whether a verbose output with more
+details on the loaded files is desired. Default is FALSE.}
 }
 \value{
 a list containing: the data read as a data.frame and a date vector of

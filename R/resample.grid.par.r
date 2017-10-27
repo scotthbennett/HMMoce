@@ -4,8 +4,8 @@
 #'   functions
 #' @param L.resol raster or raster brick indicating desired output resolution of
 #'   all likelihood rasters.
-#' @param ncores is integer indicating number of cores used in this parallel
-#'   computation. Defaults to using a detection function that chooses cores for
+#' @param ncores is integer indicating number of cores used in this parallel 
+#'   computation. Defaults to using a detection function that chooses cores for 
 #'   you.
 #'   
 #' @return a list of all resampled likelihood rasters and g, the common grid
@@ -19,6 +19,9 @@
 #' L.res <- resample.grid.par(L.rasters, L.rasters[[resamp.idx]])
 #' }
 #' @importFrom foreach "%dopar%"
+#' @note This function should probably only be used in special use cases.
+#'   Otherwise, the non-parallel version \code{\link{resample.grid}} is
+#'   typically faster.
 #'   
 
 

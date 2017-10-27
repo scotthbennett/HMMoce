@@ -1,12 +1,13 @@
 #' Extract PDT from Wildlife Computers tag data
 #' 
-#' \code{extract.pdt} is a simple formatting function that parses PDT data and makes it usable to subsequent functions
+#' \code{extract.pdt} is a simple formatting function that parses PDT data and
+#' makes it usable to subsequent functions
 #' 
 #' @param pdt data frame read from -PDTs.csv output of Wildlife Computers DAP 
 #'   processor or Tag Portal.
 #'   
 #' @return data frame formatted for pdt data
-#' 
+#'   
 
 extract.pdt <- function(pdt){
 

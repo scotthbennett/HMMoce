@@ -8,7 +8,7 @@
 #' @param migr.spd is numeric indicating movement speed of animal (in m s) while
 #'   in migratory behavior state.
 #' @param resid.frac is numeric indicating percent of migratory speed that
-#'   should be used for resident-like movements. Default is 10% of migratory
+#'   should be used for resident-like movements. Default is 10\% of migratory
 #'   speed.
 #' @param g is grid from \code{setup.grid}
 #'   

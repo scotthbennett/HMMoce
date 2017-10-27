@@ -1,4 +1,4 @@
-#' Calculate Position-based Likelihood
+#' Calculate Position-based Likelihood from SRSS
 #' 
 #' \code{calc.srss} calculates likelihood estimates for each day's estimated
 #' dawn dusk times from the tag
@@ -9,7 +9,7 @@
 #' georeferenced SRSS times that the tag-measured times are compared to in order
 #' to generate a likelihood.
 #' 
-#' @param light is -LightLoc file output from DAP/Tag Portal for WC tags and 
+#' @param light is data frame from -LightLoc file output from DAP/Tag Portal for WC tags and 
 #'   contains tag-measured dawn/dusk times.
 #' @param locs.grid is list output from \code{setup.locs.grid}
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.

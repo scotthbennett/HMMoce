@@ -2,7 +2,7 @@
 % Please edit documentation in R/get.ghr.sst.r
 \name{get.ghr.sst}
 \alias{get.ghr.sst}
-\title{Download OI Sea Surface Temperature (SST) data}
+\title{Download GHR Sea Surface Temperature (SST) data}
 \usage{
 get.ghr.sst(limits, time, filename = "", download.file = TRUE,
   dir = getwd())

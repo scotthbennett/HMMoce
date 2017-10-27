@@ -1,4 +1,4 @@
-#' Calculate WOA profile in parallel
+#' Calculate WOA profile likelihood in parallel
 #' 
 #' Calculate Depth-temperature profile based likelihood
 #' 
@@ -6,24 +6,29 @@
 #' summarized depth-temperature profiles
 #' 
 #' Tag-based depth-temperature profile summaries are compared to climatological 
-#' profiles from the World Ocean Atlas (WOA) "matched" to generate position
-#' likelihoods. This essentially attempts to estimate animal position based on
-#' the water mass it is in, particularly if extensive diving performs thorough
-#' sampling of the environment. However, remember the in situ data is being
-#' compared to climatological means or the results of an oceanographic model.
+#' profiles from the World Ocean Atlas (WOA) "matched" to generate position 
+#' likelihoods. This essentially attempts to estimate animal position based on 
+#' the water mass it is in, particularly if extensive diving performs thorough 
+#' sampling of the environment. However, remember the in situ data is being 
+#' compared to climatological means (WOA) or the results of an oceanographic 
+#' model (HYCOM).
 #' 
-#' @param pdt is PDT data from WC psat tag summarizing depth/temperature data 
-#'   over a programmed time interval
+#' @param pdt input PDT data output from \code{\link{read.wc}} and 
+#'   \code{\link{extract.pdt}}
 #' @param ptt is unique tag identifier
-#' @param woa.data is monthly global 1/4deg climatology data from WOA13
-#' @param focalDim is integer for dimensions of raster::focal used to calculate
+#' @param woa.data is (typically) a list of monthly global 1/4deg climatology
+#'   data from WOA13. See \code{\link{get.env}}.
+#' @param focalDim is integer for dimensions of raster::focal used to calculate 
 #'   sd() of temperature grid cell. Recommend focalDim = 3 if woa.data = woa.one
 #'   and 9 if using woa.quarter.
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
 #' @param sp.lim is list of limits as \code{list(xmin, xmax, ymin, ymax)}
-#' @param use.se is logical indicating whether or not to use SE when using regression to predict temperature at specific depth levels.
-#' @param ncores is integer indicating number of cores used in this parallel computation. Defaults to using a detection function that chooses cores for you.
-#'
+#' @param use.se is logical indicating whether or not to use SE when using 
+#'   regression to predict temperature at specific depth levels.
+#' @param ncores is integer indicating number of cores used in this parallel 
+#'   computation. Defaults to using a detection function that chooses cores for 
+#'   you.
+#'   
 #' @export
 #' @return raster brick of likelihood
 #' @importFrom foreach "%dopar%"

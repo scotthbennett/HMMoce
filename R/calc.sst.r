@@ -3,7 +3,7 @@
 #' \code{calc.sst} compares tag SST to remotely sensed SST and calculates 
 #' likelihoods
 #' 
-#' @param tag.sst variable containing tag-collected SST data
+#' @param tag.sst is data frame containing tag-collected SST data
 #' @param filename is the first part of the filename specified to the download 
 #'   function \code{\link{get.env}}. For example, if downloaded files were 
 #'   specific to a particular dataset, you may want to identify that with a name

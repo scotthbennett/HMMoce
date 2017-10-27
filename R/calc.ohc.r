@@ -1,22 +1,23 @@
-#' Calculate Ocean Heat Content (OHC) probability surface
+#' Calculate Ocean Heat Content (OHC) likelihood surface
 #' 
 #' Compare tag data to OHC grid and calculate likelihoods
 #' 
-#' @param pdt is variable containing tag-collected PDT data
+#' @param pdt input PDT data see \code{\link{extract.pdt}}
 #' @param filename is the first part of the filename specified to the download 
 #'   function \code{\link{get.env}}. For example, if downloaded files were 
 #'   specific to a particular dataset, you may want to identify that with a name
 #'   like 'tuna' or 'shark1'. This results in a downloaded filename of, for 
-#'   example, 'tuna_date.nc'. This filename is required here so the calc
+#'   example, 'tuna_date.nc'. This filename is required here so the calc 
 #'   function knows where to get the env data.
 #' @param isotherm default '' in which isotherm is calculated on the fly based 
 #'   on daily tag data. Otherwise, numeric isotherm constraint can be specified 
 #'   (e.g. 20 deg C).
-#' @param ohc.dir local directory where \code{get.env} downloads are stored.
+#' @param ohc.dir directory of downloaded hycom (or other) data
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
-#' @param bathy is logical indicating whether or not a bathymetric mask should
+#' @param bathy is logical indicating whether or not a bathymetric mask should 
 #'   be applied
-#' @param use.se is logical indicating whether or not to use SE when using regression to predict temperature at specific depth levels.
+#' @param use.se is logical indicating whether or not to use SE when using
+#'   regression to predict temperature at specific depth levels.
 #'   
 #' @return likelihood is raster brick of likelihood surfaces representing 
 #'   estimated position based on tag-based OHC compared to calculated OHC using 
@@ -24,6 +25,9 @@
 #'   
 #' @export
 #' @seealso \code{\link{calc.woa}}
+#' @references Luo J, Ault JS, Shay LK, Hoolihan JP, Prince ED, Brown C a.,
+#'   Rooker JR (2015) Ocean Heat Content Reveals Secrets of Fish Migrations.
+#'   PLoS One 10:e0141101
 #' @examples
 #' \dontrun{
 #' # depth-temp profile data

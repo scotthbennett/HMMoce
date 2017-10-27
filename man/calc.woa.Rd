@@ -8,22 +8,24 @@ calc.woa(pdt, ptt, woa.data = NULL, dateVec, sp.lim = NULL,
   focalDim = NULL, use.se = TRUE)
 }
 \arguments{
-\item{pdt}{is PDT data from WC psat tag summarizing depth/temperature data 
-over a programmed time interval}
+\item{pdt}{input PDT data output from \code{\link{read.wc}} and 
+\code{\link{extract.pdt}}}
 
 \item{ptt}{is unique tag identifier}
 
-\item{woa.data}{is monthly global 1/4deg climatology data from WOA13}
+\item{woa.data}{is (typically) a list of monthly global 1/4deg climatology
+data from WOA13. See \code{\link{get.env}}.}
 
 \item{dateVec}{is vector of dates from tag to pop-up in 1 day increments.}
 
 \item{sp.lim}{is list of limits as \code{list(xmin, xmax, ymin, ymax)}}
 
-\item{focalDim}{is integer for dimensions of raster::focal used to calculate
+\item{focalDim}{is integer for dimensions of raster::focal used to calculate 
 sd() of temperature grid cell. Recommend focalDim = 3 if woa.data = woa.one
 and 9 if using woa.quarter.}
 
-\item{use.se}{is logical indicating whether or not to use SE when using regression to predict temperature at specific depth levels.}
+\item{use.se}{is logical indicating whether or not to use SE when using 
+regression to predict temperature at specific depth levels.}
 }
 \value{
 raster brick of likelihood

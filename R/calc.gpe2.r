@@ -6,8 +6,8 @@
 #' Light errors are parameterized using elliptical error values output in 
 #' '-Locations.csv' (WC tags).
 #' 
-#' @param locs is -Locations file output from DAP/Tag Portal for WC tags and 
-#'   contains GPS, Argos, and GPE locations as applicable.
+#' @param locs is data frame from -Locations file output from DAP/Tag Portal for
+#'   WC tags and contains GPS, Argos, and GPE locations as applicable.
 #' @param locDates is vector of dates from locs dataframe
 #' @param locs.grid is list output from \code{setup.locs.grid}
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
@@ -15,10 +15,13 @@
 #'   generated for light-based likelihoods as given from output of WC-GPE. False
 #'   if only longitude should be used. If False, standard deviation on light 
 #'   measurements is currently fixed at 0.7 deg longitude following Musyl et al 
-#'   2001. Default is FALSE and will use longitude only.
-#' @param gpeOnly is logical. If TRUE, locs input is trimmed to GPE positions 
+#'   2011. Default is FALSE and will use longitude only.
+#' @param gpeOnly is logical. If TRUE (default), locs input is trimmed to GPE positions 
 #'   only. This is most applicable in scenarios with FastGPS data and you're 
-#'   adding this as a gps input (see "gps" argument).
+#'   adding this as a GPS input.
+#' @references Musyl MK, Domeier ML, Nasby-Lucas N, Brill RW, McNaughton LM,
+#'   Swimmer JY, Lutcavage MS, Wilson SG, Galuardi B, Liddle JB (2011)
+#'   Performance of pop-up satellite archival tags. Mar Ecol Prog Ser
 #' @export
 #' @return L is an array of lon x lat likelihood surfaces (matrices) for each 
 #'   time point (3rd dimension)

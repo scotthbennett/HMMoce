@@ -1,3 +1,12 @@
+#' Simplifies locations to one per day
+#' 
+#' @param locations is data frame from -Locations file output from DAP/Tag Portal for WC tags and 
+#'   contains GPS, Argos, and GPE locations as applicable.
+#' @param loc.dts is vector of dates from locations input
+#'   
+#' @return simplified (one per day) version of locations input
+#'
+
 simplifyLocs <- function(locations, loc.dts){
   
   udates <- unique(loc.dts)

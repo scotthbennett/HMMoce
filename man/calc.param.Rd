@@ -11,7 +11,7 @@ calc.param(migr.spd, resid.frac = 0.1, g)
 in migratory behavior state.}
 
 \item{resid.frac}{is numeric indicating percent of migratory speed that
-should be used for resident-like movements. Default is 10% of migratory
+should be used for resident-like movements. Default is 10\% of migratory
 speed.}
 
 \item{g}{is grid from \code{setup.grid}}

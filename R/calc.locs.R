@@ -1,14 +1,14 @@
 #' Calculate Position-based Likelihood
 #' 
 #' \code{calc.locs} calculates likelihood estimates for each day of animal tag 
-#' data.
+#' data using tag-based locations.
 #' 
 #' GPS and Argos positions are given a "likelihood" using this function but are
 #' currently both considered to be "known" positions without error.
 #' 
-#' @param locs is -Locations file output from DAP/Tag Portal for WC tags and 
+#' @param locs is data frame from -Locations file output from DAP/Tag Portal for WC tags and 
 #'   contains GPS, Argos, and GPE locations as applicable.
-#' @param gps is -FastGPS file output from WC Tag Portal
+#' @param gps is data frame from -FastGPS file output from WC Tag Portal
 #' @param iniloc is 2 x 5 dataframe containing day, month, year, lat, lon for 
 #'   both tag and pop locations
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.

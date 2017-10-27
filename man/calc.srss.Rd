@@ -2,12 +2,12 @@
 % Please edit documentation in R/calc.srss.r
 \name{calc.srss}
 \alias{calc.srss}
-\title{Calculate Position-based Likelihood}
+\title{Calculate Position-based Likelihood from SRSS}
 \usage{
 calc.srss(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3)
 }
 \arguments{
-\item{light}{is -LightLoc file output from DAP/Tag Portal for WC tags and 
+\item{light}{is data frame from -LightLoc file output from DAP/Tag Portal for WC tags and 
 contains tag-measured dawn/dusk times.}
 
 \item{locs.grid}{is list output from \code{setup.locs.grid}}

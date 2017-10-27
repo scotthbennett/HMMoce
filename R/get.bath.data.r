@@ -1,20 +1,22 @@
-#' Download bathymetry res is either 30 second, one or two minute resolution
-#' (.5, 1)
+#' Download bathymetry data
+#' 
+#' Download ETOPO bathymetry. Resolution is either 30 second or one minute 
+#' resolution
+#' 
 #' @param lonlow numeric indicating minimum longitude extent of desired download
 #'   (-180 to 180).
 #' @param lonhigh see lonlow
 #' @param latlow see lonlow
 #' @param lathigh see lonlow
 #' @param folder is destination folder. Default is a temporary directory.
-#' @param seaonly is logical indicating whether you want to mask out anything on
-#'   land.
-#' @param res is numeric indicating resolution in minutes. Choices currently
-#'   limited to just 0.5.
+#' @param seaonly is logical indicating whether you want to download only
+#'   bathymetry below sea level.
+#' @param res is numeric indicating resolution in minutes. Choices currently are 0.5 or 1minute.
 #' @param raster is logical indicating whether you want the function to return a
 #'   raster or not (a list will be returned).
-#' @return Downloads a NetCDF file containing ETopo bathymetry. If raster=TRUE,
-#' a raster is generated from the downloaded NetCDF. Otherwise, the file is just
-#' downloaded.
+#' @return Downloads a NetCDF file containing ETopo bathymetry. If raster=TRUE, 
+#'   a raster is generated from the downloaded NetCDF. Otherwise, the file is 
+#'   just downloaded.
 #' @examples
 #' \dontrun{
 #' sp.lim <- list(lonmin = -82, lonmax = -25, latmin = 15, latmax = 50)
@@ -53,9 +55,6 @@ get.bath.data <- function(lonlow, lonhigh, latlow, lathigh, folder = tempdir(), 
   lat <- as.numeric(RNetCDF::var.get.nc(nc, variable = "latitude"))
   bdata <- RNetCDF::var.get.nc(nc, variable = bathid)
 
-  #if(res==1) bdata = rot90(bdata)
-  #if(res==.5) bdata = rot90(bdata)	
-  
   lat = lat[order(lat)]
   
   if(seaonly==T) bdata[bdata>=0] = NA

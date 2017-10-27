@@ -2,7 +2,7 @@
 % Please edit documentation in R/calc.track.r
 \name{calc.track}
 \alias{calc.track}
-\title{Calculate movement track from state estimates}
+\title{Calculate most probable track from state estimates}
 \usage{
 calc.track(distr, g, dateVec, iniloc, method = "mean")
 }
@@ -14,7 +14,8 @@ spatial scale and grid you're working on}
 
 \item{dateVec}{is vector of dates from tag to pop-up in 1 day increments.}
 
-\item{iniloc}{is matrix of tag and pop locations. Default is NULL because this should be taken care of elsewhere.}
+\item{iniloc}{is matrix of tag and pop locations. Default is NULL because
+this should be taken care of elsewhere.}
 
 \item{method}{is character indicating what method to use for track 
 calculation. Currently only 'mean' and 'max' are supported.}
@@ -23,7 +24,7 @@ calculation. Currently only 'mean' and 'max' are supported.}
 calculated track
 }
 \description{
-\code{calc.track} uses HMM output via \code{hmm.smoother} to calculate most
+\code{calc.track} uses HMM output via \code{hmm.smoother} to calculate most 
 probable track and behavior state
 }
 \examples{

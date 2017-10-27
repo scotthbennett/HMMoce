@@ -8,7 +8,8 @@ calc.hycom.par(pdt, filename, hycom.dir, focalDim = 9, dateVec,
   use.se = TRUE, ncores = NULL)
 }
 \arguments{
-\item{pdt}{input PAT data see \code{\link{extract.pdt}}}
+\item{pdt}{input PDT data output from \code{\link{read.wc}} and
+\code{\link{extract.pdt}}}
 
 \item{filename}{is the first part of the filename specified to the download 
 function \code{\link{get.env}}. For example, if downloaded files were 
@@ -17,14 +18,14 @@ like 'tuna' or 'shark1'. This results in a downloaded filename of, for
 example, 'tuna_date.nc'. This filename is required here so the calc 
 function knows where to get the env data.}
 
-\item{hycom.dir}{directory of downloaded hycom (or other)data}
+\item{hycom.dir}{directory of downloaded hycom (or other) data}
 
 \item{focalDim}{is integer for dimensions of raster::focal used to calculate 
-sd() of temperature grid cell. Recommend focalDim = 3 if woa.data = woa.one
-and 9 if using woa.quarter.}
+sd() of temperature grid cell. Recommend focalDim = 9 for Hycom data at 
+0.08deg resolution.}
 
-\item{dateVec}{vector of complete dates for data range. This should be in 
-'Date' format}
+\item{dateVec}{vector of complete dates (from tag to pop by day) for data
+range. This should be in 'Date' format}
 
 \item{use.se}{is logical indicating whether or not to use SE when using 
 regression to predict temperature at specific depth levels.}
@@ -36,7 +37,7 @@ have!}
 a raster brick of Hycom profile likelihood
 }
 \description{
-Calculate Hycom profile probability surface in parallel
+Calculate Hycom profile likelihood surface in parallel
 }
 \examples{
 \dontrun{

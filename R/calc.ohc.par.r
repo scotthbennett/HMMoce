@@ -1,29 +1,35 @@
-#' OHC Parallel Calculate Ocean Heat Content (OHC) probability surface in
-#' parallel
+#' OHC Likelihood in Parallel
 #' 
-#' @param pdt input PAT data see \code{\link{extract.pdt}}
+#' Calculate Ocean Heat Content (OHC) likelihood surface in parallel
+#' 
+#' @param pdt input PDT data see \code{\link{extract.pdt}}
 #' @param filename is the first part of the filename specified to the download 
 #'   function \code{\link{get.env}}. For example, if downloaded files were 
 #'   specific to a particular dataset, you may want to identify that with a name
 #'   like 'tuna' or 'shark1'. This results in a downloaded filename of, for 
 #'   example, 'tuna_date.nc'. This filename is required here so the calc 
 #'   function knows where to get the env data.
-#' @param isotherm if specifying a particular isotherm, otherwise leave blank.
-#'   default value is
-#' @param ohc.dir directory of downloaded hycom (or other)data
-#' @param dateVec vector of complete dates for data range. This should be in
+#' @param isotherm default '' in which isotherm is calculated on the fly based 
+#'   on daily tag data. Otherwise, numeric isotherm constraint can be specified 
+#'   (e.g. 20 deg C).
+#' @param ohc.dir directory of downloaded hycom (or other) data
+#' @param dateVec vector of complete dates for data range. This should be in 
 #'   'Date' format
-#' @param bathy should the land be flagged out? defaults to TRUE
-#' @param use.se is logical indicating whether or not to use SE when using
+#' @param bathy is logical indicating whether or not a bathymetric mask should
+#'   be applied
+#' @param use.se is logical indicating whether or not to use SE when using 
 #'   regression to predict temperature at specific depth levels.
-#' @param ncores specify number of cores, or leave blank and use whatever you
+#' @param ncores specify number of cores, or leave blank and use whatever you 
 #'   have!
 #'   
 #' @return a raster brick of OHC likelihood
 #' @seealso \code{\link{calc.ohc}}
+#' @references Luo J, Ault JS, Shay LK, Hoolihan JP, Prince ED, Brown C a.,
+#'   Rooker JR (2015) Ocean Heat Content Reveals Secrets of Fish Migrations.
+#'   PLoS One 10:e0141101
 #' @export
 #' @importFrom foreach "%dopar%"
-#'  
+#'   
 #' @examples 
 #' \dontrun{
 #' # depth-temp profile data

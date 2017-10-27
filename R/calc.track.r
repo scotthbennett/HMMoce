@@ -1,6 +1,6 @@
-#' Calculate movement track from state estimates
+#' Calculate most probable track from state estimates
 #' 
-#' \code{calc.track} uses HMM output via \code{hmm.smoother} to calculate most
+#' \code{calc.track} uses HMM output via \code{hmm.smoother} to calculate most 
 #' probable track and behavior state
 #' 
 #' @param distr is output array from \code{hmm.smoother}
@@ -9,7 +9,8 @@
 #' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
 #' @param method is character indicating what method to use for track 
 #'   calculation. Currently only 'mean' and 'max' are supported.
-#' @param iniloc is matrix of tag and pop locations. Default is NULL because this should be taken care of elsewhere.
+#' @param iniloc is matrix of tag and pop locations. Default is NULL because
+#'   this should be taken care of elsewhere.
 #'   
 #' @return calculated track
 #' @export

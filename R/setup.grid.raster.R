@@ -1,3 +1,11 @@
+#' Setup the discrete spatial grid for the HMM
+#' 
+#' @param grid.ras is a raster for which a grid is desired
+#'   
+#' @return a list
+#' @export
+#'   
+
 setup.grid.raster <- function(grid.ras){
   
   ex <- raster::extent(grid.ras)

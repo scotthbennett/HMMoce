@@ -2,18 +2,18 @@
 % Please edit documentation in R/calc.errEll.r
 \name{calc.errEll}
 \alias{calc.errEll}
-\title{\code{calc.errEll} calculates error ellipses around input locations}
+\title{Calculates error ellipses around input locations}
 \usage{
 calc.errEll(locs, locs.grid)
 }
 \arguments{
-\item{locs}{is file of locations typically read from -Locations.csv output
+\item{locs}{is data frame of locations typically read from -Locations.csv output
 from Wildlife Computers}
 
 \item{locs.grid}{is list output from \code{setup.locs.grid}}
 }
 \value{
-an array of elliptical error ellipses for input light-based locations
+an array of error ellipses for input light-based locations
 }
 \description{
 Error ellipses are generated around WC tag based positions using

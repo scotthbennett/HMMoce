@@ -1,4 +1,4 @@
-#' Download OI Sea Surface Temperature (SST) data
+#' Download GHR Sea Surface Temperature (SST) data
 #' 
 #' \code{get.ghr.sst} downloads sea surface temperature (SST) data for given
 #' temporal and spatial constraints of your data.

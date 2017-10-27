@@ -1,30 +1,33 @@
-#' Calculate SST-based likelihood
-#' 
-#' \code{calc.sst.par} compares tag SST to remotely sensed SST and calculates
-#' likelihoods
-#' 
-#' @param tag.sst variable containing tag-collected SST data
-#' @param filename is the first part of the filename specified to the download 
-#'   function \code{\link{get.env}}. For example, if downloaded files were 
-#'   specific to a particular dataset, you may want to identify that with a name
-#'   like 'tuna' or 'shark1'. This results in a downloaded filename of, for 
-#'   example, 'tuna_date.nc'. This filename is required here so the calc
-#'   function knows where to get the env data.
-#' @param sst.dir local directory where remote sensing SST downloads are stored
-#' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
-#' @param focalDim is integer for dimensions of raster::focal used to calculate 
-#'   sd() of env grid cell. If left to NULL (default), this dimension will
-#'   approximately incorporate 0.25 degrees.
-#' @param sens.err is numeric indicating the percent sensor error in the tag sst sensor. Default is 1.
-#' @param ncores is integer indicating number of cores used in this parallel computation. Defaults to using a detection function that chooses cores for you.
-#' 
-#' @return likelihood is raster brick of likelihood surfaces representing matches
-#'   between tag-based sst and remotely sensed sst maps
-#' 
-#' @export
+#'Calculate SST-based likelihood in parallel
+#'
+#'\code{calc.sst.par} compares tag SST to remotely sensed SST and calculates 
+#'likelihoods in parallel
+#'
+#'@param tag.sst is data frame containing tag-collected SST data
+#'@param filename is the first part of the filename specified to the download 
+#'  function \code{\link{get.env}}. For example, if downloaded files were 
+#'  specific to a particular dataset, you may want to identify that with a name 
+#'  like 'tuna' or 'shark1'. This results in a downloaded filename of, for 
+#'  example, 'tuna_date.nc'. This filename is required here so the calc function
+#'  knows where to get the env data.
+#'@param sst.dir local directory where remote sensing SST downloads are stored
+#'@param dateVec is vector of dates from tag to pop-up in 1 day increments.
+#'@param focalDim is integer for dimensions of raster::focal used to calculate 
+#'  sd() of env grid cell. If left to NULL (default), this dimension will 
+#'  approximately incorporate 0.25 degrees.
+#'@param sens.err is numeric indicating the percent sensor error in the tag sst
+#'  sensor. Default is 1.
+#'@param ncores is integer indicating number of cores used in this parallel
+#'  computation. Defaults to using a detection function that chooses cores for
+#'  you.
+#'  
+#'@return likelihood is raster brick of likelihood surfaces representing matches
+#'  between tag-based sst and remotely sensed sst maps
+#'  
+#'@export
 #'@importFrom foreach "%dopar%"
-#' @seealso \code{\link{calc.sst}}
-#' 
+#'@seealso \code{\link{calc.sst}}
+#'  
 #' @examples
 #' \dontrun{
 #' 

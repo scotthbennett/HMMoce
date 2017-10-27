@@ -7,8 +7,8 @@
 calc.gpe2(locs, locDates, locs.grid, dateVec, errEll = TRUE, gpeOnly = TRUE)
 }
 \arguments{
-\item{locs}{is -Locations file output from DAP/Tag Portal for WC tags and 
-contains GPS, Argos, and GPE locations as applicable.}
+\item{locs}{is data frame from -Locations file output from DAP/Tag Portal for
+WC tags and contains GPS, Argos, and GPE locations as applicable.}
 
 \item{locDates}{is vector of dates from locs dataframe}
 
@@ -20,11 +20,11 @@ contains GPS, Argos, and GPE locations as applicable.}
 generated for light-based likelihoods as given from output of WC-GPE. False
 if only longitude should be used. If False, standard deviation on light 
 measurements is currently fixed at 0.7 deg longitude following Musyl et al 
-2001. Default is FALSE and will use longitude only.}
+2011. Default is FALSE and will use longitude only.}
 
-\item{gpeOnly}{is logical. If TRUE, locs input is trimmed to GPE positions 
+\item{gpeOnly}{is logical. If TRUE (default), locs input is trimmed to GPE positions 
 only. This is most applicable in scenarios with FastGPS data and you're 
-adding this as a gps input (see "gps" argument).}
+adding this as a GPS input.}
 }
 \value{
 L is an array of lon x lat likelihood surfaces (matrices) for each 
@@ -47,6 +47,11 @@ locs <- read.table(paste(ptt, '-Locations-GPE2.csv', sep = ''), sep = ',',
 L.light <- calc.gpe2(locs, iniloc = iniloc, locs.grid = locs.grid,
                      dateVec = dateVec, errEll = TRUE, gpeOnly = TRUE)
 }
+}
+\references{
+Musyl MK, Domeier ML, Nasby-Lucas N, Brill RW, McNaughton LM,
+  Swimmer JY, Lutcavage MS, Wilson SG, Galuardi B, Liddle JB (2011)
+  Performance of pop-up satellite archival tags. Mar Ecol Prog Ser
 }
 \seealso{
 \code{\link{calc.srss}}

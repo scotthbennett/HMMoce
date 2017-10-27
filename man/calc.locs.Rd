@@ -7,10 +7,10 @@
 calc.locs(locs, gps = NULL, iniloc, locs.grid, dateVec)
 }
 \arguments{
-\item{locs}{is -Locations file output from DAP/Tag Portal for WC tags and 
+\item{locs}{is data frame from -Locations file output from DAP/Tag Portal for WC tags and 
 contains GPS, Argos, and GPE locations as applicable.}
 
-\item{gps}{is -FastGPS file output from WC Tag Portal}
+\item{gps}{is data frame from -FastGPS file output from WC Tag Portal}
 
 \item{iniloc}{is 2 x 5 dataframe containing day, month, year, lat, lon for 
 both tag and pop locations}
@@ -25,7 +25,7 @@ L is an array of lon x lat likelihood surfaces (matrices) for each
 }
 \description{
 \code{calc.locs} calculates likelihood estimates for each day of animal tag 
-data.
+data using tag-based locations.
 }
 \details{
 GPS and Argos positions are given a "likelihood" using this function but are

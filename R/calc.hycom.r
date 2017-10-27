@@ -1,25 +1,27 @@
-#' Hycom Profile LIkelihood in Parallel
+#' Hycom Profile LIkelihood
 #' 
-#' Calculate Hycom profile probability surface in parallel
+#' Calculate Hycom profile likelihood surface
 #' 
-#' @param pdt input PAT data see \code{\link{extract.pdt}}
+#' @param pdt input PDT data output from \code{\link{read.wc}} and
+#'   \code{\link{extract.pdt}}
 #' @param filename is the first part of the filename specified to the download 
 #'   function \code{\link{get.env}}. For example, if downloaded files were 
 #'   specific to a particular dataset, you may want to identify that with a name
 #'   like 'tuna' or 'shark1'. This results in a downloaded filename of, for 
 #'   example, 'tuna_date.nc'. This filename is required here so the calc 
 #'   function knows where to get the env data.
-#' @param hycom.dir directory of downloaded hycom (or other)data
+#' @param hycom.dir directory of downloaded hycom (or other) data
 #' @param focalDim is integer for dimensions of raster::focal used to calculate 
-#'   sd() of env grid cell. If left to NULL (default), this dimension will 
-#'   approximately incorporate 0.25 degrees.
-#' @param dateVec vector of complete dates for data range. This should be in 
-#'   'Date' format
+#'   sd() of temperature grid cell. Recommend focalDim = 9 for Hycom data at 
+#'   0.08deg resolution.
+#' @param dateVec vector of complete dates (from tag to pop by day) for data 
+#'   range. This should be in 'Date' format
 #' @param use.se is logical indicating whether or not to use SE when using 
 #'   regression to predict temperature at specific depth levels.
 #'   
 #' @return a raster brick of Hycom profile likelihood
 #' @export
+#' @seealso \code{\link{calc.hycom.par}}
 #' @importFrom foreach %dopar%
 #'   
 #' @examples

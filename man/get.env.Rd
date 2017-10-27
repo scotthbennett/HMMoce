@@ -29,7 +29,9 @@ type = 'woa', otherwise NULL. Choices are 'one' or 'quarter'.}
 \item{save.dir}{is the directory to save the downloaded data to}
 
 \item{sst.type}{is character indicating type of desired SST product. Choices 
-are currently OI and GHR SST.}
+are currently Optimum Interpolation ('oi')
+\url{https://www.ncdc.noaa.gov/oisst} or a high-resolution composite
+('ghr') \url{https://www.ghrsst.org/}.}
 
 \item{depLevels}{is an integer describing which depth levels to download from
 Hycom (e.g. 1=surface). Default is NULL and all levels are downloaded.}

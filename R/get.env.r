@@ -81,7 +81,7 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
     for(i in 1:length(uniqueDates)){
       time <- as.Date(uniqueDates[i])
       repeat{
-        get.hycom4(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''),
+        get.hycom(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''),
                   download.file = TRUE, dir = save.dir, depLevels=depLevels) 
         tryCatch({
           err <- try(RNetCDF::open.nc(paste(save.dir,'/', filename, '_', time, '.nc', sep = '')), silent = T)

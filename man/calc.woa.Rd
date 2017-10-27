@@ -44,24 +44,6 @@ the water mass it is in, particularly if extensive diving performs thorough
 sampling of the environment. However, remember the in situ data is being
 compared to climatological means or the results of an oceanographic model.
 }
-\examples{
-\dontrun{
-# READ DATA
-pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop)
-pdt.udates <- pdt$udates
-pdt <- pdt$data
-
-# make dateVec, lat and lon
-
-# define where woa is 
-get.env(type = 'woa', resol = 'one')
-
-# GENERATE DAILY PROFILE LIKELIHOODS
-L.prof.woa <- calc.woa.par(pdt, dat = woa, lat = lat, lon = lon,
-                           dateVec = dateVec, envType = 'woa')
-}
-
-}
 \seealso{
 \code{\link{calc.ohc}}
 }

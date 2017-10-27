@@ -37,18 +37,6 @@ included in locs.grid input. after filtering, each yearday has a grid of
 georeferenced SRSS times that the tag-measured times are compared to in order
 to generate a likelihood.
 }
-\examples{
-\dontrun{
-
-# light data
-light <- read.wc(ptt, wd = myDir, type = 'light', tag=tag, pop=pop); 
-light.udates <- light$udates; light <- light$data
-
-# GENERATE LIGHT LIKELIHOOD
-# SRSS METHOD
-L.light <- calc.srss(light, locs.grid = locs.grid, dateVec = dateVec)
-}
-}
 \seealso{
 \code{\link{calc.gpe2}}
 }

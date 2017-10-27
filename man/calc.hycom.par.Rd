@@ -39,14 +39,3 @@ a raster brick of Hycom profile likelihood
 \description{
 Calculate Hycom profile likelihood surface in parallel
 }
-\examples{
-\dontrun{
-# pdt data
-pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop); 
-pdt.udates <- pdt$udates; pdt <- pdt$data
-
-# GENERATE DAILY PDT LIKELIHOODS USING HYCOM
-L.pdt <- calc.hycom.par(pdt, hycom.dir = hycom.dir, dateVec = dateVec)
-
-}
-}

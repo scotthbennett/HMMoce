@@ -40,15 +40,17 @@ probability
 Light errors are parameterized using elliptical error values output in.
 }
 \examples{
-\dontrun{
 
 # GENERATE MOVEMENT KERNELS. D VALUES ARE MEAN AND SD PIXELS
-K1 <- gausskern(D1[1], D1[2], muadv = 0)
-K2 <- gausskern(D2[1], D2[2], muadv = 0)
+K1 <- gausskern(3, 1, muadv = 0)
+K2 <- gausskern(10, 5, muadv = 0)
 
 # MAKE A GUESS AT STATE SWITCHING PROBABILITY
 # probability of staying in state 1 and 2, respectively
 p.init <- c(0.7, 0.8)
+
+\dontrun{
+# Not run as it relies on L, a large likelihood grid
 # RUN EXPECTATION-MAXIMIZATION ROUTINE FOR MATRIX, P (STATE SWITCH PROBABILITY)
 P.final <- expmax(p.init, g = g, L = L, K1, K2)
 

@@ -7,12 +7,11 @@
 #' @export
 #' 
 #' @examples
-#' \dontrun{
 #' dte <- '2015-01-01 05:30:17'
 #' findDateFormat(dte)
 #' dte.POSIX <- as.POSIXct(dte, format = findDateFormat(dte))
 #' dte.POSIX
-#' }
+#'
 
 findDateFormat <- function(dateVec){
 

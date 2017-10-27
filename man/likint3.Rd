@@ -21,3 +21,11 @@ an array of dim(w) that represents the likelihood of the tag-measured variable a
 \description{
 #' \code{likint3} calculates density function for a normal distribution and integrates between limits
 }
+\examples{
+# Dummy example environmental grid
+env.grid <- matrix(seq(1,100,by=1), ncol=10)
+
+# Generates likelihood of measurement
+# as compared to environmental grid
+likint3(env.grid, 2, 55, 70)
+}

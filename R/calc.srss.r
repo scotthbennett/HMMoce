@@ -23,17 +23,7 @@
 #' @return L is a raster of dim(lon x lat x dateVec) containing likelihood
 #'   surfaces for each time point
 #' @seealso \code{\link{calc.gpe2}}
-#' @examples
-#' \dontrun{
 #' 
-#' # light data
-#' light <- read.wc(ptt, wd = myDir, type = 'light', tag=tag, pop=pop); 
-#' light.udates <- light$udates; light <- light$data
-#' 
-#' # GENERATE LIGHT LIKELIHOOD
-#' # SRSS METHOD
-#' L.light <- calc.srss(light, locs.grid = locs.grid, dateVec = dateVec)
-#' }
 
 calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){
   

@@ -28,11 +28,11 @@ World Ocean Atlas
 }
 \examples{
 \dontrun{
-# download WOA data from GitHub
+# download WOA data (large RData file!) from GitHub
 woa.dir <- paste('my_woa_dir')
 get.env(type = 'woa', resol = 'quarter')
 
-# extract desired data
+# extract desired data based on spatial bounds
 woa <- extract.woa(woa.dir, bbox, 'quarter')
 
 }

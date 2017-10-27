@@ -29,23 +29,6 @@
 #' @return raster brick of likelihood
 #' @importFrom foreach "%dopar%"
 #' @seealso \code{\link{calc.ohc}}
-#' @examples 
-#' \dontrun{
-#' # READ DATA
-#' pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop)
-#' pdt.udates <- pdt$udates
-#' pdt <- pdt$data
-#' 
-#' # make dateVec, lat and lon
-#' 
-#' # define where woa is 
-#' get.env(type = 'woa', resol = 'one')
-#' 
-#' # GENERATE DAILY PROFILE LIKELIHOODS
-#' L.prof.woa <- calc.woa.par(pdt, dat = woa, lat = lat, lon = lon,
-#'                            dateVec = dateVec, envType = 'woa')
-#' }
-#' 
 
 calc.woa <- function(pdt, ptt, woa.data = NULL, dateVec, sp.lim = NULL, focalDim = NULL, use.se = TRUE){
   

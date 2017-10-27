@@ -27,6 +27,7 @@
 #' @return nothing, just downloads the data to your local machine
 #' @examples
 #' \dontrun{
+#' # Not run to prevent actual data download
 #' sp.lim <- list(lonmin = -82, lonmax = -25, latmin = 15, latmax = 50)
 #' # FOR OI SST DATA
 #' get.env(as.Date('2015-10-01'), filename='oisst', type = 'sst', 

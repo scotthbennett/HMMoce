@@ -27,12 +27,3 @@ a list of all resampled likelihood rasters and g, the common grid
 \description{
 Resample likelihood rasters to common resolution/extent
 }
-\examples{
-\dontrun{
- # use with caution as all workspace items containing 'L.' will be listed. 
- # We only want the likelihood outputs calculated above
-L.rasters <- mget(ls(pattern = 'L\\\\.'))
-resamp.idx <- which.max(lapply(L.rasters, FUN=function(x) raster::res(x)[1]))
-L.res <- resample.grid(L.rasters, L.rasters[[resamp.idx]])
-}
-}

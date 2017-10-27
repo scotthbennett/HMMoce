@@ -47,10 +47,3 @@ SST, OHC) to make overall combined likelihoods for each time point
 This function currently only supports the use of 3 input likelihood 
   data sources. This will be expanded in the future based on user needs.
 }
-\examples{
-\dontrun{
-L <- make.L(L1 = L.res[[1]][L.idx[[tt]]], L.mle.res = L.res$L.mle.res,
- dateVec = dateVec, locs.grid = locs.grid, iniloc = iniloc, 
- bathy = bathy, pdt = pdt)
-}
-}

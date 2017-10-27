@@ -29,18 +29,7 @@
 #'   PLoS One 10:e0141101
 #' @export
 #' @importFrom foreach "%dopar%"
-#'   
-#' @examples 
-#' \dontrun{
-#' # depth-temp profile data
-#' pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop); 
-#' pdt.udates <- pdt$udates; pdt <- pdt$data
-#' 
-#' # GENERATE DAILY OCEAN HEAT CONTENT (OHC) LIKELIHOODS
-#' L.ohc <- calc.ohc.par(pdt, filename='tuna', ohc.dir = hycom.dir, dateVec = dateVec,
-#'                   isotherm = '')
-#' }
-
+#'
 
 calc.ohc.par <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRUE, use.se = TRUE, ncores = NULL){
   

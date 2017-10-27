@@ -9,6 +9,13 @@
 #' 
 #' @return an array of dim(w) that represents the likelihood of the tag-measured variable as compared to the input grid
 #' @export 
+#' @examples 
+#' # Dummy example environmental grid
+#' env.grid <- matrix(seq(1,100,by=1), ncol=10)
+#'
+#' # Generates likelihood of measurement
+#' # as compared to environmental grid
+#' likint3(env.grid, 2, 55, 70)
 
 likint3 <- function(w, wsd, minT, maxT){
   #lwr <- minT - .75 * (maxT - minT)

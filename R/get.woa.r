@@ -11,10 +11,10 @@
 get.woa <- function(save.dir = getwd(), resol = 'one'){
 
   if (resol == 'one'){
-    url <- 'https://github.com/camrinbraun/camrinbraun.github.io/blob/master/woa.one.rda?raw=true'
+    url <- 'https://s3-us-west-2.amazonaws.com/braun-public/EnvData/woa/woa.one.rda'
     filename <- paste(save.dir, '/woa.one.rda', sep='')
   } else if (resol == 'quarter'){
-    url <- 'https://github.com/camrinbraun/camrinbraun.github.io/blob/master/woa.quarter.rda?raw=true'
+    url <- 'https://s3-us-west-2.amazonaws.com/braun-public/EnvData/woa/woa.quarter.rda'
     filename <- paste(save.dir, '/woa.quarter.rda', sep='')
   }
 

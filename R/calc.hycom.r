@@ -37,21 +37,27 @@
 
 calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se = TRUE){
   
-  options(warn=-1)
+  names(pdt) <- tolower(names(pdt))
+  options(warn=1)
   
   t0 <- Sys.time()
-  print(paste('Starting Hycom profile likelihood calculation...'))
+  print(paste('Starting OHC likelihood calculation...'))
   
   # calculate midpoint of tag-based min/max temps
-  pdt$MidTemp <- (pdt$MaxTemp + pdt$MinTemp) / 2
+  if(length(grep('mean', names(pdt))) > 0){
+    pdt$useTemp <- pdt[,grep('mean', names(pdt))]
+  } else{
+    pdt$useTemp <- (pdt$maxtemp + pdt$mintemp) / 2
+  }
   
   # get unique time points
-  dateVec = lubridate::parse_date_time(dateVec, '%Y-%m-%d')
+  if(class(pdt$date)[1] != 'POSIXct') stop('Error: pdt$Date must be as.POSIXct format.')
   
-  udates <- unique(lubridate::parse_date_time(pdt$Date, orders = '%Y-%m-%d %H%:%M:%S'))
+  pdt$dateVec <- findInterval(pdt$date, dateVec)
+  udates <- unique(pdt$dateVec)
   T <- length(udates)
   
-  print(paste0('Generating profile likelihood for ', udates[1], ' through ', udates[length(udates)]))
+  print(paste('Generating profile likelihood...'))
   
   # open nc and get the indices for the vars
   nc1 =  RNetCDF::open.nc(dir(hycom.dir, full.names = T)[1])
@@ -88,14 +94,11 @@ calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se =
   lat <- RNetCDF::var.get.nc(nc1, lat.idx)
   if(length(dim(lat)) == 2) lat <- lat[1,]
   
-  # result will be array of likelihood surfaces
-  L.hycom <- array(0, dim = c(length(lon), length(lat), length(dateVec)))
-  
   print(paste('Starting iterations through deployment period ', '...'))
   
-  for(i in 1:T){ 
-    time <- as.Date(udates[i])
-    pdt.i <- pdt[which(pdt$Date == time),]
+  for(i in udates){ 
+    time <- dateVec[i]
+    pdt.i <- pdt[which(pdt$dateVec == i),]
     print(paste('Starting ', time,'...',sep=''))
     
     # open day's hycom data
@@ -103,22 +106,22 @@ calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se =
     dat <- RNetCDF::var.get.nc(nc, temp.idx) * scale + offset
     
     #extracts depth from tag data for day i
-    y <- pdt.i$Depth[!is.na(pdt.i$Depth)] 
+    y <- pdt.i$depth[!is.na(pdt.i$depth)] 
     y[y < 0] <- 0
     
     #extract temperature from tag data for day i
-    x <- pdt.i$MidTemp[!is.na(pdt.i$Depth)]  
+    x <- pdt.i$useTemp[!is.na(pdt.i$depth)]  
     
     # use the which.min
-    depIdx = unique(apply(as.data.frame(pdt.i$Depth), 1, FUN = function(x) which.min((x - depth) ^ 2)))
+    depIdx = unique(apply(as.data.frame(pdt.i$depth), 1, FUN = function(x) which.min((x - depth) ^ 2)))
     hycomDep <- depth[depIdx]
     
     # make predictions based on the regression model earlier for the temperature at standard WOA depth levels for low and high temperature at that depth
     suppressWarnings(
-      fit.low <- locfit::locfit(pdt.i$MinTemp ~ pdt.i$Depth)
+      fit.low <- locfit::locfit(pdt.i$mintemp ~ pdt.i$depth)
     )
     suppressWarnings(
-      fit.high <- locfit::locfit(pdt.i$MaxTemp ~ pdt.i$Depth)
+      fit.high <- locfit::locfit(pdt.i$maxtemp ~ pdt.i$depth)
     )
     n = length(hycomDep)
     
@@ -150,7 +153,7 @@ calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se =
     }
     
     # make index of dates for filling in lik.prof
-    didx = base::match(udates, dateVec)
+    #didx = base::match(udates, dateVec)
     
     # setup the likelihood array for each day. Will have length (dim[3]) = n depths
     lik.pdt = array(NA, dim = c(dim(dat)[1], dim(dat)[2], length(depIdx)))
@@ -192,13 +195,13 @@ calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se =
     # multiply likelihood across depth levels for each day
     lik.pdt <- apply(lik.pdt[,,use.idx], 1:2, FUN=function(x) prod(x, na.rm=F))
     
-    if(i == 1){
+    if(!exists('L.hycom')){
       # result will be array of likelihood surfaces
       L.hycom <- array(0, dim = c(dim(lik.pdt), length(dateVec)))
     }
     
-    idx <- which(dateVec == as.Date(time))
-    L.hycom[,,idx] = lik.pdt / max(lik.pdt, na.rm=T)
+    #idx <- which(dateVec == as.Date(time))
+    L.hycom[,,i] = lik.pdt / max(lik.pdt, na.rm=T)
     
   }
   

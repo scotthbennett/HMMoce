@@ -46,19 +46,20 @@ calc.sst <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.
   print(paste('Starting SST likelihood calculation...'))
   t0 <- Sys.time()
   
-  tag.sst$dts <- as.Date(as.POSIXct(tag.sst$Date, format = findDateFormat(tag.sst$Date)))
-  by_dte <- dplyr::group_by(tag.sst, as.factor(tag.sst$dts))  # group by unique DAILY time points
-  tag.sst <- data.frame(dplyr::summarise_(by_dte, "min(Temperature)", "max(Temperature)"))
-  colnames(tag.sst) <- list('date', 'minT', 'maxT')
-  tag.sst$date <- as.Date(tag.sst$date)
   
+  tag.sst$dateVec <- dateVec[which(dateVec %in% as.POSIXct(tag.sst$Date, format = findDateFormat(tag.sst$Date), tz='UTC'))]
+  by_dte <- dplyr::group_by(tag.sst, as.factor(tag.sst$dateVec))  # group by unique DAILY time points
+  tag.sst <- data.frame(dplyr::summarise_(by_dte, "min(Temperature)", "max(Temperature)"))
+  colnames(tag.sst) <- list('time', 'minT', 'maxT')
+  tag.sst$time <- as.POSIXct(tag.sst$time, tz='UTC')
+
   T <- length(tag.sst[,1])
   
   print(paste('Starting iterations through deployment period ', '...'))
   
   for(i in 1:T){
     
-    time <- tag.sst$date[i]
+    time <- tag.sst$time[i]
     sst.i <- c(tag.sst$minT[i] * (1 - sens.err / 100), tag.sst$maxT[i] * (1 + sens.err / 100)) # sensor error
 
     # open day's sst data
@@ -107,7 +108,7 @@ calc.sst <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.
       lat.agg <- seq(raster::extent(r)[3], raster::extent(r)[4], length.out=dim(r)[1])
     }
     
-    idx <- which(dateVec == as.Date(time))
+    idx <- which(dateVec == time)
     L.sst[,,idx] = lik.sst / max(lik.sst, na.rm=T)
     
   }

@@ -208,7 +208,7 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
     
     lik.ohc <- lik.try / max(lik.try, na.rm = T)
     
-    if(i == 1){
+    if(!exists('L.ohc')){
       # result will be array of likelihood surfaces
       L.ohc <- array(0, dim = c(dim(lik.ohc), length(dateVec)))
     }

@@ -46,12 +46,13 @@ calc.sst <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.
   print(paste('Starting SST likelihood calculation...'))
   t0 <- Sys.time()
   
+  if(class(tag.sst$Date)[1] != 'POSIXct') stop('Error: tag.sst$Date must be as.POSIXct format.')
   
-  tag.sst$dateVec <- findInterval(as.POSIXct(tag.sst$Date, format = findDateFormat(tag.sst$Date), tz='UTC'), dateVec)
+  tag.sst$dateVec <- findInterval(tag.sst$Date, dateVec)
   by_dte <- dplyr::group_by(tag.sst, as.factor(tag.sst$dateVec))  # group by unique time points
   tag.sst <- data.frame(dplyr::summarise_(by_dte, "min(Temperature)", "max(Temperature)"))
   colnames(tag.sst) <- list('time', 'minT', 'maxT')
-  tag.sst$time <- dateVec[tag.sst$time]
+  tag.sst$time <- dateVec[as.numeric(as.character(tag.sst$time))]
 
   T <- length(tag.sst[,1])
   

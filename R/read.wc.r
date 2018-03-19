@@ -86,7 +86,7 @@ read.wc <- function(filename, tag, pop, type = 'sst', verbose=FALSE){
     # get data gaps
     gaps <- diff(c(as.Date(tag), udates, as.Date(pop)), units='days')
     if (verbose){
-      print(paste(length(which(as.Date(seq(tag, pop, 'day')) %in% udates)), ' of ', length(seq(tag, pop, 'day')), ' deployment days have GPE data...', sep=''))
+      print(paste(length(which(as.Date(seq(tag, pop, 'day')) %in% udates)), ' of ', length(seq(tag, pop, 'day')), ' deployment days have SST data...', sep=''))
       print(paste('Data gaps are ', paste(gaps[gaps > 1], collapse=', '), ' days...'))
     }
     
@@ -114,7 +114,7 @@ read.wc <- function(filename, tag, pop, type = 'sst', verbose=FALSE){
     # get data gaps
     gaps <- diff(c(as.Date(tag), udates, as.Date(pop)), units='days')
     if (verbose){
-      print(paste(length(which(as.Date(seq(tag, pop, 'day')) %in% udates)), ' of ', length(seq(tag, pop, 'day')), ' deployment days have GPE data...', sep=''))
+      print(paste(length(which(as.Date(seq(tag, pop, 'day')) %in% udates)), ' of ', length(seq(tag, pop, 'day')), ' deployment days have light data...', sep=''))
       print(paste('Data gaps are ', paste(gaps[gaps > 1], collapse=', '), ' days...'))
     }
     

@@ -3,7 +3,7 @@
 #' \code{calc.sst} compares tag SST to remotely sensed SST and calculates 
 #' likelihoods
 #' 
-#' @param tag.sst is data frame containing tag-collected SST data
+#' @param tag.sst is data frame containing tag-collected SST data. Requires at least cols: Date (POSIXct), Temperature
 #' @param filename is the first part of the filename specified to the download 
 #'   function \code{\link{get.env}}. For example, if downloaded files were 
 #'   specific to a particular dataset, you may want to identify that with a name
@@ -47,11 +47,11 @@ calc.sst <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.
   t0 <- Sys.time()
   
   
-  tag.sst$dateVec <- dateVec[which(dateVec %in% as.POSIXct(tag.sst$Date, format = findDateFormat(tag.sst$Date), tz='UTC'))]
-  by_dte <- dplyr::group_by(tag.sst, as.factor(tag.sst$dateVec))  # group by unique DAILY time points
+  tag.sst$dateVec <- findInterval(as.POSIXct(tag.sst$Date, format = findDateFormat(tag.sst$Date), tz='UTC'), dateVec)
+  by_dte <- dplyr::group_by(tag.sst, as.factor(tag.sst$dateVec))  # group by unique time points
   tag.sst <- data.frame(dplyr::summarise_(by_dte, "min(Temperature)", "max(Temperature)"))
   colnames(tag.sst) <- list('time', 'minT', 'maxT')
-  tag.sst$time <- as.POSIXct(tag.sst$time, tz='UTC')
+  tag.sst$time <- dateVec[tag.sst$time]
 
   T <- length(tag.sst[,1])
   

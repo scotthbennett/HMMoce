@@ -3,7 +3,6 @@
 #' \code{read.wc} reads and formats tag data output from Wildlife Computers Data
 #' Portal
 #' 
-#' @param ptt is individual ID number
 #' @param filename is path to the file where your data lives
 #' @param tag is POSIXct object of the tagging date
 #' @param pop is POSIXct object of the pop-up date
@@ -27,7 +26,7 @@
 #' }
 #' @export
 
-read.wc <- function(ptt, filename, tag, pop, type = 'sst', verbose=FALSE){
+read.wc <- function(filename, tag, pop, type = 'sst', verbose=FALSE){
   
   #if(substr(wd, nchar(wd), nchar(wd)) == '/'){
   #} else{

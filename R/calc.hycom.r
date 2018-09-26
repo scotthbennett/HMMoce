@@ -83,7 +83,7 @@ calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se =
   if(length(off.idx) != 0){
     offset <- RNetCDF::att.get.nc(nc1, temp.idx, attribute=off.idx)
   } else{
-    offset <- 1
+    offset <- 0
   }
   
   # get and check the vars

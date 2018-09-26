@@ -90,7 +90,7 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
   if(length(off.idx) != 0){
     offset <- RNetCDF::att.get.nc(nc1, temp.idx, attribute=off.idx)
   } else{
-    offset <- 1
+    offset <- 0
   }
   
   # get and check the vars

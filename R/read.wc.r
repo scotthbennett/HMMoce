@@ -36,7 +36,9 @@ read.wc <- function(filename, tag, pop, type = 'sst', verbose=FALSE){
   if(type == 'pdt'){
     # READ IN PDT DATA FROM WC FILES
     #data <- utils::read.table(paste(wd, ptt,'-PDTs.csv', sep=''), sep=',',header=T,blank.lines.skip=F, skip = 0)
+    #data <- utils::read.csv(filename)# sep=',', header=T, blank.lines.skip=F, skip = 0)
     data <- utils::read.table(filename, sep=',', header=T, blank.lines.skip=F, skip = 0)
+    if (length(grep('Discont16', names(data))) == 0 & ncol(data) > 89) names(data)[90:94] <- c('Depth16','MinTemp16','MaxTemp16','X.Ox16','Discont16')
     if (verbose) print(paste('If read.wc() fails for type=pdt, check the number of column headers in the PDTs.csv file.'))
     data <- extract.pdt(data)
     dts <- as.POSIXct(data$Date, format = findDateFormat(data$Date))

@@ -81,8 +81,8 @@ read.wc <- function(filename, tag, pop, type = 'sst', verbose=FALSE){
     if (length(data[,1]) <= 1){
       stop('Something wrong with reading and formatting of tags SST data. Check date format.')
     }
-    dts <- as.Date(as.POSIXct(data$Date, format = findDateFormat(data$Date)))
-    udates <- unique(dts)
+    dts <- as.POSIXct(data$Date, format = findDateFormat(data$Date))
+    udates <- unique(as.Date(dts))
     data <- data[,c(1:11)]
     
     # get data gaps

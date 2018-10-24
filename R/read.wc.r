@@ -9,7 +9,10 @@
 #' @param type is character indicating which type of data to read. Choices are 
 #'   'sst', 'pdt', 'light' corresponding to those data files output from WC Data
 #'   Portal
-#' @param verbose is logical indicating whether a verbose output with more
+#' @param dateFormat is input format argument for \code{as.POSIXct} or NULL.
+#'   Default is NULL and if NULL the code will attempt to detect date format but
+#'   weird things can happen so its best to input your own.
+#' @param verbose is logical indicating whether a verbose output with more 
 #'   details on the loaded files is desired. Default is FALSE.
 #' @importFrom dplyr %>%
 #' @importFrom dplyr group_by
@@ -26,7 +29,7 @@
 #' }
 #' @export
 
-read.wc <- function(filename, tag, pop, type = 'sst', verbose=FALSE){
+read.wc <- function(filename, tag, pop, type = 'sst', dateFormat=NULL, verbose=FALSE){
   
   #if(substr(wd, nchar(wd), nchar(wd)) == '/'){
   #} else{
@@ -41,7 +44,14 @@ read.wc <- function(filename, tag, pop, type = 'sst', verbose=FALSE){
     if (length(grep('Discont16', names(data))) == 0 & ncol(data) > 89) names(data)[90:94] <- c('Depth16','MinTemp16','MaxTemp16','X.Ox16','Discont16')
     if (verbose) print(paste('If read.wc() fails for type=pdt, check the number of column headers in the PDTs.csv file.'))
     data <- extract.pdt(data)
-    dts <- as.POSIXct(data$Date, format = findDateFormat(data$Date))
+    if (is.null(dateFormat)){
+      dts <- as.POSIXct(data$Date, format = findDateFormat(data$Date))
+      
+    } else{
+      dts <- as.POSIXct(data$Date, format = dateFormat)
+      
+    }
+    data$Date <- dts
     d1 <- as.POSIXct('1900-01-02') - as.POSIXct('1900-01-01')
     didx <- dts >= (tag + d1) & dts <= (pop - d1)
     data <- data[didx,]; dts <- dts[didx]
@@ -74,7 +84,14 @@ read.wc <- function(filename, tag, pop, type = 'sst', verbose=FALSE){
     # READ IN TAG SST FROM WC FILES
     #data <- utils::read.table(paste(wd, ptt, '-SST.csv', sep=''), sep=',',header=T, blank.lines.skip=F)
     data <- utils::read.table(filename, sep=',',header=T, blank.lines.skip=F)
-    dts <- as.POSIXct(data$Date, format = findDateFormat(data$Date))
+    if (is.null(dateFormat)){
+      dts <- as.POSIXct(data$Date, format = findDateFormat(data$Date))
+      
+    } else{
+      dts <- as.POSIXct(data$Date, format = dateFormat)
+      
+    }
+    data$Date <- dts
     d1 <- as.POSIXct('1900-01-02') - as.POSIXct('1900-01-01')
     didx <- dts >= (tag + d1) & dts <= (pop - d1)
     data <- data[didx,]

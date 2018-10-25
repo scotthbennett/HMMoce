@@ -64,6 +64,6 @@ bin_TempTS <- function (ts, tsDates=NULL, res = 8)
 		}
 	}
 	pdt.rec$MeanPDT <- rowMeans(cbind(pdt.rec$MaxTemp, pdt.rec$MinTemp))
-	pdt.rec$date <- as.Date(pdt.rec$date)
+	#pdt.rec$date <- as.Date(pdt.rec$date)
 	return(pdt.rec)
 }

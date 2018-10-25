@@ -39,9 +39,9 @@ plotHMM <- function(distr, track, dateVec, ptt, known = NULL, resid = FALSE, beh
   sv[sv == 0] <- NA
   grDevices::graphics.off();
 
-  if (class(dateVec) != 'Date'){
-    stop('Error: dateVec must be of class "Date". See ?as.Date.')
-  }
+  #if (class(dateVec) != 'Date'){
+  #  stop('Error: dateVec must be of class "Date". See ?as.Date.')
+ # }
 
   if(save.plot) grDevices::pdf(paste(ptt, '_track_results.pdf', sep = ''), width = 7, height = 8)
 

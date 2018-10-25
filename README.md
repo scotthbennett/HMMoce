@@ -19,7 +19,7 @@ Open-source oceanographic measurements and outputs from high-resolution models a
 Package Citation
 ----------------
 
-TBD
+Braun, C. D., Galuardi, B., & Thorrold, S. R. (2018). HMMoce: An R package for improved geolocation of archival‐tagged fishes using a hidden Markov method. Methods in Ecology and Evolution, 9(5), 1212-1220.
 
 Package Structure
 -----------------
@@ -29,11 +29,11 @@ The package is structured as follows: \* Load the relevant tag data and establis
 Installation Instructions
 -------------------------
 
-`HMMoce` can be installed from CRAN from within `R` using `install.packages('HMMoce')`. To get the latest developments, get it from GitHub using `devtools::install_github('camrinbraun/HMMoce')`
+`HMMoce` can be installed from CRAN from within `R` using `install.packages('HMMoce')`. To get the development version, get it from GitHub using `devtools::install_github('camrinbraun/HMMoce', ref='dev')`
 
 Examples
 --------
 
-For an example use of the package, please see the vignette using `vignette('HMMoce')`.
+For an example use of the package, please see the available vignettes using `vignette(package='HMMoce')`.
 
 [![Travis-CI Build Status](https://travis-ci.org/camrinbraun/HMMoce.svg?branch=master)](https://travis-ci.org/camrinbraun/HMMoce)

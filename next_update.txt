@@ -1,8 +1,9 @@
 ## expected updates for the next version of HMMoce:
-error in vignette name
 formatting ideas from moveHMM
 update citation
 aws ami #s to vignette (and website reference for AMI table by region)
 add AIC calculations
-more informative error message for read.wc(type='pdt')
 clarify makePar args for migr.spd
+
+
+x - more informative error message for read.wc(type='pdt')

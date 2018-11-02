@@ -263,9 +263,15 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
     print('Starting bathymetry mask...')
     
     maxDep <- data.frame(dplyr::summarise_(dplyr::group_by_(pdt, "Date"), "max(Depth)"))
-    maxDep$Date <- as.Date(maxDep$Date)
-    maxDep.df <- data.frame(Date = dateVec)
+    #maxDep$Date <- as.Date(maxDep$Date)
+    
+    if (class(maxDep$Date)[1] != class(dateVec)[1]){
+      stop('Error: class of pdt and dateVec must match. They are both usually of class Date unless you are running at higher temporal resolution than daily then they are POSIXct. Either way, they must match.')
+    }
+    
+    maxDep.df <- data.frame(Date = as.Date(dateVec)
     maxDep.df <- merge(maxDep.df, maxDep, by = 'Date', all.x=T)
+    
     maxDep.df[which(maxDep.df[,2] <= 0), 2] <- 1
     maxDep.df[which(is.na(maxDep.df[,2])), 2] <- 1
     #b.idx <- which(!is.na(maxDep.df[,2]))

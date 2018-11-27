@@ -4,11 +4,10 @@
 \alias{read.wc}
 \title{Read and format tag data}
 \usage{
-read.wc(ptt, filename, tag, pop, type = "sst", verbose = FALSE)
+read.wc(filename, tag, pop, type = "sst", dateFormat = NULL,
+  verbose = FALSE)
 }
 \arguments{
-\item{ptt}{is individual ID number}
-
 \item{filename}{is path to the file where your data lives}
 
 \item{tag}{is POSIXct object of the tagging date}
@@ -19,7 +18,11 @@ read.wc(ptt, filename, tag, pop, type = "sst", verbose = FALSE)
 'sst', 'pdt', 'light' corresponding to those data files output from WC Data
 Portal}
 
-\item{verbose}{is logical indicating whether a verbose output with more
+\item{dateFormat}{is input format argument for \code{as.POSIXct} or NULL.
+Default is NULL and if NULL the code will attempt to detect date format but
+weird things can happen so its best to input your own.}
+
+\item{verbose}{is logical indicating whether a verbose output with more 
 details on the loaded files is desired. Default is FALSE.}
 }
 \value{

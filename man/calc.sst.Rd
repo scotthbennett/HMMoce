@@ -7,7 +7,7 @@
 calc.sst(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.err = 1)
 }
 \arguments{
-\item{tag.sst}{is data frame containing tag-collected SST data}
+\item{tag.sst}{is data frame containing tag-collected SST data. Requires at least cols: Date (POSIXct), Temperature}
 
 \item{filename}{is the first part of the filename specified to the download 
 function \code{\link{get.env}}. For example, if downloaded files were 

@@ -5,7 +5,8 @@
 \title{Download HYCOM data}
 \usage{
 get.hycom(limits, time, vars = c("water_temp"), include_latlon = TRUE,
-  filename = "", download.file = TRUE, dir = getwd(), depLevels = NULL)
+  filename = "", download.file = TRUE, dir = getwd(), depLevels = NULL,
+  ...)
 }
 \arguments{
 \item{limits}{A list of length 4; minlon, maxlon, minlat, maxlat. Longitude values are -180,180}

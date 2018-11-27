@@ -1,7 +1,7 @@
 citHeader("To cite HMMoce in publications use:")
 
 citEntry(entry = "Article",
-         title        = "HMMoce: An R package for improved geolocation of archival‐tagged fishes using a hidden Markov method",
+         title        = "HMMoce:An R package for improved geolocation of archival-tagged fishes using a hidden Markov method",
          author       = personList(as.person("Camrin D Braun"),
                                    as.person("Benjamin Galuardi"),
                                    as.person("Simon R Thorrold")),
@@ -9,5 +9,6 @@ citEntry(entry = "Article",
          year         = "2018",
          volume       = "9",
          number       = "5",
-         pages        = "1212-1220"
+         pages        = "1212-1220",
+         textVersion  = "Braun, C. D., Galuardi, B., and Thorrold, S. R. (2018). HMMoce: An R package for improved geolocation of archival-tagged fishes using a hidden Markov method. Methods in Ecology and Evolution, 9(5), 1212-1220."
 )

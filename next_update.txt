@@ -4,6 +4,6 @@ update citation
 aws ami #s to vignette (and website reference for AMI table by region)
 add AIC calculations
 clarify makePar args for migr.spd
-
+reflective boundaries using transition probabilities in filter/smoother
 
 x - more informative error message for read.wc(type='pdt')

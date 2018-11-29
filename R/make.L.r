@@ -269,7 +269,7 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
       stop('Error: class of pdt and dateVec must match. They are both usually of class Date unless you are running at higher temporal resolution than daily then they are POSIXct. Either way, they must match.')
     }
     
-    maxDep.df <- data.frame(Date = as.Date(dateVec)
+    maxDep.df <- data.frame(Date = as.Date(dateVec))
     maxDep.df <- merge(maxDep.df, maxDep, by = 'Date', all.x=T)
     
     maxDep.df[which(maxDep.df[,2] <= 0), 2] <- 1

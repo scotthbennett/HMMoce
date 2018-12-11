@@ -53,7 +53,7 @@ get.ghr.sst <- function(limits, time, filename='', download.file=TRUE, dir = get
   expts = data.frame(
     start=c(as.Date('2010-06-09')),
     end=c(Sys.Date() + 1),
-    url=c('http://upwell.pfeg.noaa.gov/erddap/griddap/jplG1SST.nc?SST')
+    url=c('https://upwell.pfeg.noaa.gov/erddap/griddap/jplG1SST.nc?SST')
     )
   
   if(time[1] < expts$start[1])

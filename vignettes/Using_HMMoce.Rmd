@@ -29,7 +29,7 @@ Get started by installing the latest stable release of `HMMoce` from CRAN or get
 install.packages('HMMoce')
 
 # development version is on GitHub
-devtools::install_git('https://github.com/camrinbraun/HMMoce', depends = T)
+devtools::install_github('camrinbraun/HMMoce', ref='dev', dependencies = F)
 
 # then load the package
 library(HMMoce)
@@ -75,12 +75,12 @@ dateVec <- as.Date(seq(tag, pop, by = 'day'))
 # READ IN DATA AS OUTPUT FROM WC PORTAL
 # SST DATA
 sstFile <- system.file("extdata", "141259-SST.csv", package = "HMMoce")
-tag.sst <- read.wc(ptt, sstFile, type = 'sst', tag=tag, pop=pop, verbose=T) 
+tag.sst <- read.wc(sstFile, type = 'sst', tag=tag, pop=pop, verbose=T) 
 sst.udates <- tag.sst$udates; tag.sst <- tag.sst$data
 
 # DEPTH-TEMPERATURE PROFILE DATA
 pdtFile <- system.file("extdata", "141259-PDTs.csv", package = "HMMoce")
-pdt <- read.wc(ptt, pdtFile, type = 'pdt', tag=tag, pop=pop, verbose=T) 
+pdt <- read.wc(pdtFile, type = 'pdt', tag=tag, pop=pop, verbose=T) 
 pdt.udates <- pdt$udates; pdt <- pdt$data
 
 # RAW LIGHT DATA

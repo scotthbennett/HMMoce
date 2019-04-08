@@ -22,6 +22,12 @@
 
 #' @return a list containing: L, the overall likelihood array and L.mle, a more 
 #'   coarse version of L used later for parameter estimation
+#' @examples
+#' \dontrun{
+#' L <- make.L(L1 = L.res[[1]][L.idx[[tt]]], L.mle.res = L.res$L.mle.res,
+#'  dateVec = dateVec, locs.grid = locs.grid, iniloc = iniloc, 
+#'  bathy = bathy, pdt = pdt)
+#' }
 #' @export
 #' @note This function currently only supports the use of 3 input likelihood 
 #'   data sources. This will be expanded in the future based on user needs.
@@ -53,9 +59,10 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
     lon <- locs.grid$lon[1,]
     lat <- locs.grid$lat[,1]
     
-    kn.idx <- which(dateVec %in% known.locs$date)
+    kn.idx <- which(as.Date(dateVec) %in% known.locs$date)
+    
     for(i in kn.idx){
-      known.locs.i <- known.locs[which(known.locs$date %in% dateVec[i]),]
+      known.locs.i <- known.locs[which(known.locs$date %in% as.Date(dateVec[i])),]
       
       if(length(known.locs.i[,1]) > 1){
         # if multiple known locations are provided for a given day, only the first is used
@@ -66,7 +73,7 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
       y = which.min((known.locs.i$lat - lat) ^ 2)
 
       # assign the known location for this day, i, as 1 (known) in likelihood raster
-      L.locs[[i]][raster::cellFromXY(L.locs[[kn.idx]], known.locs.i[,c(2,3)])] <- 1
+      L.locs[[i]][raster::cellFromXY(L.locs[[kn.idx]], known.locs.i[,c(3,2)])] <- 1
       
     }
     
@@ -257,9 +264,15 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
     print('Starting bathymetry mask...')
     
     maxDep <- data.frame(dplyr::summarise_(dplyr::group_by_(pdt, "Date"), "max(Depth)"))
-    maxDep$Date <- as.Date(maxDep$Date)
-    maxDep.df <- data.frame(Date = dateVec)
+    #maxDep$Date <- as.Date(maxDep$Date)
+    
+    if (class(maxDep$Date)[1] != class(dateVec)[1]){
+      stop('Error: class of pdt and dateVec must match. They are both usually of class Date unless you are running at higher temporal resolution than daily then they are POSIXct. Either way, they must match.')
+    }
+    
+    maxDep.df <- data.frame(Date = as.Date(dateVec))
     maxDep.df <- merge(maxDep.df, maxDep, by = 'Date', all.x=T)
+    
     maxDep.df[which(maxDep.df[,2] <= 0), 2] <- 1
     maxDep.df[which(is.na(maxDep.df[,2])), 2] <- 1
     #b.idx <- which(!is.na(maxDep.df[,2]))

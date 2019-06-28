@@ -39,6 +39,7 @@ series_to_pdt <- function(ts, dateVec, depLevels=NULL){
   }
   
   #pdt.rec$MeanPDT <- rowMeans(cbind(pdt.rec$MaxTemp, pdt.rec$MinTemp))
+  pdt.rec <- pdt.rec[which(pdt.rec$dVec != 0),]
   pdt.rec$date <- dateVec[pdt.rec$dVec]
   names(pdt.rec) <- tolower(names(pdt.rec))
   return(pdt.rec)

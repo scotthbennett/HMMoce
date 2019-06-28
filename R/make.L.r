@@ -59,9 +59,9 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
     lon <- locs.grid$lon[1,]
     lat <- locs.grid$lat[,1]
     
-    kn.idx <- which(dateVec %in% known.locs$date)
+    kn.idx <- which(as.Date(dateVec) %in% known.locs$date)
     for(i in kn.idx){
-      known.locs.i <- known.locs[which(known.locs$date %in% dateVec[i]),]
+      known.locs.i <- known.locs[which(known.locs$date %in% as.Date(dateVec[i])),]
       
       if(length(known.locs.i[,1]) > 1){
         # if multiple known locations are provided for a given day, only the first is used
@@ -72,7 +72,7 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
       y = which.min((known.locs.i$lat - lat) ^ 2)
 
       # assign the known location for this day, i, as 1 (known) in likelihood raster
-      L.locs[[i]][raster::cellFromXY(L.locs[[kn.idx]], known.locs.i[,c(2,3)])] <- 1
+      L.locs[[i]][raster::cellFromXY(L.locs[[kn.idx]], known.locs.i[,c(3,2)])] <- 1
       
     }
     

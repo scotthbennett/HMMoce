@@ -32,11 +32,11 @@ get.bath.data <- function(lonlow, lonhigh, latlow, lathigh, folder = tempdir(), 
   fname = paste(folder, "bathy.nc", sep = "/")
   if(res==1){
     cat('ERDDAP downloading: Topography, Smith & Sandwell v11.1, 1/60-degree \n UCSD   (Dataset ID: usgsCeSS111)')
-    opt = "https://coastwatch.pfeg.noaa.gov/erddap/griddap/usgsCeSS111.nc?topo[(LATHIGH):(LATLOW)][(LONLOW):(LONHIGH)]"
+    opt = "https://coastwatch.pfeg.noaa.gov/erddap/griddap/usgsCeSS91.nc?topo[(LATHIGH):(LATLOW)][(LONLOW):(LONHIGH)]"
     bathid = 'topo'
   } else if(res == 0.5){
     cat('ERDDAP downloading: Topography, SRTM30+ Version 1.0, 30 arc second, Global \n 	Scripps   (Dataset ID: usgsCeSrtm30v1)')
-    opt ="https://coastwatch.pfeg.noaa.gov/erddap/griddap/usgsCeSrtm30v1.nc?topo[(LATHIGH):(LATLOW)][(LONLOW):(LONHIGH)]"
+    opt ="https://coastwatch.pfeg.noaa.gov/erddap/griddap/usgsCeSrtm30v6.nc?topo[(LATHIGH):(LATLOW)][(LONLOW):(LONHIGH)]"
     #opt = 'http://coastwatch.pfeg.noaa.gov/erddap/griddap/etopo180.nc?altitude[(LATLOW):1:(LATHIGH)][(LONLOW):1:(LONHIGH)]'
     bathid = 'topo'
   }

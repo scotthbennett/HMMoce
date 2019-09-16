@@ -98,13 +98,20 @@ get.hycom <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
   
   ## Add the time domain.
   if(length(time) == 2){
-    url = sprintf('%stime_start=%s%%3A00%%3A00Z&time_end=%s%%3A00%%3A00Z&timeStride=1&',
+    url = sprintf('%stime_start=%s%%3A00%%3A00Z&time_end=%s%%3A00%%3A00Z&',
                   url, strftime(time[1], '%Y-%m-%dT00'),
                   strftime(time[2], '%Y-%m-%dT00'))
   } else if(length(time) == 1){
-    url = sprintf('%stime_start=%s%%3A00%%3A00Z&time_end=%s%%3A00%%3A00Z&timeStride=1&',
+    url = sprintf('%stime_start=%s%%3A00%%3A00Z&time_end=%s%%3A00%%3A00Z&',
                   url, strftime(time[1], '%Y-%m-%dT00'),
                   strftime(time[1], '%Y-%m-%dT00'))
+  }
+  
+  ## Check for the newer HYCOM experiments (3hr time resolution) and add stride=8 if needed, otherwise 1 for daily HYCOM data
+  if(any(grep('GLBy', url))){
+    url = sprintf('%stimeStride=%s&', url, 8)
+  } else{
+    url = sprintf('%stimeStride=%s&', url, 1)
   }
   
   ## Add the lat-lon points if requested.

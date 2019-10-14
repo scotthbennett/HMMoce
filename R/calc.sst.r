@@ -47,6 +47,7 @@ calc.sst <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.
   t0 <- Sys.time()
   
   if(class(tag.sst$Date)[1] != 'POSIXct') stop('Error: tag.sst$Date must be as.POSIXct format.')
+  if(class(dateVec)[1] != 'POSIXct') dateVec <- as.POSIXct(dateVec)
   
   tag.sst$dateVec <- findInterval(tag.sst$Date, dateVec)
   by_dte <- dplyr::group_by(tag.sst, as.factor(tag.sst$dateVec))  # group by unique time points

@@ -41,7 +41,7 @@ calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se =
   options(warn=1)
   
   t0 <- Sys.time()
-  print(paste('Starting OHC likelihood calculation...'))
+  print(paste('Starting 3D likelihood calculation...'))
   
   # calculate midpoint of tag-based min/max temps
   if(length(grep('mean', names(pdt))) > 0){
@@ -52,6 +52,7 @@ calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se =
   
   # get unique time points
   if(class(pdt$date)[1] != 'POSIXct') stop('Error: pdt$Date must be as.POSIXct format.')
+  if(class(dateVec)[1] != 'POSIXct') dateVec <- as.POSIXct(dateVec)
   
   pdt$dateVec <- findInterval(pdt$date, dateVec)
   udates <- unique(pdt$dateVec)

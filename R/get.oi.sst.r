@@ -53,9 +53,9 @@ get.oi.sst <- function(limits, time, filename='', download.file=TRUE, dir = getw
   expts = data.frame(
     start=c(as.Date('1981-09-01')),
     end=c(Sys.Date() + 1),
-    url=c('https://upwell.pfeg.noaa.gov/erddap/griddap/ncdcOisst2Agg_LonPM180.nc?sst')
+    url=c('https://coastwatch.pfeg.noaa.gov/erddap/griddap/ncdcOisst2Agg_LonPM180.nc?sst')
     )
-  
+
   if(time[1] < expts$start[1])
     stop('Data begins at %s and is not available at %s.',
          strftime(expts$start[1], '%d %b %Y'),

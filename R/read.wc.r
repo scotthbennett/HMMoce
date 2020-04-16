@@ -95,7 +95,7 @@ read.wc <- function(filename, tag, pop, type = 'sst', dateFormat=NULL, verbose=F
     d1 <- as.POSIXct('1900-01-02') - as.POSIXct('1900-01-01')
     didx <- dts >= (tag + d1) & dts <= (pop - d1)
     data <- data[didx,]
-    if (length(data[,1]) <= 1){
+    if (length(data[,1]) < 1){
       stop('Something wrong with reading and formatting of tags SST data. Check date format.')
     }
     dts <- as.POSIXct(data$Date, format = findDateFormat(data$Date))

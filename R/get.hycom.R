@@ -89,8 +89,10 @@ get.hycom <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
   if(any(grep('19', url))) url = sprintf('%s%s?', url, as.numeric(format(time, '%Y')))
   
   ## Add the variables.
-  for(var in vars)
+  for(var in vars){
     url = sprintf('%svar=%s&', url, var)
+  }
+  
   ## Add the spatial domain.
   url = sprintf('%snorth=%f&west=%f&east=%f&south=%f&horizStride=1&',
                 url, limits[[4]], limits[[1]], limits[[2]], limits[[3]])
@@ -117,6 +119,7 @@ get.hycom <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
   ## Add the lat-lon points if requested.
   if(include_latlon)
     url = sprintf('%saddLatLon=true&', url)
+  
   ## Finish the URL.
   if (is.null(depLevels)){
     url = sprintf('%sdisableProjSubset=on&vertCoord=&accept=netcdf', url)
@@ -130,7 +133,7 @@ get.hycom <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
   if(filename != ''){
     if(download.file == TRUE){
       #download.file(url, filename, method = 'auto')
-      curl_download(url, filename, quiet=FALSE)
+      curl::curl_download(url, filename, quiet=FALSE)
     } else if(download.file == FALSE){
       system(sprintf('curl -o "%s" "%s"', filename, url))
     }

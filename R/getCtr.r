@@ -44,8 +44,8 @@ getCtr <- function(distr, tr, g, threshold = 50, makePlot=FALSE){
   
   for (i in 1:dim(pts)[3]){
     #print(i)
-    ctr <- contourLines(lon, lat, pts[,,i])
-    idx <- which.min(lapply(ctr, FUN=function(x) which(round(x$level,1) == round(threshold, 1))) == 1)
+    ctr <- contourLines(lon, lat, pts[, , i], levels = seq(0, 1, by=.05))
+    idx <- which.min(lapply(ctr, FUN = function(x) which(round(x$level, 2) == round(threshold, 2))) == 1)
     ctr.i <- data.frame(ctr[[idx]])
     sp::coordinates(ctr.i) <- ~x+y
     l1 <- sp::SpatialLines(list(sp::Lines(sp::Line(sp::coordinates(ctr.i)), "L1")))

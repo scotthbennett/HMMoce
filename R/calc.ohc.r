@@ -59,8 +59,9 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
   
   # get unique time points
   if(class(pdt$date)[1] != 'POSIXct') stop('Error: pdt$Date must be as.POSIXct format.')
+  if (class(dateVec)[1] == 'Date') dateVec2 <- as.POSIXct(dateVec)
   
-  pdt$dateVec <- findInterval(pdt$date, dateVec)
+  pdt$dateVec <- findInterval(pdt$date, dateVec2)
   udates <- unique(pdt$dateVec)
   T <- length(udates)
   

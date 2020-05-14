@@ -4,7 +4,8 @@
 \alias{calc.hycom}
 \title{Hycom Profile LIkelihood}
 \usage{
-calc.hycom(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se = TRUE)
+calc.hycom(pdt, filename, hycom.dir, focalDim = 9, dateVec,
+  use.se = TRUE)
 }
 \arguments{
 \item{pdt}{input PDT data output from \code{\link{read.wc}} and

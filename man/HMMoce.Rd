@@ -4,7 +4,6 @@
 \name{HMMoce}
 \alias{HMMoce}
 \alias{HMMoce-package}
-\alias{HMMoce-package}
 \title{HMMoce: an R package for improved analysis of marine animal movement data 
 using hidden Markov models}
 \description{

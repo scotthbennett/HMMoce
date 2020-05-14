@@ -4,7 +4,8 @@
 \alias{hmm.filter}
 \title{HMM filter functions}
 \usage{
-hmm.filter(g, L, K1, K2, P, maskL = T, bound.thr = 0.1, minBounds = 10)
+hmm.filter(g, L, K1, K2, P, maskL = T, bound.thr = 0.1,
+  minBounds = 10)
 }
 \arguments{
 \item{g}{grid from \code{\link{setup.grid}}}

@@ -4,7 +4,8 @@
 \alias{calc.sst}
 \title{Calculate SST-based likelihood}
 \usage{
-calc.sst(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.err = 1)
+calc.sst(tag.sst, filename, sst.dir, dateVec, focalDim = NULL,
+  sens.err = 1)
 }
 \arguments{
 \item{tag.sst}{is data frame containing tag-collected SST data. Requires at least cols: Date (POSIXct), Temperature}

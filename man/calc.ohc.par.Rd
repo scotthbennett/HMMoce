@@ -4,8 +4,8 @@
 \alias{calc.ohc.par}
 \title{OHC Likelihood in Parallel}
 \usage{
-calc.ohc.par(pdt, filename, isotherm = "", ohc.dir, dateVec, bathy = TRUE,
-  use.se = TRUE, ncores = NULL)
+calc.ohc.par(pdt, filename, isotherm = "", ohc.dir, dateVec,
+  bathy = TRUE, use.se = TRUE, ncores = NULL)
 }
 \arguments{
 \item{pdt}{input PDT data see \code{\link{extract.pdt}}}

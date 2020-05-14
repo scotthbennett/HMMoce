@@ -4,7 +4,8 @@
 \alias{expmax}
 \title{Expectation-maximization framework for state-switching}
 \usage{
-expmax(p.init, g, L, K1, K2, niter = 1000, threshold = 0.01, save = F)
+expmax(p.init, g, L, K1, K2, niter = 1000, threshold = 0.01,
+  save = F)
 }
 \arguments{
 \item{p.init}{a vector of length 2. The first is the probability of staying 

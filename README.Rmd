@@ -20,12 +20,18 @@ knitr::opts_chunk$set(echo=FALSE, warning=FALSE,
 
 ```
 
-**Camrin D. Braun^1,2^\*, Benjamin Galuardi^3,4^, Simon R. Thorrold^2^**
+**Camrin D. Braun^1,2^\*, Benjamin Galuardi^3,4^, Paul Gatti^5^, Simon R. Thorrold^2^**
 
  1. Massachusetts Institute of Technology-Woods Hole Oceanographic Institution Joint Program in Oceanography/Applied Ocean Science and Engineering, Cambridge, MA 02139
  2. Biology Department, Woods Hole Oceanographic Institution, Woods Hole, MA 02543
  3. School of Marine Science and Technology, University of Massachusetts Dartmouth, Fairhaven, MA 02719
  4. Greater Atlantic Regional Fisheries Office, National Marine Fisheries Service, National Oceanic and Atmospheric Administration, Gloucester, MA 01930
+ 5. Centre for Fisheries Ecosystems Research, Fisheries and Marine Institute of Memorial University of Newfoundland
+
+## Update 2020-05-13
+All the tweaks and improvements made over the last 1-2 years have been folded into v1.2 which is now on the master branch. The next version will likely be v2.0 and will lack backwards compatibility with previous versions. The new version is currently under development in the -dev branch and pull requests are welcome!
+
+Many thanks to Paul Gatti for catching many small bugs and providing several (very!) useful new functions for what will be the next version. Check out the -dev branch to learn more.
 
 ## Package Summary
 Electronic tagging of marine animals is common throughout the world oceans. Many of these studies have deployed archival tags that rely on light levels and sea-surface temperatures to retrospectively track movements of tagged animals. However, methodological issues associated with light-level geolocation have constrained meaningful inference to species where it is possible to accurately estimate time of sunrise and sunset. Most studies have largely disregarded the oceanographic profiles collected by the tag as a potential way of refining light-level geolocation estimates provided by electronic tags.

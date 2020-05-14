@@ -66,7 +66,9 @@ estimates derived from electronic tags.
 
 ## Package Citation
 
-TBD
+Braun, C. D., Galuardi, B., and Thorrold, S. R. (2018). HMMoce: An R
+package for improved geolocation of archival-tagged fishes using a
+hidden Markov method. Methods in Ecology and Evolution, 9(5), 1212-1220.
 
 ## Package Structure
 

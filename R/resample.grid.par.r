@@ -10,14 +10,6 @@
 #'   
 #' @return a list of all resampled likelihood rasters and g, the common grid
 #' @export
-#' @examples 
-#' \dontrun{
-#'  # use with caution as all workspace items containing 'L.' will be listed. 
-#'  # We only want the likelihood outputs calculated above
-#' L.rasters <- mget(ls(pattern = 'L\\.'))
-#' resamp.idx <- which.max(lapply(L.rasters, FUN=function(x) raster::res(x)[1]))
-#' L.res <- resample.grid.par(L.rasters, L.rasters[[resamp.idx]])
-#' }
 #' @importFrom foreach "%dopar%"
 #' @note This function should probably only be used in special use cases.
 #'   Otherwise, the non-parallel version \code{\link{resample.grid}} is

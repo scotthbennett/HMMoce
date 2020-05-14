@@ -36,22 +36,6 @@ likelihood is raster brick of likelihood surfaces representing
 \code{calc.sst} compares tag SST to remotely sensed SST and calculates 
 likelihoods
 }
-\examples{
-\dontrun{
-
-# sst data
-tag.sst <- read.wc(ptt, wd = myDir, type = 'sst', tag=tag, pop=pop); 
-sst.udates <- tag.sst$udates; tag.sst <- tag.sst$data
-
-# IF YOU NEED TO DOWNLOAD SST DATA
-sst.dir <- paste('my_sst_dir')
-get.env(sst.udates, type = 'sst', spatLim = sp.lim, save.dir = sst.dir)
-
-# GENERATE DAILY SST LIKELIHOODS
-L.sst <- calc.sst(tag.sst, sst.dir = sst.dir, dateVec = dateVec)
-
-}
-}
 \seealso{
 \code{\link{calc.ohc}}
 }

@@ -39,16 +39,6 @@ likelihood is raster brick of likelihood surfaces representing
 \description{
 Compare tag data to OHC grid and calculate likelihoods
 }
-\examples{
-\dontrun{
-# depth-temp profile data
-pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop); 
-pdt.udates <- pdt$udates; pdt <- pdt$data
-# GENERATE DAILY OCEAN HEAT CONTENT (OHC) LIKELIHOODS
-L.ohc <- calc.ohc(pdt, filename='tuna', ohc.dir = hycom.dir, dateVec = dateVec,
-                  isotherm = '')
-}
-}
 \references{
 Luo J, Ault JS, Shay LK, Hoolihan JP, Prince ED, Brown C a.,
   Rooker JR (2015) Ocean Heat Content Reveals Secrets of Fish Migrations.

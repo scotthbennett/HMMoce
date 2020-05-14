@@ -28,18 +28,6 @@
 #' @return The url used to extract the requested data from the NetCDF subset
 #'   service.
 #' @importFrom curl curl_download
-#' @examples
-#' \dontrun{
-#' lon <- c(-90, -60)
-#' lat <- c(0, 30)
-#' time <- as.Date('2013-03-01')
-#' get.hycom(lon, lat, time, type='a', filename = '', vars = 'water_temp')
-#' # only returns url because filename is unspecified
-#' get.hycom(lon, lat, time, type='a', filename = 'my_data.nc', vars = 'water_temp')
-#' nc <- open.nc('my_data.nc')
-#' hycom <- var.get.nc(nc, 'water_temp')
-#' image.plot(hycom[,,1])
-#' }
 #'
 #' @author   Function originally written for R by Ben Jones (WHOI) and modified
 #'   by Camrin Braun and Ben Galuardi.

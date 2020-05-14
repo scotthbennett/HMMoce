@@ -28,12 +28,3 @@ This function should probably only be used in special use cases.
   Otherwise, the non-parallel version \code{\link{resample.grid}} is
   typically faster.
 }
-\examples{
-\dontrun{
- # use with caution as all workspace items containing 'L.' will be listed. 
- # We only want the likelihood outputs calculated above
-L.rasters <- mget(ls(pattern = 'L\\\\.'))
-resamp.idx <- which.max(lapply(L.rasters, FUN=function(x) raster::res(x)[1]))
-L.res <- resample.grid.par(L.rasters, L.rasters[[resamp.idx]])
-}
-}

@@ -51,4 +51,10 @@ Authors:
   \item Benjamin Galuardi \email{drdrumfish@gmail.com}
 }
 
+Other contributors:
+\itemize{
+  \item Benjamin Jones (Contributed to earlier version of some of the download functions.) [contributor]
+  \item Martin Pedersen (Developed an earlier version of some of the HMM framework and helper functions.) [contributor]
+}
+
 }

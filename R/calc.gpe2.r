@@ -16,22 +16,39 @@
 #'   if only longitude should be used. If False, standard deviation on light 
 #'   measurements is currently fixed at 0.7 deg longitude following Musyl et al 
 #'   2011. Default is FALSE and will use longitude only.
-#' @param gpeOnly is logical. If TRUE (default), locs input is trimmed to GPE positions 
-#'   only. This is most applicable in scenarios with FastGPS data and you're 
-#'   adding this as a GPS input.
-#' @references Musyl MK, Domeier ML, Nasby-Lucas N, Brill RW, McNaughton LM,
-#'   Swimmer JY, Lutcavage MS, Wilson SG, Galuardi B, Liddle JB (2011)
+#' @param gpeOnly is logical. If TRUE (default), locs input is trimmed to GPE
+#'   positions only. This is most applicable in scenarios with FastGPS data and
+#'   you're adding this as a GPS input.
+#' @references Musyl MK, Domeier ML, Nasby-Lucas N, Brill RW, McNaughton LM, 
+#'   Swimmer JY, Lutcavage MS, Wilson SG, Galuardi B, Liddle JB (2011) 
 #'   Performance of pop-up satellite archival tags. Mar Ecol Prog Ser
 #' @export
 #' @return L is an array of lon x lat likelihood surfaces (matrices) for each 
 #'   time point (3rd dimension)
 #' @seealso \code{\link{calc.srss}}
 #' @examples
+#' ## Setup for calculating light likelihood
+#' # Read the data
+#' locsFile <- system.file("extdata", "141259-Locations-GPE2.csv", package = "HMMoce")
+#' locs <- read.table(locsFile, sep = ',', header = TRUE, blank.lines.skip = FALSE)
+#' 
+#' # Set spatial and temporal limits
+#' sp.lim <- list(lonmin = -82, lonmax = -25, latmin = 15, latmax = 50)
+#' locs.grid <- setup.locs.grid(sp.lim)
+#' iniloc <- data.frame(matrix(c(13, 10, 2015, 41.3, -69.27, 10, 4, 2016, 40.251, -36.061),
+#'  nrow = 2, ncol = 5, byrow = TRUE))
+#' names(iniloc) <- list('day','month','year','lat','lon')
+#' tag <- as.POSIXct(paste(iniloc[1,1], '/', iniloc[1,2], '/', iniloc[1,3], sep=''), 
+#' format = '%d/%m/%Y', tz='UTC')
+#' pop <- as.POSIXct(paste(iniloc[2,1], '/', iniloc[2,2], '/', iniloc[2,3], sep=''), 
+#' format = '%d/%m/%Y', tz='UTC')
+#' dateVec <- as.Date(seq(tag, pop, by = 'day')) 
+#' 
+#' # Try a calculation
+#' L.light <- calc.gpe2(locs[1,], iniloc, locs.grid, dateVec, errEll=TRUE, gpeOnly=TRUE)
+#' 
 #' \dontrun{
-#' # light data as output from GPE2, different filtering algorithm seems to work
-#' # better for light likelihood generation
-#' locs <- read.table(paste(ptt, '-Locations-GPE2.csv', sep = ''), sep = ',', 
-#'                    header = T, blank.lines.skip = F)
+#' # Full example light calculation
 #' L.light <- calc.gpe2(locs, iniloc = iniloc, locs.grid = locs.grid,
 #'                      dateVec = dateVec, errEll = TRUE, gpeOnly = TRUE)
 #' }

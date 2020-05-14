@@ -23,17 +23,7 @@
 #' @export
 #' @seealso \code{\link{calc.hycom.par}}
 #' @importFrom foreach %dopar%
-#'   
-#' @examples
-#' \dontrun{
-#' # pdt data
-#' pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop); 
-#' pdt.udates <- pdt$udates; pdt <- pdt$data
-#' 
-#' # GENERATE DAILY PDT LIKELIHOODS USING HYCOM
-#' L.pdt <- calc.hycom(pdt, hycom.dir = hycom.dir, dateVec = dateVec)
-#' 
-#' }
+#'
 
 calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se = TRUE){
   

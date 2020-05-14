@@ -30,6 +30,7 @@ this function an array containing final state estimates.
 }
 \examples{
 \dontrun{
+# Not run as function relies on large arrays of likelihoods
 # RUN THE SMOOTHING STEP
 s <- hmm.smoother(f, K1, K2, L, P.final)
 }

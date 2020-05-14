@@ -12,9 +12,7 @@
 #' @export
 #' 
 #' @examples
-#' \dontrun{
 #' kern = gausskern(3, 0.5)
-#' }
 #' 
 #' @references Pedersen, M.W., Righton, D., Thygesen, U.H., Andersen, K.H., and
 #'   Madsen, H. 2008. Geolocation of North Sea cod (Gadus morhua) using hidden

@@ -22,17 +22,6 @@
 #' @return The url used to extract the requested data from the NetCDF subset 
 #'   service.
 #' @importFrom curl curl_download
-#' @examples 
-#' \dontrun{
-#' sp.lim <- list(-90, -60, 0, 30)
-#' time <- as.Date('2013-03-01')
-#' get.oi.sst(sp.lim, time, filename = '')
-#' # only returns url because filename is unspecified
-#' get.oi.sst(sp.lim, time, filename = 'my_data.nc')
-#' nc <- open.nc('my_data.nc')
-#' sst <- var.get.nc(nc, 'sst')
-#' image.plot(sst)
-#' }
 #'   
 #' @author   Function originally written for R by Ben Jones (WHOI) and modified 
 #'   by Camrin Braun and Ben Galuardi.

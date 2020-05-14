@@ -16,10 +16,9 @@ dateformat is character string used as input to strptime(format = dateformat)
 \code{findDateFormat} determines the date format of a given vector of dates
 }
 \examples{
-\dontrun{
 dte <- '2015-01-01 05:30:17'
 findDateFormat(dte)
 dte.POSIX <- as.POSIXct(dte, format = findDateFormat(dte))
 dte.POSIX
-}
+
 }

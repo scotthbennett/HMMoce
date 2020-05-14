@@ -34,9 +34,19 @@ a list containing: the data read as a data.frame and a date vector of
 Portal
 }
 \examples{
-\dontrun{
-# example data loading using example data in the package
+# example data in the package
 sstFile <- system.file("extdata", "141259-SST.csv", package = "HMMoce")
+ptt <- 141259
+
+# set temporal and spatial bounds
+iniloc <- data.frame(matrix(c(13, 10, 2015, 41.3, -69.27, 10, 4, 2016, 40.251, -36.061),
+ nrow = 2, ncol = 5, byrow = TRUE))
+ names(iniloc) <- list('day','month','year','lat','lon')
+ tag <- as.POSIXct(paste(iniloc[1,1], '/', iniloc[1,2], '/', iniloc[1,3], sep=''), 
+ format = '\%d/\%m/\%Y', tz='UTC')
+ pop <- as.POSIXct(paste(iniloc[2,1], '/', iniloc[2,2], '/', iniloc[2,3], sep=''), 
+ format = '\%d/\%m/\%Y', tz='UTC')
+
+# read and format the example data
 tag.sst <- read.wc(ptt, sstFile, type = 'sst', tag=tag, pop=pop)
-}
 }

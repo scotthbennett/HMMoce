@@ -48,20 +48,6 @@ The method may return before the download is completed. It will continue to
 display progress  until the download completes. Change the default
 \code{download.file} if the download is failing on your platform.
 }
-\examples{
-\dontrun{
-lon <- c(-90, -60)
-lat <- c(0, 30)
-time <- as.Date('2013-03-01')
-get.hycom(lon, lat, time, type='a', filename = '', vars = 'water_temp')
-# only returns url because filename is unspecified
-get.hycom(lon, lat, time, type='a', filename = 'my_data.nc', vars = 'water_temp')
-nc <- open.nc('my_data.nc')
-hycom <- var.get.nc(nc, 'water_temp')
-image.plot(hycom[,,1])
-}
-
-}
 \references{
 \url{https://hycom.org/}
 }

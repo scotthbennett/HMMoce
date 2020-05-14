@@ -28,15 +28,7 @@
 #' @references Luo J, Ault JS, Shay LK, Hoolihan JP, Prince ED, Brown C a.,
 #'   Rooker JR (2015) Ocean Heat Content Reveals Secrets of Fish Migrations.
 #'   PLoS One 10:e0141101
-#' @examples
-#' \dontrun{
-#' # depth-temp profile data
-#' pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop); 
-#' pdt.udates <- pdt$udates; pdt <- pdt$data
-#' # GENERATE DAILY OCEAN HEAT CONTENT (OHC) LIKELIHOODS
-#' L.ohc <- calc.ohc(pdt, filename='tuna', ohc.dir = hycom.dir, dateVec = dateVec,
-#'                   isotherm = '')
-#' }
+#'   
 
 calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRUE, use.se = TRUE){
 

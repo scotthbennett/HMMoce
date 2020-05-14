@@ -1,6 +1,6 @@
-#' Download OI Sea Surface Temperature (SST) data
+#' Download MUR Sea Surface Temperature (SST) data
 #' 
-#' \code{get.oi.sst} downloads sea surface temperature (SST) data for given
+#' \code{get.mur.sst} downloads sea surface temperature (SST) data for given
 #' temporal and spatial constraints of your data.
 #' 
 #' The method may return before the download is completed. It will continue to 
@@ -17,18 +17,29 @@
 #'   query the server and download or use the optional \code{curl}. Some users 
 #'   may need to use \code{curl} in order to get this to work.
 #' @param dir is local directory where ncdf files should be downloaded to. 
-#'   default is current working directory. if enter a directory that doesn't 
+#'   default is current working directory. if enter a directory that doesnt 
 #'   exist, it will be created.
 #' @return The url used to extract the requested data from the NetCDF subset 
 #'   service.
 #' @importFrom curl curl_download
+#' @examples 
+#' \dontrun{
+#' sp.lim <- list(-90, -60, 0, 30)
+#' time <- as.Date('2013-03-01')
+#' get.oi.sst(sp.lim, time, filename = '')
+#' # only returns url because filename is unspecified
+#' get.oi.sst(sp.lim, time, filename = 'my_data.nc')
+#' nc <- open.nc('my_data.nc')
+#' sst <- var.get.nc(nc, 'sst')
+#' image.plot(sst)
+#' }
 #'   
 #' @author   Function originally written for R by Ben Jones (WHOI) and modified 
 #'   by Camrin Braun and Ben Galuardi.
 #' @references \url{https://www.ncdc.noaa.gov/oisst}
 #'   
 
-get.oi.sst <- function(limits, time, filename='', download.file=TRUE, dir = getwd()) {
+get.mur.sst <- function(limits, time, filename='', download.file=TRUE, dir = getwd()) {
   
   options(warn = -1)
   
@@ -40,10 +51,10 @@ get.oi.sst <- function(limits, time, filename='', download.file=TRUE, dir = getw
   ## early.
   
   expts = data.frame(
-    start=c(as.Date('1981-09-01')),
+    start=c(as.Date('2002-06-01')),
     end=c(Sys.Date() + 1),
-    url=c('https://upwell.pfeg.noaa.gov/erddap/griddap/ncdcOisst2Agg_LonPM180.nc?sst')
-    )
+    url=c('https://coastwatch.pfeg.noaa.gov/erddap/griddap/jplMURSST41.nc?analysed_sst')
+  )
   
   if(time[1] < expts$start[1])
     stop('Data begins at %s and is not available at %s.',
@@ -70,7 +81,7 @@ get.oi.sst <- function(limits, time, filename='', download.file=TRUE, dir = getw
   }
   
   ## Add the spatial domain.
-  url = sprintf('%s[(0):1:(0)][(%s):1:(%s)][(%s):1:(%s)]',
+  url = sprintf('%s[(%s):1:(%s)][(%s):1:(%s)]',
                 url, limits[[3]], limits[[4]], limits[[1]], limits[[2]])
   print(url)
   

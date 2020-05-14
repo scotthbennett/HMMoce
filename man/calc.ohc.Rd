@@ -8,7 +8,7 @@ calc.ohc(pdt, filename, isotherm = "", ohc.dir, dateVec, bathy = TRUE,
   use.se = TRUE)
 }
 \arguments{
-\item{pdt}{input PDT data see \code{\link{extract.pdt}}}
+\item{pdt}{input PDT data see \code{\link{extract.pdt}}. Need at least cols: MinTemp, MaxTemp, Date (POSIXct)}
 
 \item{filename}{is the first part of the filename specified to the download 
 function \code{\link{get.env}}. For example, if downloaded files were 

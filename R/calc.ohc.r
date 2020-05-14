@@ -2,7 +2,7 @@
 #' 
 #' Compare tag data to OHC grid and calculate likelihoods
 #' 
-#' @param pdt input PDT data see \code{\link{extract.pdt}}
+#' @param pdt input PDT data see \code{\link{extract.pdt}}. Need at least cols: MinTemp, MaxTemp, Date (POSIXct)
 #' @param filename is the first part of the filename specified to the download 
 #'   function \code{\link{get.env}}. For example, if downloaded files were 
 #'   specific to a particular dataset, you may want to identify that with a name
@@ -32,6 +32,7 @@
 
 calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRUE, use.se = TRUE){
 
+  names(pdt) <- tolower(names(pdt))
   options(warn=1)
   
   t0 <- Sys.time()
@@ -42,10 +43,18 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
   rho <- 1025 # kg/m3 <- assumed density of seawater
   
   # calculate midpoint of tag-based min/max temps
-  pdt$MidTemp <- (pdt$MaxTemp + pdt$MinTemp) / 2
+  if(length(grep('mean', names(pdt))) > 0){
+    pdt$useTemp <- pdt[,grep('mean', names(pdt))]
+  } else{
+    pdt$useTemp <- (pdt$maxtemp + pdt$mintemp) / 2
+  }
   
   # get unique time points
-  udates <- unique(pdt$Date)
+  if(class(pdt$date)[1] != 'POSIXct') stop('Error: pdt$Date must be as.POSIXct format.')
+  if (class(dateVec)[1] == 'Date') dateVec2 <- as.POSIXct(dateVec)
+  
+  pdt$dateVec <- findInterval(pdt$date, dateVec2)
+  udates <- unique(pdt$dateVec)
   T <- length(udates)
   
   if(isotherm != '') iso.def <- TRUE else iso.def <- FALSE
@@ -74,7 +83,7 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
   if(length(off.idx) != 0){
     offset <- RNetCDF::att.get.nc(nc1, temp.idx, attribute=off.idx)
   } else{
-    offset <- 1
+    offset <- 0
   }
   
   # get and check the vars
@@ -87,9 +96,9 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
   
   print(paste('Starting iterations through deployment period ', '...'))
   
-  for(i in 1:T){
-    time <- udates[i]
-    pdt.i <- pdt[which(pdt$Date == time),]
+  for(i in udates){
+    time <- dateVec[i]
+    pdt.i <- pdt[which(pdt$dateVec == i),]
     print(paste(time))
     
     # open day's hycom data
@@ -97,14 +106,14 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
     dat <- RNetCDF::var.get.nc(nc, temp.idx) * scale + offset
     
     #extracts depth from tag data for day i
-    y <- pdt.i$Depth[!is.na(pdt.i$Depth)] 
+    y <- pdt.i$depth[!is.na(pdt.i$depth)] 
     y[y<0] <- 0
     
     #extract temperature from tag data for day i
-    x <- pdt.i$MidTemp[!is.na(pdt.i$Depth)]  
+    x <- pdt.i$useTemp[!is.na(pdt.i$depth)]  
     
     # use the which.min
-    depIdx = unique(apply(as.data.frame(pdt.i$Depth), 1, FUN=function(x) which.min((x - depth) ^ 2)))
+    depIdx = unique(apply(as.data.frame(pdt.i$depth), 1, FUN=function(x) which.min((x - depth) ^ 2)))
     hycomDep <- depth[depIdx]
     
     if(bathy){
@@ -118,10 +127,10 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
     
     # make predictions based on the regression model earlier for the temperature at standard WOA depth levels for low and high temperature at that depth
     suppressWarnings(
-    fit.low <- locfit::locfit(pdt.i$MinTemp ~ pdt.i$Depth, maxk=500)
+    fit.low <- locfit::locfit(pdt.i$mintemp ~ pdt.i$depth, maxk=500)
     )
     suppressWarnings(
-    fit.high <- locfit::locfit(pdt.i$MaxTemp ~ pdt.i$Depth, maxk=500)
+    fit.high <- locfit::locfit(pdt.i$maxtemp ~ pdt.i$depth, maxk=500)
     )
     n = length(hycomDep)
       
@@ -192,13 +201,13 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
     
     lik.ohc <- lik.try / max(lik.try, na.rm = T)
     
-    if(i == 1){
+    if(!exists('L.ohc')){
       # result will be array of likelihood surfaces
       L.ohc <- array(0, dim = c(dim(lik.ohc), length(dateVec)))
     }
     
-    idx <- which(dateVec == as.Date(time))
-    L.ohc[,,idx] = lik.ohc
+    #idx <- which(dateVec == as.Date(time))
+    L.ohc[,,i] = lik.ohc
 
   }
 

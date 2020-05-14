@@ -71,6 +71,9 @@ calc.gpe2 <- function(locs, locDates, locs.grid, dateVec, errEll = TRUE, gpeOnly
     stop('Error: Currently gpeOnly must be set to TRUE otherwise duplicate dates are handled improperly.')
   }
   
+  # check date formats match
+  if (class(locDates) != class(dateVec)[1]) dateVec <- as.Date(dateVec)
+  
   # set up results array
   row <- dim(locs.grid$lon)[1]
   col <- dim(locs.grid$lon)[2]

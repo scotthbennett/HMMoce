@@ -4,7 +4,8 @@
 \alias{calc.gpe2}
 \title{Calculate Light Likelihood from GPE2 Output}
 \usage{
-calc.gpe2(locs, locDates, locs.grid, dateVec, errEll = TRUE, gpeOnly = TRUE)
+calc.gpe2(locs, locDates, locs.grid, dateVec, errEll = TRUE,
+  gpeOnly = TRUE)
 }
 \arguments{
 \item{locs}{is data frame from -Locations file output from DAP/Tag Portal for

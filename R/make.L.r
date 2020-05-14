@@ -60,7 +60,7 @@ make.L <- function(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res, dateV
     lat <- locs.grid$lat[,1]
     
     kn.idx <- which(as.Date(dateVec) %in% known.locs$date)
-    
+
     for(i in kn.idx){
       known.locs.i <- known.locs[which(known.locs$date %in% as.Date(dateVec[i])),]
       

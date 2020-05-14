@@ -1,0 +1,11 @@
+## expected updates for the next version of HMMoce:
+formatting ideas from moveHMM
+update citation
+aws ami #s to vignette (and website reference for AMI table by region)
+add AIC calculations
+clarify makePar args for migr.spd
+reflective boundaries using transition probabilities in filter/smoother
+modify makePar documentation and vignette to reflect what the EM actually does (see email from Ben Feb 4 2019)
+make environmental download functions more modular (xtracto?)
+
+x - more informative error message for read.wc(type='pdt')

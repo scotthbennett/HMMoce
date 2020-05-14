@@ -4,8 +4,8 @@
 \alias{plotRD}
 \title{Plot RD results}
 \usage{
-plotRD(distr, track, ptt, known = NULL, g, xlims, ylims, makePlot = TRUE,
-  save.plot = FALSE)
+plotRD(distr, track, ptt, known = NULL, g, xlims, ylims,
+  makePlot = TRUE, save.plot = FALSE)
 }
 \arguments{
 \item{distr}{is output array from \code{hmm.smoother}}

@@ -19,7 +19,7 @@
 #' @param save.dir is the directory to save the downloaded data to
 #' @param sst.type is character indicating type of desired SST product. Choices 
 #'   are currently Optimum Interpolation ('oi')
-#'   \url{https://www.ncdc.noaa.gov/oisst} or a high-resolution composite
+#'   \url{https://www.ncdc.noaa.gov/oisst}, MUR ('mur')\url{https://coastwatch.pfeg.noaa.gov/erddap/griddap/jplMURSST41.html} or a high-resolution composite
 #'   ('ghr') \url{https://www.ghrsst.org/}.
 #' @param depLevels is an integer describing which depth levels to download from
 #'   Hycom (e.g. 1=surface). Default is NULL and all levels are downloaded.
@@ -42,7 +42,7 @@
 #' }
 #' @export
 
-get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = NULL, resol = NULL, save.dir = getwd(), sst.type=NULL, depLevels=NULL){
+get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = NULL, resol = NULL, save.dir = getwd(), sst.type=NULL, depLevels=NULL, ...){
   
   if(is.null(type)){
     
@@ -58,7 +58,7 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
       for(i in 1:length(uniqueDates)){
         time <- as.Date(uniqueDates[i])
         repeat{
-          get.oi.sst(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''), download.file = TRUE, dir = save.dir) # filenames based on dates from above
+          get.oi.sst(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''), download.file = TRUE, dir = save.dir, ...) # filenames based on dates from above
           tryCatch({
             err <- try(RNetCDF::open.nc(paste(save.dir, filename, '_', time, '.nc', sep = '')), silent = T)
           }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})
@@ -69,7 +69,18 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
       for(i in 1:length(uniqueDates)){
         time <- as.Date(uniqueDates[i])
         repeat{
-          get.ghr.sst(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''), download.file = TRUE, dir = save.dir) # filenames based on dates from above
+          get.ghr.sst(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''), download.file = TRUE, dir = save.dir, ...) # filenames based on dates from above
+          tryCatch({
+            err <- try(RNetCDF::open.nc(paste(save.dir, filename, '_', time, '.nc', sep = '')), silent = T)
+          }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})
+          if(class(err) != 'try-error') break
+        }
+      }
+    } else if(sst.type == 'mur'){
+      for(i in 1:length(uniqueDates)){
+        time <- as.Date(uniqueDates[i])
+        repeat{
+          get.mur.sst(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''), download.file = TRUE, dir = save.dir, ...) # filenames based on dates from above
           tryCatch({
             err <- try(RNetCDF::open.nc(paste(save.dir, filename, '_', time, '.nc', sep = '')), silent = T)
           }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})
@@ -78,14 +89,14 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
       }
     }
     
-
+    
   } else if(type == 'hycom'){
     
     for(i in 1:length(uniqueDates)){
       time <- as.Date(uniqueDates[i])
       repeat{
         get.hycom(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''),
-                  download.file = TRUE, dir = save.dir, depLevels=depLevels) 
+                  download.file = TRUE, dir = save.dir, depLevels=depLevels, ...) 
         tryCatch({
           err <- try(RNetCDF::open.nc(paste(save.dir,'/', filename, '_', time, '.nc', sep = '')), silent = T)
         }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})
@@ -99,7 +110,7 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
       stop('Error: If type = woa then resol must be specified. See ?get.env for help.')
     }
     
-    filename <- get.woa(save.dir = save.dir, resol = resol)
+    filename <- get.woa(save.dir = save.dir, resol = resol, ...)
     print(paste('WOA data downloaded to ', filename,'...', sep=''))
     
   }

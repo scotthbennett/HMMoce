@@ -49,6 +49,7 @@ Useful links:
 Authors:
 \itemize{
   \item Benjamin Galuardi \email{drdrumfish@gmail.com}
+  \item Paul Gatti \email{Paul.Gatti@mi.mun.ca}
 }
 
 Other contributors:

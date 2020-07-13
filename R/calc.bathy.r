@@ -1,16 +1,16 @@
 # focalDim=3;ncores=4;sens.err=1;bathy.grid=b3
-calc.bathy=function (tag.pdt,bathy.grid, dateVec, focalDim = NULL, sens.err = 1){
+calc.bathy <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err = 1){
   
   # required functions & packages
   # functions needed in parallel
-  ac=function(x){return(as.character(x))}
-  an=function(x){return(as.numeric(ac(x)))}
-  an.=function(x){return(as.numeric(x))}
+  #ac=function(x){return(as.character(x))}
+  #an=function(x){return(as.numeric(ac(x)))}
+  #an.=function(x){return(as.numeric(x))}
   
   
   print(paste("Starting bathymetry likelihood calculation..."))
   t0 <- Sys.time()
-  tag.pdt$Date <- as.Date(as.POSIXct(tag.pdt$Date, format = findDateFormat(tag.pdt$Date)))
+  mmd$Date <- as.Date(as.POSIXct(mmd$Date, format = findDateFormat(mmd$Date)))
   
   # compute bathy.grid sd
   # bathy.grid=b3;focalDim=3
@@ -18,7 +18,7 @@ calc.bathy=function (tag.pdt,bathy.grid, dateVec, focalDim = NULL, sens.err = 1)
   # sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
   #  dat <- base::t(raster::as.matrix(raster::flip(bathy.grid, 2)))
   
-  T <- length(tag.pdt[, 1])
+  T <- length(dateVec)
   print(paste("Starting iterations through deployment period ", "..."))
   
   L.bathy <- array(0, dim = c(dim(bathy.grid)[1:2], length(dateVec)))
@@ -28,20 +28,23 @@ calc.bathy=function (tag.pdt,bathy.grid, dateVec, focalDim = NULL, sens.err = 1)
                  length.out = dim(bathy.grid)[1])
   
   for (i in 1:T) {
+    print(i)
     # i=1; sens.err=1
-    time <- tag.pdt$Date[i]
-    bathy.i <- c(tag.pdt$Depth[i] * (1 - sens.err/100), tag.pdt$Depth[i] *(1 + sens.err/100))
-    bathy.i=sort(-abs(bathy.i))
+    idx <- which(mmd$Date %in% dateVec[i])
+    if (length(idx) == 0) next
+    
+    bathy.i <- c(mmd$MaxDepth[idx] * (1 - sens.err / 100), mmd$MaxDepth[idx] * (1 + sens.err / 100))
+    #bathy.i = sort(-abs(bathy.i))
     lik.bathy <- likint3(bathy.grid, sdx, bathy.i[1], bathy.i[2])
     
-    idx <- which(dateVec == as.Date(time))
-    lik.bathy = as.matrix(lik.bathy)/max(as.matrix(lik.bathy), na.rm = T)
-    lik.bathy[is.na(lik.bathy) | is.infinite(lik.bathy)]<-0
-    L.bathy[,,idx]<-lik.bathy
+    #idx <- which(dateVec == as.Date(time))
+    lik.bathy = as.matrix(lik.bathy) / max(as.matrix(lik.bathy), na.rm = T)
+    lik.bathy[is.na(lik.bathy) | is.infinite(lik.bathy)] <- 0
+    L.bathy[,,which(dateVec %in% mmd$Date[idx])]<-lik.bathy
   }
   
-  L.bathy=aperm(L.bathy,c(2,1,3))
-  L.bathy=L.bathy[,dim(L.bathy)[2]:1,]
+  L.bathy <- aperm(L.bathy,c(2,1,3))
+  L.bathy <- L.bathy[,dim(L.bathy)[2]:1,]
   
   print(paste("Making final likelihood raster..."))
   crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
@@ -52,7 +55,6 @@ calc.bathy=function (tag.pdt,bathy.grid, dateVec, focalDim = NULL, sens.err = 1)
   L.bathy <- raster::flip(L.bathy, direction = "y")
   L.bathy[L.bathy < 0] <- 0
   t1 <- Sys.time()
-  print(paste("Bathymetric calculations took ", round(as.numeric(difftime(t1, 
-                                                                          t0, units = "mins")), 2), "minutes..."))
+  print(paste("Bathymetric calculations took ", round(as.numeric(difftime(t1, t0, units = "mins")), 2), "minutes..."))
   return(L.bathy)
 }

@@ -23,9 +23,9 @@
 #'   service.
 #' @importFrom curl curl_download
 #'   
-#' @author   Function originally written for R by Ben Jones (WHOI) and modified 
+#' @author Function originally written for R by Ben Jones (WHOI) and modified 
 #'   by Camrin Braun and Ben Galuardi.
-#' @references \url{https://www.ncdc.noaa.gov/oisst}
+#' @references \url{https://www.ghrsst.org/}
 #'   
 
 get.ghr.sst <- function(limits, time, filename='', download.file=TRUE, dir = getwd()) {
@@ -41,9 +41,12 @@ get.ghr.sst <- function(limits, time, filename='', download.file=TRUE, dir = get
   
   expts = data.frame(
     start=c(as.Date('2010-06-09')),
-    end=c(Sys.Date() + 1),
+    end=c('2017-09-13'),
     url=c('https://upwell.pfeg.noaa.gov/erddap/griddap/jplG1SST.nc?SST')
     )
+  
+  ## Can get global data post 2017 and trim it down but files are large and need to be unzipped, then trimmed. Maybe add a prompt to make sure the user still wants to proceed.
+  ## https://data.nodc.noaa.gov/thredds/catalog/ghrsst/L4/GLOB/JPL_OUROCEAN/G1SST/2019/342/catalog.html?dataset=ghrsst/L4/GLOB/JPL_OUROCEAN/G1SST/2019/342/20191208-JPL_OUROCEAN-L4UHfnd-GLOB-v01-fv01_0-G1SST.nc.bz2
   
   if(time[1] < expts$start[1])
     stop('Data begins at %s and is not available at %s.',

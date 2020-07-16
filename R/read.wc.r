@@ -86,6 +86,7 @@ read.wc <- function(filename, tag, pop, type = 'sst', dateFormat=NULL, verbose=F
     #print(paste('Data gaps are ', paste(gaps[gaps > 1], collapse=', '), ' days in PDT...'))
     gaps <- diff(c(as.Date(tag), udates, as.Date(pop)), units='days')
     if(verbose){
+      print(head(data))
       print(paste(length(which(as.Date(seq(tag, pop, 'day')) %in% udates)), ' of ', length(seq(tag, pop, 'day')), ' deployment days have PDT data...', sep=''))
       print(paste('Data gaps are ', paste(gaps[gaps > 1], collapse=', '), ' days in PDT...'))
     }
@@ -115,6 +116,7 @@ read.wc <- function(filename, tag, pop, type = 'sst', dateFormat=NULL, verbose=F
     # get data gaps
     gaps <- diff(c(as.Date(tag), udates, as.Date(pop)), units='days')
     if (verbose){
+      print(head(data))
       print(paste(length(which(as.Date(seq(tag, pop, 'day')) %in% udates)), ' of ', length(seq(tag, pop, 'day')), ' deployment days have SST data...', sep=''))
       print(paste('Data gaps are ', paste(gaps[gaps > 1], collapse=', '), ' days...'))
     }
@@ -122,16 +124,16 @@ read.wc <- function(filename, tag, pop, type = 'sst', dateFormat=NULL, verbose=F
   } else if(type == 'light'){
     # READ IN LIGHT DATA FROM WC FILES
     #data <- utils::read.table(paste(wd,'/', ptt, '-LightLoc.csv', sep=''), sep=',',header=T, blank.lines.skip=F,skip=2)
-    data <- utils::read.table(filename, sep=',',header=T, blank.lines.skip=F,skip=2)
-    if(!any(grep('depth', names(data), ignore.case=T))) data <- utils::read.table(filename, sep=',',header=T, blank.lines.skip=F,skip=1)
-    if(!any(grep('depth', names(data), ignore.case=T))) data <- utils::read.table(filename, sep=',',header=T, blank.lines.skip=F,skip=0)
+    data <- utils::read.table(filename, sep=',',header=T, blank.lines.skip=F, skip=2)
+    if(!any(grep('depth', names(data), ignore.case=T))) data <- utils::read.table(filename, sep=',',header=T, blank.lines.skip = F, skip = 1)
+    if(!any(grep('depth', names(data), ignore.case=T))) data <- utils::read.table(filename, sep=',',header=T, blank.lines.skip = F, skip = 0)
     data <- data[which(!is.na(data[,1])),]
     
-    #dts <- as.POSIXct(data$Day, format = findDateFormat(data$Day), tz = 'UTC')
-    dts <- as.POSIXct(data$Day, format = '%d-%b-%y', tz = 'UTC')
+    #dts <- as.POSIXct(data$Day, format = findDateFormat(data$Day))
+    dts <- lubridate::parse_date_time(data$Day, orders=c('dby', 'dbY'), tz='UTC')
     
     if(as.Date(dts[1]) > as.Date(Sys.Date()) | as.Date(dts[1]) < '1990-01-01'){
-      stop('Error: dates not parsed correctly.')    
+      stop('Error: dates are in the future or before 1990 and thus likely did not parse correctly.')    
     }
     
     d1 <- as.POSIXct('1900-01-02') - as.POSIXct('1900-01-01')
@@ -143,6 +145,7 @@ read.wc <- function(filename, tag, pop, type = 'sst', dateFormat=NULL, verbose=F
     # get data gaps
     gaps <- diff(c(as.Date(tag), udates, as.Date(pop)), units='days')
     if (verbose){
+      print(head(data))
       print(paste(length(which(as.Date(seq(tag, pop, 'day')) %in% udates)), ' of ', length(seq(tag, pop, 'day')), ' deployment days have light data...', sep=''))
       print(paste('Data gaps are ', paste(gaps[gaps > 1], collapse=', '), ' days...'))
     }

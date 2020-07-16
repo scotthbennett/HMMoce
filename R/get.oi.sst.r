@@ -69,8 +69,11 @@ get.oi.sst <- function(limits, time, filename='', download.file=TRUE, dir = getw
                   strftime(time[1], '%Y-%m-%dT00'))
   }
   
+  ## Add useless zlevel
+  url = paste0(url,'[(0.0):1:(0.0)]')
+  
   ## Add the spatial domain.
-  url = sprintf('%s[(0):1:(0)][(%s):1:(%s)][(%s):1:(%s)]',
+  url = sprintf('%s[(%s):1:(%s)][(%s):1:(%s)]',
                 url, limits[[3]], limits[[4]], limits[[1]], limits[[2]])
   print(url)
   

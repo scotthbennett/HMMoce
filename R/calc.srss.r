@@ -84,12 +84,10 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){
   max.ss <- sapply(1:365, function(i) raster::cellStats(ss.ras[[i]],stat='max',na.rm=T))
   
   # make some calculations on the tag data: yday, dtime, etc
-  light <- light[,c('Day','Time','Type')]
-  light$dtime <- lubridate::dmy_hms(paste(light$Day, light$Time, sep = ' '))
-  light$yday <- lubridate::yday(light$dtime)
-  light$daymins <- lubridate::minute(light$dtime) + (lubridate::hour(light$dtime) * 60)
+  light$yday <- lubridate::yday(light$Date)
+  light$daymins <- lubridate::minute(light$Date) + (lubridate::hour(light$Date) * 60)
   light <- light[which(light$Type != ''),]
-  lightDates <- as.Date(format(light$dtime, '%Y-%m-%d'))
+  lightDates <- as.Date(format(light$Date, '%Y-%m-%d'))
   
   print(paste('Starting daily calculations', '...'))
   

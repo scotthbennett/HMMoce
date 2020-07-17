@@ -17,6 +17,7 @@
 #' @return Downloads a NetCDF file containing ETopo bathymetry. If raster=TRUE, 
 #'   a raster is generated from the downloaded NetCDF. Otherwise, the file is 
 #'   just downloaded.
+#' @author Function originally written by Ben Galuardi.
 #' @examples
 #' \dontrun{
 #' # Not run to prevent actual data download

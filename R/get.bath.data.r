@@ -52,22 +52,10 @@ get.bath.data <- function(lonlow, lonhigh, latlow, lathigh, folder = tempdir(), 
   curl::curl_download(opt, fname, quiet=FALSE)
   #utils::download.file(opt, fname)
   
-  nc <- RNetCDF::open.nc(fname)
-  lon <- as.numeric(RNetCDF::var.get.nc(nc, variable = "longitude"))
-  lat <- as.numeric(RNetCDF::var.get.nc(nc, variable = "latitude"))
-  bdata <- RNetCDF::var.get.nc(nc, variable = bathid)
-
-  lat = lat[order(lat)]
+  ## bathy is on irregular grid so needs to be coerced
+  bathy <- irregular_ncToRaster(fname)
   
-  if(seaonly==T) bdata[bdata>=0] = NA
-  
-  bathy = list(x = lon, y = lat, data = bdata)
-  
-  if(raster){
-    crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
-    ex <- raster::extent(bathy)
-    bathy <- raster::raster(t(bathy$data), xmn = ex[1], xmx = ex[2], ymn = ex[3], ymx = ex[4], crs)
-  }
+  if (seaonly == T) bathy[bathy >= 0] <- NA
   
   bathy
   

@@ -5,12 +5,12 @@
 #' @param fname is input filename of the .nc file
 #' @return a raster version of the input .nc file coerced to regular grid
 
-irregular_ncToRaster <- function(fname){
+irregular_ncToRaster <- function(fname, varid){
   
   nc <- RNetCDF::open.nc(fname)
   lon <- as.numeric(RNetCDF::var.get.nc(nc, variable = "longitude"))
   lat <- as.numeric(RNetCDF::var.get.nc(nc, variable = "latitude"))
-  bdata <- RNetCDF::var.get.nc(nc, variable = bathid)
+  bdata <- RNetCDF::var.get.nc(nc, variable = varid)
   
   lat = lat[order(lat)]
   

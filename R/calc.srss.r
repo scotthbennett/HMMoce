@@ -12,10 +12,10 @@
 #' @param light is data frame from -LightLoc file output from DAP/Tag Portal for WC tags and 
 #'   contains tag-measured dawn/dusk times.
 #' @param locs.grid is list output from \code{setup.locs.grid}
-#' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
+#' @param dateVec is vector of POSIXct dates for each time step of the likelihood
 #' @param res is resolution of light grid in degrees. default is 1 deg. higher
 #'   resolution (e.g. res = .25 for 1/4 deg) takes considerably longer to
-#'   compute
+#'   compute and may not be appropriate for most scenarios
 #' @param focalDim is integer for dimensions of raster::focal used to calculate 
 #'   sd() of SRSS grid cell. Recommend focalDim = 3 if res=1 and focalDim = 9 if
 #'   res=0.25.
@@ -43,8 +43,8 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){
   lat <- seq(min(lat), max(lat), res)
   
   crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
-  L.grid = numeric(length = c(length(lon)*length(lat)*length(dateVec)))
-  dim(L.grid) = c(length(lon),length(lat), length(dateVec))
+  L.grid = numeric(length = c(length(lon) * length(lat) * length(dateVec)))
+  dim(L.grid) = c(length(lon), length(lat), length(dateVec))
   list.ras <- list(x = lon, y = lat, z = L.grid)
   ex <- raster::extent(list.ras)
   L.light <- raster::brick(list.ras$z, xmn=ex[1], xmx=ex[2], ymn=ex[3], ymx=ex[4], transpose=T, crs)
@@ -60,8 +60,8 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){
   xy = sp::SpatialPoints(xy, proj4string = sp::CRS("+proj=longlat +datum=WGS84"))
   
   # now do the building and rasterize
-  sr.grid = numeric(length = c(length(lon)*length(lat)*365))
-  dim(sr.grid) = c(length(lon),length(lat), 365)
+  sr.grid = numeric(length = c(length(lon) * length(lat) * 365))
+  dim(sr.grid) = c(length(lon), length(lat), 365)
   ss.grid = sr.grid
   t <- Sys.time()
   fyear = seq(ISOdate(lubridate::year(dateVec[1]), 1, 1, tz = 'UTC'), ISOdate(lubridate::year(dateVec[1]), 12, 31, tz = 'UTC'), 'day')
@@ -84,17 +84,24 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){
   max.ss <- sapply(1:365, function(i) raster::cellStats(ss.ras[[i]],stat='max',na.rm=T))
   
   # make some calculations on the tag data: yday, dtime, etc
+  
+  light$dateVec <- findInterval(light$Date, dateVec)
+  #by_dte <- dplyr::group_by(light, as.factor(light$dateVec))  # group by unique time points
+  #light <- data.frame(dplyr::summarise_(by_dte, "min(Temperature)", "max(Temperature)"))
+  #colnames(light) <- list('time', 'minT', 'maxT')
+  #light$time <- dateVec[as.numeric(as.character(light$time))]
   light$yday <- lubridate::yday(light$Date)
   light$daymins <- lubridate::minute(light$Date) + (lubridate::hour(light$Date) * 60)
   light <- light[which(light$Type != ''),]
-  lightDates <- as.Date(format(light$Date, '%Y-%m-%d'))
+  #light$Date <- as.Date(format(light$Date, '%Y-%m-%d'))
+  if (class(light$Date)[1] != class(dateVec)[1]) stop('dateVec and light$Date both need to be of class POSIXct.')
   
   print(paste('Starting daily calculations', '...'))
   
   for(t in 2:(length(dateVec)) - 1){
 
     # data for this time step T
-    light.t <- light[which(lightDates %in% dateVec[t]),]
+    light.t <- light[which(light$dateVec == t),]
     
     if(length(light.t[,1]) == 0){
       
@@ -108,7 +115,7 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){
           sr <- NA
         }
         
-        light[which(lightDates %in% dateVec[t] & light$Type == 'Dawn'), 6] <- sr
+        #light[which(light$Date %in% dateVec[t] & light$Type == 'Dawn'), 6] <- sr
         
         # now for likelihood
         # get the SD for this day, T
@@ -127,7 +134,7 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){
           ss <- NA
         }
         
-        light[which(lightDates %in% dateVec[t] & light$Type == 'Dusk'), 6] <- ss
+        #light[which(light$Date %in% dateVec[t] & light$Type == 'Dusk'), 6] <- ss
         
         # and sunset
         ssf <- raster::focal(ss.ras[[didx]], w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = T))
@@ -167,8 +174,8 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){
           ss <- NA
         }
         
-        light[which(lightDates %in% dateVec[t] & light$Type == 'Dawn'), 6] <- sr
-        light[which(lightDates %in% dateVec[t] & light$Type == 'Dusk'), 6] <- ss
+        #light[which(light$Date %in% dateVec[t] & light$Type == 'Dawn'), 6] <- sr
+        #light[which(light$Date %in% dateVec[t] & light$Type == 'Dusk'), 6] <- ss
         
         # now for likelihood
         # get the SD for this day, T

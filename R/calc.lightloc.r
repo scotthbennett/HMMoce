@@ -56,10 +56,9 @@ calc.lightloc <- function(lightloc, locs.grid, dateVec, errEll = TRUE){
   t0 <- Sys.time()
   
   # check date formats match
-  llDates <- lightloc$Date
-  llDates <- as.Date(llDates)
-  dateVec <- as.Date(dateVec)
-  #if (class(llDates) != class(dateVec)[1]) dateVec <- as.Date(dateVec)
+  lightloc <- lightloc[which(lightloc$Date <= max(dateVec)),]
+  lightloc$dateVec <- findInterval(lightloc$Date, dateVec)
+  T <- length(dateVec)
   
   # set up results array
   row <- dim(locs.grid$lon)[1]
@@ -70,61 +69,65 @@ calc.lightloc <- function(lightloc, locs.grid, dateVec, errEll = TRUE){
   
   print(paste('Starting iterations through deployment period...'))
   
-  for(t in 2:(length(dateVec)) - 1){
+  for(t in 1:T){
     
-    if(!is.null(lightloc) & dateVec[t] %in% llDates){
-      # set index to identify position in locs file
-      idx <- which(llDates == dateVec[t])
+    # data for this time step T
+    light.t <- lightloc[which(lightloc$dateVec == t),]
+
+    if (nrow(light.t) > 1){
       
-      if (nrow(lightloc[idx,]) > 1){
+      L.lightloc.try <- array(0, dim = c(col, row, nrow(light.t)))
+      
+      ## if multiple matches at this time step
+      for (ii in 1:nrow(light.t)){
         
-        L.lightloc.try <- array(0, dim = c(col, row, nrow(lightloc[idx,])))
-        
-        for (ii in 1:nrow(lightloc[idx,])){
-          idx.ii <- idx[ii]
-          locs.ii <- lightloc[idx.ii,]
-          
-          if(errEll == FALSE){
-            if (locs.ii$Error.Semi.minor.axis < 100000) locs.ii$Error.Semi.minor.axis <- 100000
-            # create longitude likelihood based on GPE data
-            slon.sd <- locs.ii$Error.Semi.minor.axis / 1000 / 111 #semi minor axis
-            # use normally distributed error from position using fixed std dev
-            L.lightloc.try[,,ii] <- stats::dnorm(t(locs.grid$lon), locs.ii$Longitude, slon.sd)
-            
-          } else if(errEll == TRUE){
-            if (locs.ii$Error.Semi.minor.axis < 100000) locs.ii$Error.Semi.minor.axis <- 100000
-            L.lightloc.try[,,ii] <- calc.errEll(locs.ii, locs.grid)
-            
-          } 
-          
-        }
-        
-        L.lightloc[,,t] <- apply(L.lightloc.try, 1:2, sum, na.rm = T)
-        
-      } else{
+        locs.ii <- light.t[ii,]
         
         if(errEll == FALSE){
-          if (lightloc$Error.Semi.minor.axis[idx] < 100000) lightloc$Error.Semi.minor.axis[idx] <- 100000
+          if (locs.ii$Error.Semi.minor.axis[1] < 100000) locs.ii$Error.Semi.minor.axis[1] <- 100000
           # create longitude likelihood based on GPE data
-          slon.sd <- lightloc$Error.Semi.minor.axis[idx] / 1000 / 111 #semi minor axis
+          slon.sd <- locs.ii$Error.Semi.minor.axis[1] / 1000 / 111 #semi minor axis
           # use normally distributed error from position using fixed std dev
-          L.light <- stats::dnorm(t(locs.grid$lon), lightloc$Longitude[idx], slon.sd)
-          
-          L.lightloc[,,t] <- L.light
+          L.lightloc.try[,,ii] <- stats::dnorm(t(locs.grid$lon), locs.ii$Longitude[1], slon.sd)
           
         } else if(errEll == TRUE){
-          if (lightloc$Error.Semi.minor.axis[idx] < 100000) lightloc$Error.Semi.minor.axis[idx] <- 100000
-          L.lightloc[,,t] <- calc.errEll(lightloc[idx,], locs.grid)
+          if (locs.ii$Error.Semi.minor.axis[1] < 100000) locs.ii$Error.Semi.minor.axis[1] <- 100000
+          L.lightloc.try[,,ii] <- calc.errEll(locs.ii[1,], locs.grid)
           
-        }
+        } 
         
       }
       
-    } 
+      L.lightloc[,,t] <- apply(L.lightloc.try, 1:2, sum, na.rm = T)
+      
+      ## normalize
+      L.lightloc[,,t] = L.lightloc[,,t] / max(L.lightloc[,,t], na.rm=T)
+      
+    } else if (nrow(light.t) == 1){
+      
+      if(errEll == FALSE){
+        if (light.t$Error.Semi.minor.axis[1] < 100000) light.t$Error.Semi.minor.axis[1] <- 100000
+        # create longitude likelihood based on GPE data
+        slon.sd <- light.t$Error.Semi.minor.axis[1] / 1000 / 111 #semi minor axis
+        # use normally distributed error from position using fixed std dev
+        L.light <- stats::dnorm(t(locs.grid$lon), light.t$Longitude[1], slon.sd)
+        
+        L.lightloc[,,t] <- L.light
+        
+      } else if(errEll == TRUE){
+        if (light.t$Error.Semi.minor.axis[1] < 100000) light.t$Error.Semi.minor.axis[1] <- 100000
+        L.lightloc[,,t] <- calc.errEll(light.t[1,], locs.grid)
+        
+      }
+      
+      ## normalize
+      L.lightloc[,,t] = L.lightloc[,,t] / max(L.lightloc[,,t], na.rm=T)
+      
+    } else{
+      ## do nothing
+    }
     
-    ## normalize
-    L.lightloc[,,t] = L.lightloc[,,t] / max(L.lightloc[,,t], na.rm=T)
-    
+   
   }
   
   print(paste('Making final likelihood raster...'))

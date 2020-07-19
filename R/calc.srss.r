@@ -85,6 +85,7 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){
   
   # make some calculations on the tag data: yday, dtime, etc
   
+  light <- light[which(light$Date <= max(dateVec)),]
   light$dateVec <- findInterval(light$Date, dateVec)
   #by_dte <- dplyr::group_by(light, as.factor(light$dateVec))  # group by unique time points
   #light <- data.frame(dplyr::summarise_(by_dte, "min(Temperature)", "max(Temperature)"))

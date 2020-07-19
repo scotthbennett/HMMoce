@@ -27,14 +27,14 @@
 
 calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){
   
-  options(warn=2)
+  #options(warn=2)
   t0 <- Sys.time()
   print(paste('Starting light likelihood calculation using SRSS times...'))
   
   #=====
   # BUILD A SPOT FOR THE RESULTS TO GO
   #=====
-
+  
   # need lat/lon vectors from locs.grid
   lon <- locs.grid$lon[1,]
   lat <- locs.grid$lat[,1]
@@ -67,7 +67,7 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){
   fyear = seq(ISOdate(lubridate::year(dateVec[1]), 1, 1, tz = 'UTC'), ISOdate(lubridate::year(dateVec[1]), 12, 31, tz = 'UTC'), 'day')
   sr.grid[,,1:365] = sapply(1:365, function(i) matrix(maptools::sunriset(xy, fyear[i], direction = "sunrise", POSIXct.out = TRUE)$day,length(lon),length(lat)))
   ss.grid[,,1:365] = sapply(1:365, function(i) matrix(maptools::sunriset(xy, fyear[i], direction = "sunset", POSIXct.out = TRUE)$day,length(lon),length(lat)))
-
+  
   list.ras <- list(x = lon, y = lat, z = sr.grid*24*60)
   ex <- raster::extent(list.ras)
   sr.ras <- raster::brick(list.ras$z, xmn=ex[1], xmx=ex[2], ymn=ex[3], ymx=ex[4], transpose=T, crs)
@@ -76,7 +76,7 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){
   list.ras <- list(x = lon, y = lat, z = ss.grid*24*60)
   ss.ras <- raster::brick(list.ras$z, xmn=ex[1], xmx=ex[2], ymn=ex[3], ymx=ex[4], transpose=T, crs)
   ss.ras <- raster::flip(ss.ras, direction = 'y')
-
+  
   # need to be able to cut SRSS times from tag that aren't within limits of the grid
   min.sr <- sapply(1:365, function(i) raster::cellStats(sr.ras[[i]],stat='min',na.rm=T))
   max.sr <- sapply(1:365, function(i) raster::cellStats(sr.ras[[i]],stat='max',na.rm=T))
@@ -98,8 +98,10 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){
   
   print(paste('Starting daily calculations', '...'))
   
-  for(t in 2:(length(dateVec)) - 1){
-
+  T <- length(dateVec)
+  
+  for(t in 1:T){
+    
     # data for this time step T
     light.t <- light[which(light$dateVec == t),]
     
@@ -124,7 +126,7 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){
         srlik <- liksrss(sr, srss = sr.ras[[didx]], srsd = srf)
         
         L.light[[t]] <- srlik
-
+        
       } else if(length(light.t[,1]) == 1 & any(light.t$Type == 'Dusk')){
         # if we just have a dusk measurement
         didx <- light.t$yday[1]
@@ -141,7 +143,7 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){
         sslik <- liksrss(ss, srss = ss.ras[[didx]], srsd = ssf)
         
         L.light[[t]] <- sslik
-
+        
       } else{
         # if we have both dawn and dusk measurements
         didx <- light.t$yday[1]
@@ -213,7 +215,7 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){
         }
         
         L.light[[t]] <- r
-
+        
       }
       
     }

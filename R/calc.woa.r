@@ -20,7 +20,7 @@
 #' @param focalDim is integer for dimensions of raster::focal used to calculate 
 #'   sd() of temperature grid cell. Recommend focalDim = 3 if woa.data = woa.one
 #'   and 9 if using woa.quarter.
-#' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
+#' @param dateVec is vector of POSIXct dates for each time step of the likelihood
 #' @param sp.lim is list of limits as \code{list(xmin, xmax, ymin, ymax)}
 #' @param use.se is logical indicating whether or not to use SE when using 
 #'   regression to predict temperature at specific depth levels.
@@ -31,6 +31,8 @@
 #' @seealso \code{\link{calc.ohc}}
 
 calc.woa <- function(pdt, ptt, woa.data = NULL, dateVec, sp.lim = NULL, focalDim = NULL, use.se = TRUE){
+  
+  .Defunct('calc.hycom', package = 'HMMoce')
   
   options(warn=-1)
   

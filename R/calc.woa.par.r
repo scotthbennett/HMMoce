@@ -36,6 +36,8 @@
 
 calc.woa.par <- function(pdt, ptt, woa.data = NULL, dateVec, sp.lim = NULL, focalDim = NULL, use.se = TRUE, ncores = NULL){
   
+  .Defunct('calc.hycom', package = 'HMMoce')
+  
   options(warn=-1)
 
   t0 <- Sys.time()

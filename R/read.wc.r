@@ -111,7 +111,7 @@ read.wc <- function(filename, tag, pop, type = 'sst', dateFormat=NULL, verbose=F
     }
     dts <- as.POSIXct(data$Date, format = findDateFormat(data$Date))
     udates <- unique(as.Date(dts))
-    data <- data[,c(1:11)]
+    data <- data[,c('Date','Depth','Temperature')]
     
     # get data gaps
     gaps <- diff(c(as.Date(tag), udates, as.Date(pop)), units='days')

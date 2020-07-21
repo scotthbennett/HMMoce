@@ -30,10 +30,6 @@ make.L <- function(ras.list, iniloc, dateVec, known.locs = NULL){
 
     if (class(known.locs$date)[1] != class(dateVec)[1]) stop('dateVec and known.locs$date both need to be of class POSIXct.')
     
-    # get lat/lon vectors
-    lon <- seq(raster::extent(L)[1], raster::extent(L)[2], length.out=dim(L)[2])
-    lat <- seq(raster::extent(L)[3], raster::extent(L)[4], length.out=dim(L)[1])
-
     known.locs <- known.locs[which(known.locs$date <= max(dateVec)),]
     known.locs$dateVec <- findInterval(known.locs$date, dateVec)
     
@@ -46,10 +42,10 @@ make.L <- function(ras.list, iniloc, dateVec, known.locs = NULL){
         known.locs.i <- known.locs.i[1,]
       }
       
-      x = which.min((known.locs.i$lon - lon) ^ 2)
-      y = which.min((known.locs.i$lat - lat) ^ 2)
-
-      # assign the known location for this day, i, as 1 (known) in likelihood raster
+      ## erase other likelihood results for this day
+      L[[i]] <- L[[i]] * 0
+      
+      ## assign the known location for this day, i, as 1 (known) in likelihood raster
       L.locs[[i]][raster::cellFromXY(L.locs[[i]], known.locs.i[,c('lon','lat')])] <- 1
       
     }
@@ -61,6 +57,8 @@ make.L <- function(ras.list, iniloc, dateVec, known.locs = NULL){
   ## COMBINE THE LIKELIHOOD LAYERS
   ## for each day:
   for (i in 1:length(dateVec)){
+    
+    print(i)
     
     ## get relevant likelihoods across the list
     for (bb in 1:length(ras.list)){
@@ -97,7 +95,11 @@ make.L <- function(ras.list, iniloc, dateVec, known.locs = NULL){
     }
     
     ## sum & normalize whatever layers remain
-    L[[i]] <- sum(s) / cellStats(sum(s), 'max') ## do not remove NA yet
+    if (nlayers(s) == 1){
+      L[[i]] <- s / cellStats(s, 'max') ## do not remove NA yet
+    } else{
+      L[[i]] <- sum(s) / cellStats(sum(s), 'max') ## do not remove NA yet  
+    }
     
   }
   
@@ -107,8 +109,8 @@ make.L <- function(ras.list, iniloc, dateVec, known.locs = NULL){
     print('Adding start and end locations from iniloc...')
 
     # get lat/lon vectors
-    lon <- seq(raster::extent(L)[1], raster::extent(L)[2], length.out=dim(L)[2])
-    lat <- seq(raster::extent(L)[3], raster::extent(L)[4], length.out=dim(L)[1])
+    #lon <- seq(raster::extent(L)[1], raster::extent(L)[2], length.out=dim(L)[2])
+    #lat <- seq(raster::extent(L)[3], raster::extent(L)[4], length.out=dim(L)[1])
     
     if (class(iniloc$date)[1] != class(dateVec)[1]) stop('dateVec and known.locs$date both need to be of class POSIXct.')
     iniloc$dateVec <- findInterval(iniloc$date, dateVec)
@@ -116,8 +118,11 @@ make.L <- function(ras.list, iniloc, dateVec, known.locs = NULL){
     for(i in unique(iniloc$dateVec)){
       known.locs.i <- iniloc[which(iniloc$dateVec == i),]
       
-      x = which.min((known.locs.i$lon - lon) ^ 2)
-      y = which.min((known.locs.i$lat - lat) ^ 2)
+      #x = which.min((known.locs.i$lon - lon) ^ 2)
+      #y = which.min((known.locs.i$lat - lat) ^ 2)
+      
+      ## erase other likelihood results for this day
+      L[[i]] <- L[[i]] * 0
       
       # assign the known location for this day, i, as 1 (known) in likelihood raster
       L[[i]][raster::cellFromXY(L[[i]], known.locs.i[,c('lon','lat')])] <- 1

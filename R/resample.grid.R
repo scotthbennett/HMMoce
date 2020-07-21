@@ -55,6 +55,6 @@ resample.grid <- function(L.rasters, L.res, mle.res=0.75, bound=NULL){
   
   print(paste('Raster resample took ', Sys.time() - start.t, '.'))
   
-  list(L.rasters, L.mle.res = L.mle.res, g = g, g.mle = g.mle)
+  list(L.rasters = L.rasters, L.mle.res = L.mle.res, g = g, g.mle = g.mle)
   
 }

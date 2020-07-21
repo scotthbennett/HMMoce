@@ -30,7 +30,7 @@
 #' @seealso \code{\link{calc.sst.par}}
 #'   
 
-calc.bottomTemp <- function(tag.bt, filename, bt.dir, dateVec, focalDim = NULL, sens.err = 1, varName = 'Temperature', ncores = NULL){
+calc.bottomTemp.par <- function(tag.bt, filename, bt.dir, dateVec, focalDim = NULL, sens.err = 1, varName = 'Temperature', ncores = NULL){
   
   print(paste('Starting bottom temperature likelihood calculation...'))
   
@@ -39,16 +39,14 @@ calc.bottomTemp <- function(tag.bt, filename, bt.dir, dateVec, focalDim = NULL, 
   
   t0 <- Sys.time()
   
-  if(class(tag.bt$Date)[1] != 'POSIXct') stop('Error: tag.bt$Date must be as.POSIXct format.')
-  #if(class(dateVec)[1] != 'POSIXct') dateVec <- as.POSIXct(dateVec)
-  
+  if (class(tag.bt$Date)[1] != class(dateVec)[1]) stop('dateVec and tag.sst$Date both need to be of class POSIXct.')
+
+  tag.bt <- tag.bt[which(tag.bt$Date <= max(dateVec)),]
   tag.bt$dateVec <- findInterval(tag.bt$Date, dateVec)
-  by_dte <- dplyr::group_by(tag.bt, as.factor(tag.bt$dateVec))  # group by unique time points
-  tag.bt <- data.frame(dplyr::summarise_(by_dte, "min(Temperature)", "max(Temperature)"))
-  colnames(tag.bt) <- list('time', 'minT', 'maxT')
-  tag.bt$time <- dateVec[as.numeric(as.character(tag.bt$time))]
+  tag.bt <- data.frame(tag.bt %>% group_by(dateVec) %>% 
+                         dplyr::summarise(minT = min(Temperature, na.rm=T), maxT = max(Temperature, na.rm=T), .groups = 'drop_last'))
   
-  T <- length(tag.bt[,1])
+  T <- length(dateVec)
   
   print(paste('Starting iterations through deployment period ', '...'))
   
@@ -57,7 +55,7 @@ calc.bottomTemp <- function(tag.bt, filename, bt.dir, dateVec, focalDim = NULL, 
   bt1 <- c(tag.bt$minT[1] * (1 - sens.err), tag.bt$maxT[1] * (1 + sens.err)) # sensor error
   
   # open day's bt data
-  nc1 <- RNetCDF::open.nc(paste(bt.dir, filename, '_', as.Date(time1), '.nc', sep='')) #add lat lon in filename '.nc', sep=''))
+  nc1 <- RNetCDF::open.nc(paste(bt.dir, filename, '_', as.Date(dateVec[tag.bt$dateVec[1]]), '.nc', sep='')) #add lat lon in filename '.nc', sep=''))
   
   # get correct name in bt data
   ncnames = NULL
@@ -67,6 +65,9 @@ calc.bottomTemp <- function(tag.bt, filename, bt.dir, dateVec, focalDim = NULL, 
   dat <- RNetCDF::var.get.nc(nc1, nameidx)
   lon <- RNetCDF::var.get.nc(nc1, 'longitude')
   lat <- RNetCDF::var.get.nc(nc1, 'latitude')
+  
+  # result will be array of likelihood surfaces
+  L.bt <- array(0, dim = c(length(lon), length(lat), length(dateVec)))
   
   # calc sd of bt
   # focal calc on mean temp and write to sd var
@@ -83,25 +84,19 @@ calc.bottomTemp <- function(tag.bt, filename, bt.dir, dateVec, focalDim = NULL, 
   if(is.null(focalDim)){
     focalDim <- round(0.25 / raster::res(r)[1], 0)
     if(focalDim %% 2 == 0) focalDim <- focalDim - 1
+    if (focalDim == 1) focalDim <- 3 ## if this equals 1, weird things happen
   }
   
   # calculate sd from bt grid using focal()
-  sdx = raster::focal(r, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = T))
+  sdx = raster::focal(r, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = T), pad = TRUE)
   sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
-  
-  # re-calc dat after raster::aggregate, if it happened
   dat <- base::t(raster::as.matrix(raster::flip(r, 2)))
-  
-  # compare bt to that day's tag-based ohc
-  lik.bt <- likint3(dat, sdx, bt1[1], bt1[2])
-  
-  # result will be array of likelihood surfaces
-  L.bt <- array(0, dim = c(dim(lik.bt), length(dateVec)))
   
   # get aggregated version of lat/lon for raster creation later
   lon.agg <- seq(raster::extent(r)[1], raster::extent(r)[2], length.out=dim(r)[2])
   lat.agg <- seq(raster::extent(r)[3], raster::extent(r)[4], length.out=dim(r)[1])
   
+
   ## END of SETUP RUN
   
   print('Processing in parallel... ')
@@ -113,11 +108,16 @@ calc.bottomTemp <- function(tag.bt, filename, bt.dir, dateVec, focalDim = NULL, 
     
   #for(i in 1:T){
     
-    time <- tag.bt$time[i]
-    bt.i <- c(tag.bt$minT[i] * (1 - sens.err / 100), tag.bt$maxT[i] * (1 + sens.err / 100)) # sensor error
+    print(dateVec[i])
+    
+    # tag data for this time step T
+    tag.bt.i <- tag.bt[which(tag.bt$dateVec == i),]
+    if (nrow(tag.bt.i) == 0) return(NA)
+    
+    bt.i <- c(tag.bt.i$minT * (1 - sens.err / 100), tag.bt.i$maxT * (1 + sens.err / 100)) # sensor error
     
     # open day's bt data
-    nc <- RNetCDF::open.nc(paste(bt.dir, filename, '_', as.Date(time), '.nc', sep='')) #add lat lon in filename '.nc', sep=''))
+    nc <- RNetCDF::open.nc(paste(bt.dir, filename, '_', as.Date(dateVec[i]), '.nc', sep='')) #add lat lon in filename '.nc', sep=''))
     dat <- RNetCDF::var.get.nc(nc, nameidx) # for OI bt
     
     # calc sd of bt
@@ -130,7 +130,7 @@ calc.bottomTemp <- function(tag.bt, filename, bt.dir, dateVec, focalDim = NULL, 
       if(aggFact != 1) r <- raster::aggregate(r, fact = aggFact)
     } 
     
-    sdx = raster::focal(r, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = T))
+    sdx = raster::focal(r, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = TRUE))
     sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
     
     dat <- base::t(raster::as.matrix(raster::flip(r, 2)))
@@ -146,17 +146,11 @@ calc.bottomTemp <- function(tag.bt, filename, bt.dir, dateVec, focalDim = NULL, 
   
   parallel::stopCluster(cl)
   
-  # make index of dates for filling in L.bt
-  
-  didx <- base::match(unique(tag.bt$time), dateVec)
-  
   #lapply
   lik.bt <- lapply(ans, function(x) x / max(x, na.rm = T))
   
-  ii = 1
-  for (i in didx){
-    L.bt[,,i] <- lik.bt[[ii]]
-    ii <- ii + 1
+  for (i in 1:T){
+    L.bt[,,i] <- lik.bt[[i]]
   }
   
   print(paste('Making final likelihood raster...'))

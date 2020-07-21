@@ -3,23 +3,18 @@
 #' \code{make.L} combines individual likelihoods from various data sources (e.g.
 #' SST, OHC) to make overall combined likelihoods for each time point
 #' 
-#' @param lik a likelihood array
+#' @param ras.list a list of likelihood rasters
+#' @param iniloc is data.frame of tag and pop locations. Required columns are 'date' (POSIX), 'lon', 'lat'.
+#' @param dateVec is vector of POSIXct dates for each time step of the likelihood
 #' @param known.locs is data frame of known locations containing named columns 
 #'   of 'date' (POSIX), 'lon', 'lat'. Default is NULL.
-#' @param dateVec is vector of POSIXct dates for each time step of the likelihood
-#' @param iniloc is matrix of tag and pop locations. Default is NULL because
-#'   this should be taken care of elsewhere.
-#' @return a list containing: L, the overall likelihood array and L.mle, a more 
-#'   coarse version of L used later for parameter estimation
+#' @return an overall likelihood array, L
+#' 
 #' @examples
 #' \dontrun{
-#' L <- make.L(L1 = L.res[[1]][L.idx[[tt]]], L.mle.res = L.res$L.mle.res,
-#'  dateVec = dateVec, locs.grid = locs.grid, iniloc = iniloc, 
-#'  bathy = bathy, pdt = pdt)
+#' L <- make.L(ras.list, iniloc, dateVec)
 #' }
 #' @export
-#' @note This function currently only supports the use of 3 input likelihood 
-#'   data sources. This will be expanded in the future based on user needs.
 #'   
 
 make.L <- function(ras.list, iniloc, dateVec, known.locs = NULL){
@@ -115,6 +110,7 @@ make.L <- function(ras.list, iniloc, dateVec, known.locs = NULL){
     lon <- seq(raster::extent(L)[1], raster::extent(L)[2], length.out=dim(L)[2])
     lat <- seq(raster::extent(L)[3], raster::extent(L)[4], length.out=dim(L)[1])
     
+    if (class(iniloc$date)[1] != class(dateVec)[1]) stop('dateVec and known.locs$date both need to be of class POSIXct.')
     iniloc$dateVec <- findInterval(iniloc$date, dateVec)
     
     for(i in unique(iniloc$dateVec)){

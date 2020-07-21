@@ -1,13 +1,14 @@
 #' Estimate parameters
 #' 
-#' \code{est_params} is a wrapper for several different parameter optimization routines
+#' \code{opt.params} is a wrapper for several different parameter optimization routines
 #' 
 #' @param pars.init is vector of initial parameter set: sigma1 (resident), sigma2 (migrant), p11 switch from behavior 1 to 1 (remain resident), p22 switch from behavior 2 to 2 (remain migrant)
-#' @param lower.bounds x
-#' @param upper.bounds x
-#' @param g x
-#' @param L x
+#' @param lower.bounds vector of lower bounds of pars.init
+#' @param upper.bounds vector of upper bounds of pars.init
+#' @param g grid from \code{\link{setup.grid}}
+#' @param L is likelihood array output from \code{make.L}
 #' @param alg.opt character indicating which optimization algorithm to use. Options are "optim", "nlminb", "ga", "ga_optim". 
+#' @param write.results optional. logical indicating whether to write results with \code{saveRDS}.
 #' @param hessian optional. logical indicating whether to compute hessian matrix for estimate of parameter standard deviation. Note: usually slows down the computations significantly. Default is FALSE.
 #' @param maskL optional. logical indicating whether to apply likelihood mask in \code{hmm.filter}. Default is FALSE.
 #' @param optim_method optional. see \code{method} input to \code{optim}. Default is "L-BFGS-B".
@@ -25,10 +26,11 @@
 #' 
 #' }
 
-est_params <- function(pars.init, lower.bounds, upper.bounds, g, L, alg.opt = 'optim', write.results = FALSE,...){
+opt.params <- function(pars.init, lower.bounds, upper.bounds, g, L, alg.opt = 'optim',...){
   
   args <- list(...)
   
+  write.results <- ifelse('write.results' %in% names(args), args$write.results, FALSE)
   hessian <- ifelse('hessian' %in% names(args), args$hessian, FALSE)
   maskL <- ifelse('maskL' %in% names(args), args$maskL, FALSE)
   optim_method <- ifelse('optim_method' %in% names(args), args$optim_method, 'L-BFGS-B')
@@ -77,6 +79,12 @@ est_params <- function(pars.init, lower.bounds, upper.bounds, g, L, alg.opt = 'o
     print(t1 - t0) 
     if (write.results) saveRDS(res, file = filename)
     
+    ## format optim
+    if (reformat) res <- list(par = res$par,
+                              value = res$value,
+                              convergence = res$convergence,
+                              message = res$message)
+    
   }
   
 
@@ -100,6 +108,12 @@ est_params <- function(pars.init, lower.bounds, upper.bounds, g, L, alg.opt = 'o
     print(t1 - t0) 
     if (write.results) saveRDS(res, file = filename)
     
+    ## format nlminb output like optim
+    if (reformat) res <- list(par = res$par,
+                              value = res$objective,
+                              convergence = res$convergence,
+                              message = res$message)
+    
   }
   
   
@@ -118,7 +132,7 @@ est_params <- function(pars.init, lower.bounds, upper.bounds, g, L, alg.opt = 'o
     print('Genetic algorithm with the higher resolution likelihood grid may take a VERY long time to run (several hours).')
     t0 = Sys.time()
     
-    res <- ga(type = 'real-valued',
+    res <- GA::ga(type = 'real-valued',
                  fitness = pos.log.lik.fun,
                  g = g,
                  L = L,
@@ -136,15 +150,23 @@ est_params <- function(pars.init, lower.bounds, upper.bounds, g, L, alg.opt = 'o
     t1 = Sys.time()
     print(t1 - t0)
     if (write.results) saveRDS(res, file = filename)
+    
+    ## format ga output like optim
+    if (reformat) res <- list(par = res@solution,
+                              value = res@fitnessValue,
+                              convergence = NA,
+                              message = NA)
 
   }
   
   if(alg.opt == "ga_optim"){
+    
     print('Refining genetic algorithm optimization results with optim...')
-    pars.init = an(res@solution)
     t0 = Sys.time()
     
-    res.optim <- optim(par = pars.init,
+    par.inits <- ifelse(reformat, res$par, res@solution)
+    
+    res <- optim(par = par.inits,
                        fn = neg.log.lik.fun,
                        g = g,
                        L = L,
@@ -158,6 +180,12 @@ est_params <- function(pars.init, lower.bounds, upper.bounds, g, L, alg.opt = 'o
     t1 = Sys.time()
     print(t1 - t0) 
     if (write.results) saveRDS(res, file = filename)
+    
+    ## format optim
+    if (reformat) res <- list(par = res$par,
+                              value = res$value,
+                              convergence = res$convergence,
+                              message = res$message)
     
   }
   

@@ -8,6 +8,7 @@
 #' @param g grid from \code{\link{setup.grid}}
 #' @param L is likelihood array output from \code{make.L}
 #' @param alg.opt character indicating which optimization algorithm to use. Options are "optim", "nlminb", "ga", "ga_optim". 
+#' @param reformat logical indicating whether to reformat and thus standardize output of the optimization algorithms
 #' @param write.results optional. logical indicating whether to write results with \code{saveRDS}.
 #' @param hessian optional. logical indicating whether to compute hessian matrix for estimate of parameter standard deviation. Note: usually slows down the computations significantly. Default is FALSE.
 #' @param maskL optional. logical indicating whether to apply likelihood mask in \code{hmm.filter}. Default is FALSE.
@@ -26,7 +27,7 @@
 #' 
 #' }
 
-opt.params <- function(pars.init, lower.bounds, upper.bounds, g, L, alg.opt = 'optim',...){
+opt.params <- function(pars.init, lower.bounds, upper.bounds, g, L, alg.opt = 'optim', reformat = TRUE, ...){
   
   args <- list(...)
   

@@ -40,7 +40,8 @@ Suggests:
     knitr,
     rmarkdown,
     png,
-    grid
+    grid,
+    GA
 RoxygenNote: 6.1.1
 URL: http://www.camrinbraun.com/
 BugReports: https://github.com/camrinbraun/HMMoce/issues

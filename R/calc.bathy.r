@@ -5,7 +5,7 @@
 #' 
 #' @param mmd is dataframe containing at least cols: "Date" (POSIXct) and "MaxDepth" in meters (positive values are wet)
 #' @param bathy.grid is raster of bathymetry. If the minimum bathymetry values are < 0, the function automatically converts in-water values to positive and masks land.
-#' @dateVec is vector of POSIXct dates for each time step of the likelihood
+#' @param dateVec is vector of POSIXct dates for each time step of the likelihood
 #' @param focalDim is integer for dimensions of raster::focal used to calculate 
 #'   sd() of env grid cell. If left to NULL (default), this dimension will
 #'   approximately incorporate 0.25 degrees.
@@ -21,7 +21,7 @@
 
 calc.bathy <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err = 5, lik.type = 'max'){
   
-  warning('Bathymetry likelihood calculation with lik.type = normal is experimental. If you use it, please send feedback on your experience as we work to improve it.')
+  if (lik.type == 'dnorm') warning('Bathymetry likelihood calculation with lik.type = normal is experimental. If you use it, please send feedback on your experience as we work to improve it.')
   
   ## convert a negative bathy grid to positive to match expectations and mask land
   if (cellStats(bathy.grid, 'min', na.rm=T) < 0){
@@ -29,12 +29,17 @@ calc.bathy <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err = 5, 
     bathy.grid[bathy.grid < 0] <- NA
   }
   
+  mmd <- mmd[which(mmd$Date <= max(dateVec)),]
+  mmd$dateVec <- findInterval(mmd$Date, dateVec)
+  mmd <- data.frame(mmd %>% group_by(dateVec) %>% 
+                          dplyr::summarise(maxDepth = max(MaxDepth, na.rm=TRUE), .groups = 'drop_last'))
+  
   print(paste("Starting bathymetry likelihood calculation..."))
   t0 <- Sys.time()
   #if (class(mmd$Date) != 'Date') stop('mmd$Date must be of class Date')
   
   # compute bathy.grid sd
-  sdx = raster::focal(bathy.grid, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x,na.rm = T))
+  sdx = raster::focal(bathy.grid, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x,na.rm = TRUE), pad = TRUE)
   ## sdx to matrix for likint3
   sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
   ## bathy grid to matrix for likint3
@@ -52,10 +57,11 @@ calc.bathy <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err = 5, 
   for (i in 1:T) {
 
     print(dateVec[i])
-    idx <- which(mmd$Date %in% dateVec[i])
-    if (length(idx) == 0) next
     
-    bathy.i <- c(mmd$MaxDepth[idx] * (1 - sens.err / 100), mmd$MaxDepth[idx] * (1 + sens.err / 100))
+    mmd.i <- mmd[which(mmd$dateVec == i),]
+    if (nrow(mmd.i) == 0) next
+    
+    bathy.i <- c(mmd.i$maxDepth * (1 - sens.err / 100), mmd.i$maxDepth * (1 + sens.err / 100)) # sensor error
     
     if (lik.type == 'max'){
       ## create bathy max from max depth of tag to max of bathy grid allowed (=1), otherwise 0
@@ -68,13 +74,13 @@ calc.bathy <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err = 5, 
       
       ## the actual likelihood calculation
       lik.bathy <- likint3(dat, sdx, bathy.i[1], bathy.i[2])
-      lik.bathy = as.matrix(lik.bathy) / max(as.matrix(lik.bathy), na.rm = T)
+      lik.bathy = as.matrix(lik.bathy) / max(as.matrix(lik.bathy), na.rm = TRUE)
     } else{
       stop('Argument lik.type can only be one of max or dnorm.')
     }
     
     lik.bathy[is.na(lik.bathy) | is.infinite(lik.bathy)] <- 0
-    L.bathy[,,which(dateVec %in% mmd$Date[idx])] <- lik.bathy
+    L.bathy[,,i] <- lik.bathy
   }
   
   L.bathy <- aperm(L.bathy,c(2,1,3))

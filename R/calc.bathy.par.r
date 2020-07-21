@@ -25,10 +25,15 @@
 calc.bathy.par <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err = 5, lik.type = 'max', ncores = NULL){
   
   ## convert a negative bathy grid to positive to match expectations and mask land
-  if (cellStats(bathy.grid, 'min', na.rm=T) < 0){
+  if (cellStats(bathy.grid, 'min', na.rm=TRUE) < 0){
     bathy.grid <- bathy.grid * -1
     bathy.grid[bathy.grid < 0] <- NA
   }
+  
+  mmd <- mmd[which(mmd$Date <= max(dateVec)),]
+  mmd$dateVec <- findInterval(mmd$Date, dateVec)
+  mmd <- data.frame(mmd %>% group_by(dateVec) %>% 
+                      dplyr::summarise(maxDepth = max(MaxDepth, na.rm=TRUE), .groups = 'drop_last'))
   
   print(paste("Starting bathymetry likelihood calculation..."))
   t0 <- Sys.time()
@@ -36,10 +41,10 @@ calc.bathy.par <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err =
   
   ## get ncores
   if (is.null(ncores)) ncores <- ceiling(parallel::detectCores() * .9)
-  if (is.na(ncores) | ncores < 0) ncores <- ceiling(as.numeric(system('nproc', intern=T)) * .9)
+  if (is.na(ncores) | ncores < 0) ncores <- ceiling(as.numeric(system('nproc', intern=TRUE)) * .9)
   
   # compute bathy.grid sd
-  sdx = raster::focal(bathy.grid, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x,na.rm = T))
+  sdx = raster::focal(bathy.grid, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x,na.rm = T), pad = TRUE)
   ## sdx to matrix for likint3
   sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
   ## bathy grid to matrix for likint3
@@ -62,13 +67,12 @@ calc.bathy.par <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err =
   
   ans = foreach::foreach(i = 1:T, .packages = c('raster')) %dopar%{
     
-    #for (i in 1:T) {
+    #print(dateVec[i])
     
-    print(dateVec[i])
-    idx <- which(mmd$Date %in% dateVec[i])
-    if (length(idx) == 0) next
+    mmd.i <- mmd[which(mmd$dateVec == i),]
+    if (nrow(mmd.i) == 0) return(NA)
     
-    bathy.i <- c(mmd$MaxDepth[idx] * (1 - sens.err / 100), mmd$MaxDepth[idx] * (1 + sens.err / 100))
+    bathy.i <- c(mmd.i$maxDepth * (1 - sens.err / 100), mmd.i$maxDepth * (1 + sens.err / 100)) # sensor error
     
     if (lik.type == 'max'){
       ## create bathy max from max depth of tag to max of bathy grid allowed (=1), otherwise 0
@@ -94,18 +98,11 @@ calc.bathy.par <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err =
   
   parallel::stopCluster(cl)
 
-  # make index of dates for filling in L.bathy
-  didx <- base::match(unique(mmd$Date), dateVec)
-  didx <- didx[which(!is.na(didx))]
-  print(str(didx))
-  
   #lapply
-  lik.bathy <- lapply(ans, function(x) x / max(x, na.rm = T))
+  lik.bathy <- lapply(ans, function(x) x / max(x, na.rm = TRUE))
   
-  ii = 1
-  for (i in didx){
+  for (i in 1:T){
     L.bathy[,,i] <- lik.bathy[[ii]]
-    ii <- ii + 1
   }
   
   L.bathy <- aperm(L.bathy,c(2,1,3))

@@ -39,7 +39,7 @@ display progress  until the download completes. Change the default
 \code{download.file} if the download is failing on your platform.
 }
 \references{
-\url{https://www.ncdc.noaa.gov/oisst}
+\url{https://www.ghrsst.org/}
 }
 \author{
 Function originally written for R by Ben Jones (WHOI) and modified 

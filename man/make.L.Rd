@@ -4,53 +4,27 @@
 \alias{make.L}
 \title{Combine individual source likelihoods}
 \usage{
-make.L(L1, L2 = NULL, L3 = NULL, known.locs = NULL, L.mle.res,
-  dateVec = NULL, locs.grid = NULL, iniloc = NULL, bathy = NULL,
-  pdt = NULL)
+make.L(ras.list, iniloc, dateVec, known.locs = NULL)
 }
 \arguments{
-\item{L1}{a likelihood array}
+\item{ras.list}{a list of likelihood rasters}
 
-\item{L2}{a likelihood array}
+\item{iniloc}{is data.frame of tag and pop locations. Required columns are 'date' (POSIX), 'lon', 'lat'.}
 
-\item{L3}{a likelihood array}
+\item{dateVec}{is vector of POSIXct dates for each time step of the likelihood}
 
 \item{known.locs}{is data frame of known locations containing named columns 
-of date, lon, lat. Default is NULL.}
-
-\item{L.mle.res}{is a coarse resolution array of dim(L1) that speeds up the 
-parameter estimation step later on}
-
-\item{dateVec}{is vector of dates from tag to pop-up date by day. Only
-required if known.locs is not NULL.}
-
-\item{locs.grid}{is output grid from \code{setup.locs.grid}. Only required if
-known.locs is not NULL.}
-
-\item{iniloc}{is matrix of tag and pop locations. Default is NULL because
-this should be taken care of elsewhere.}
-
-\item{bathy}{is bathymetry raster (likely from ETOPO1) as acquired by
-\code{get.bath.data}}
-
-\item{pdt}{is data frame output from read.wc(type='pdt')}
+of 'date' (POSIX), 'lon', 'lat'. Default is NULL.}
 }
 \value{
-a list containing: L, the overall likelihood array and L.mle, a more 
-  coarse version of L used later for parameter estimation
+an overall likelihood array, L
 }
 \description{
 \code{make.L} combines individual likelihoods from various data sources (e.g.
 SST, OHC) to make overall combined likelihoods for each time point
 }
-\note{
-This function currently only supports the use of 3 input likelihood 
-  data sources. This will be expanded in the future based on user needs.
-}
 \examples{
 \dontrun{
-L <- make.L(L1 = L.res[[1]][L.idx[[tt]]], L.mle.res = L.res$L.mle.res,
- dateVec = dateVec, locs.grid = locs.grid, iniloc = iniloc, 
- bathy = bathy, pdt = pdt)
+L <- make.L(ras.list, iniloc, dateVec)
 }
 }

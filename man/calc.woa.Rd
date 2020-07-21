@@ -16,7 +16,7 @@ calc.woa(pdt, ptt, woa.data = NULL, dateVec, sp.lim = NULL,
 \item{woa.data}{is (typically) a list of monthly global 1/4deg climatology
 data from WOA13. See \code{\link{get.env}}.}
 
-\item{dateVec}{is vector of dates from tag to pop-up in 1 day increments.}
+\item{dateVec}{is vector of POSIXct dates for each time step of the likelihood}
 
 \item{sp.lim}{is list of limits as \code{list(xmin, xmax, ymin, ymax)}}
 

@@ -12,11 +12,11 @@ contains tag-measured dawn/dusk times.}
 
 \item{locs.grid}{is list output from \code{setup.locs.grid}}
 
-\item{dateVec}{is vector of dates from tag to pop-up in 1 day increments.}
+\item{dateVec}{is vector of POSIXct dates for each time step of the likelihood}
 
 \item{res}{is resolution of light grid in degrees. default is 1 deg. higher
 resolution (e.g. res = .25 for 1/4 deg) takes considerably longer to
-compute}
+compute and may not be appropriate for most scenarios}
 
 \item{focalDim}{is integer for dimensions of raster::focal used to calculate 
 sd() of SRSS grid cell. Recommend focalDim = 3 if res=1 and focalDim = 9 if

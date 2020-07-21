@@ -26,8 +26,7 @@ weird things can happen so its best to input your own.}
 details on the loaded files is desired. Default is FALSE.}
 }
 \value{
-a list containing: the data read as a data.frame and a date vector of
-  unique dates in that data
+a the data read as a data.frame
 }
 \description{
 \code{read.wc} reads and formats tag data output from Wildlife Computers Data

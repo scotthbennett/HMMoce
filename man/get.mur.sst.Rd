@@ -52,7 +52,7 @@ image.plot(sst)
   
 }
 \references{
-\url{https://www.ncdc.noaa.gov/oisst}
+\url{https://coastwatch.pfeg.noaa.gov/erddap/griddap/jplMURSST41.html}
 }
 \author{
 Function originally written for R by Ben Jones (WHOI) and modified 

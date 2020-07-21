@@ -47,3 +47,6 @@ bathy <- get.bath.data(sp.lim$lonmin, sp.lim$lonmax, sp.lim$latmin,
 sp.lim$latmax, folder = tempdir())
 }
 }
+\author{
+Function originally written by Ben Galuardi.
+}

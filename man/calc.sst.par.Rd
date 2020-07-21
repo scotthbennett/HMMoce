@@ -8,7 +8,7 @@ calc.sst.par(tag.sst, filename, sst.dir, dateVec, focalDim = NULL,
   sens.err = 1, ncores = NULL)
 }
 \arguments{
-\item{tag.sst}{is data frame containing tag-collected SST data}
+\item{tag.sst}{is data frame containing tag-collected SST data. Requires at least cols: Date (POSIXct), Temperature}
 
 \item{filename}{is the first part of the filename specified to the download 
 function \code{\link{get.env}}. For example, if downloaded files were 
@@ -19,7 +19,7 @@ knows where to get the env data.}
 
 \item{sst.dir}{local directory where remote sensing SST downloads are stored}
 
-\item{dateVec}{is vector of dates from tag to pop-up in 1 day increments.}
+\item{dateVec}{is vector of POSIXct dates for each time step of the likelihood}
 
 \item{focalDim}{is integer for dimensions of raster::focal used to calculate 
 sd() of env grid cell. If left to NULL (default), this dimension will 

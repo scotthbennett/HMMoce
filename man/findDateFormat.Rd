@@ -13,7 +13,7 @@ findDateFormat(dateVec)
 dateformat is character string used as input to strptime(format = dateformat)
 }
 \description{
-\code{findDateFormat} determines the date format of a given vector of dates
+\code{findDateFormat} determines the date format of a given vector of character dates. The function essentially guesses its way through a number of common formats used in tag data outputs. It will throw an error if it can't find the appropriate date format.
 }
 \examples{
 dte <- '2015-01-01 05:30:17'

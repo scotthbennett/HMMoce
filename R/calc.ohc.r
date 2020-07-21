@@ -2,7 +2,7 @@
 #' 
 #' Compare tag data to OHC grid and calculate likelihoods
 #' 
-#' @param pdt input PDT data see \code{\link{extract.pdt}}. Need at least cols: MinTemp, MaxTemp, Date (POSIXct)
+#' @param pdt input depth-temperature profile data. Need at least cols: Date (POSIXct), Depth, MinTemp, MaxTemp, 
 #' @param filename is the first part of the filename specified to the download 
 #'   function \code{\link{get.env}}. For example, if downloaded files were 
 #'   specific to a particular dataset, you may want to identify that with a name
@@ -13,9 +13,9 @@
 #'   on daily tag data. Otherwise, numeric isotherm constraint can be specified 
 #'   (e.g. 20 deg C).
 #' @param ohc.dir directory of downloaded hycom (or other) data
-#' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
+#' @param dateVec is vector of POSIXct dates for each time step of the likelihood
 #' @param bathy is logical indicating whether or not a bathymetric mask should 
-#'   be applied
+#'   be applied. This does NOT use an input bathymetry dataset but rather masks the depth-temperature likelihood based on the possible locations given the maximum recorded tag-depth (i.e. areas with bottom depth shallower than tag-recorded max depth are masked out).
 #' @param use.se is logical indicating whether or not to use SE when using
 #'   regression to predict temperature at specific depth levels.
 #'   
@@ -33,7 +33,9 @@
 calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRUE, use.se = TRUE){
 
   names(pdt) <- tolower(names(pdt))
-  options(warn=1)
+  #options(warn=1)
+  
+  if (class(pdt$date)[1] != class(dateVec)[1]) stop('dateVec and pdt$date both need to be of class POSIXct.')
   
   t0 <- Sys.time()
   print(paste('Starting OHC likelihood calculation...'))
@@ -49,13 +51,9 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
     pdt$useTemp <- (pdt$maxtemp + pdt$mintemp) / 2
   }
   
-  # get unique time points
-  if(class(pdt$date)[1] != 'POSIXct') stop('Error: pdt$Date must be as.POSIXct format.')
-  if (class(dateVec)[1] == 'Date') dateVec2 <- as.POSIXct(dateVec)
-  
-  pdt$dateVec <- findInterval(pdt$date, dateVec2)
-  udates <- unique(pdt$dateVec)
-  T <- length(udates)
+  pdt <- pdt[which(pdt$date <= max(dateVec)),]
+  pdt$dateVec <- findInterval(pdt$date, dateVec)
+  T <- length(dateVec)
   
   if(isotherm != '') iso.def <- TRUE else iso.def <- FALSE
   
@@ -94,20 +92,25 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
   lat <- RNetCDF::var.get.nc(nc1, lat.idx)
   if(length(dim(lat)) == 2) lat <- lat[1,]
   
+  # result will be array of likelihood surfaces
+  L.ohc <- array(0, dim = c(length(lon), length(lat), length(dateVec)))
+  
   print(paste('Starting iterations through deployment period ', '...'))
   
-  for(i in udates){
-    time <- dateVec[i]
+  for(i in 1:T){
+    
+    print(dateVec[i])
+    
     pdt.i <- pdt[which(pdt$dateVec == i),]
-    print(paste(time))
+    if (nrow(pdt.i) == 0) next
     
     # open day's hycom data
-    nc <- RNetCDF::open.nc(paste(ohc.dir, filename,'_', as.Date(time), '.nc', sep=''))
+    nc <- RNetCDF::open.nc(paste(ohc.dir, filename,'_', as.Date(dateVec[i]), '.nc', sep=''))
     dat <- RNetCDF::var.get.nc(nc, temp.idx) * scale + offset
     
     #extracts depth from tag data for day i
     y <- pdt.i$depth[!is.na(pdt.i$depth)] 
-    y[y<0] <- 0
+    y[y < 0] <- 0
     
     #extract temperature from tag data for day i
     x <- pdt.i$useTemp[!is.na(pdt.i$depth)]  
@@ -135,9 +138,9 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
     n = length(hycomDep)
       
     #suppressWarnings(
-    pred.low = stats::predict(fit.low, newdata = hycomDep, se = T, get.data = T)
+    pred.low = stats::predict(fit.low, newdata = hycomDep, se = TRUE, get.data = TRUE)
     #suppressWarnings(
-    pred.high = stats::predict(fit.high, newdata = hycomDep, se = T, get.data = T)
+    pred.high = stats::predict(fit.high, newdata = hycomDep, se = TRUE, get.data = TRUE)
     
     if (use.se){
       # data frame for next step
@@ -152,23 +155,23 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
     }
 
     # isotherm is minimum temperature recorded for that time point
-    if(iso.def == FALSE) isotherm <- min(df$low, na.rm = T)
+    if(iso.def == FALSE) isotherm <- min(df$low, na.rm = TRUE)
     
     # perform tag data integration at limits of model fits
-    minT.ohc <- cp * rho * sum(df$low - isotherm, na.rm = T) / 10000
-    maxT.ohc <- cp * rho * sum(df$high - isotherm, na.rm = T) / 10000
+    minT.ohc <- cp * rho * sum(df$low - isotherm, na.rm = TRUE) / 10000
+    maxT.ohc <- cp * rho * sum(df$high - isotherm, na.rm = TRUE) / 10000
     
     # Perform hycom integration
     #dat[dat < isotherm] <- NA
     dat <- dat - isotherm
-    ohc <- cp * rho * apply(dat[,,depIdx], 1:2, sum, na.rm = T) / 10000 
+    ohc <- cp * rho * apply(dat[,,depIdx], 1:2, sum, na.rm = TRUE) / 10000 
     ohc[ohc == 0] <- NA
     
     # calc sd of OHC
     # focal calc on mean temp and write to sd var
     r = raster::flip(raster::raster(t(ohc)), 2)
     sdx = raster::focal(r, w = matrix(1, nrow = 9, ncol = 9),
-                        fun = function(x) stats::sd(x, na.rm = T))
+                        fun = function(x) stats::sd(x, na.rm = TRUE), pad=TRUE)
     sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
 
     # compare hycom to that day's tag-based ohc
@@ -184,29 +187,22 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
                       high = pred.high$fit + pred.high$se.fit * sqrt(n),
                       depth = hycomDep)
       
-      minT.ohc <- cp * rho * sum(df$low - isotherm, na.rm = T) / 10000
-      maxT.ohc <- cp * rho * sum(df$high - isotherm, na.rm = T) / 10000
+      minT.ohc <- cp * rho * sum(df$low - isotherm, na.rm = TRUE) / 10000
+      maxT.ohc <- cp * rho * sum(df$high - isotherm, na.rm = TRUE) / 10000
       
       lik.try <- try(likint3(ohc, sdx, minT.ohc, maxT.ohc), TRUE)
       
       if (class(lik.try) == 'try-error'){
         lik.try <- ohc * 0
-        warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral for ', time, '...', sep=''))
+        warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral for ', dateVec[i], '...', sep=''))
       }
       
     } else if (class(lik.try) == 'try-error' & use.se == TRUE){
       lik.try <- ohc * 0
-      warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral for ', time, '...', sep=''))
+      warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral for ', dateVec[i], '...', sep=''))
     }
     
-    lik.ohc <- lik.try / max(lik.try, na.rm = T)
-    
-    if(!exists('L.ohc')){
-      # result will be array of likelihood surfaces
-      L.ohc <- array(0, dim = c(dim(lik.ohc), length(dateVec)))
-    }
-    
-    #idx <- which(dateVec == as.Date(time))
+    lik.ohc <- lik.try / max(lik.try, na.rm = TRUE)
     L.ohc[,,i] = lik.ohc
 
   }
@@ -217,7 +213,7 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
   if(!any(lon < 180)) lon <- lon - 360
   list.ohc <- list(x = lon, y = lat, z = L.ohc)
   ex <- raster::extent(list.ohc)
-  L.ohc <- raster::brick(list.ohc$z, xmn=ex[1], xmx=ex[2], ymn=ex[3], ymx=ex[4], transpose=T, crs)
+  L.ohc <- raster::brick(list.ohc$z, xmn=ex[1], xmx=ex[2], ymn=ex[3], ymx=ex[4], transpose=TRUE, crs)
   L.ohc <- raster::flip(L.ohc, direction = 'y')
 
   L.ohc[L.ohc < 0] <- 0

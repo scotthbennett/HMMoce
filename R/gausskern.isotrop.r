@@ -1,11 +1,28 @@
-# no final standardisation by the sum
-# used to design a pseudo optimal size for the kernel based on sigma 
-# the idea is to keep at least 99% of the diffusion 
-gausskern.isotrop=function (siz, sigma, muadv = 0,ratio.xy) {
+#' Create isotropic Gaussian Kernel
+#' 
+#' \code{gausskern.isotrop} calculates 2D Gaussian kernel based on kernel size, 
+#' deviation, and advection
+#' 
+#' @param siz size of the kernel, siz x siz. Must be a positive integer.
+#' @param sigma standard deviation of the kernel. Unit is cell width. Must be a 
+#'   positive number.
+#' @param muadv advection of the kernel. Unit of the input is cell width. 
+#'   Defaults to 0.
+#' @param ratio.xy
+#' @return Gaussian kernel as a 2D matrix of size (siz x siz)
+#' @export
+#' 
+#' @examples
+#' kern = gausskern.isotrop(3, 0.5)
+#' @note No final standardization by the sum. This function is used to design a pseudo-optimal size for the kernel based on sigma while maintaining 99% of the allowable diffusion.
+#' 
+#' @author Paul Gatti
+
+gausskern.isotrop <- function (siz, sigma, muadv = 0, ratio.xy) {
   
   # x longitude
-  sizx=siz/ratio.xy
-  sigmax=siz/ratio.xy
+  sizx = siz / ratio.xy
+  sigmax = siz / ratio.xy
   if (round(sizx) < 1) sizx = 1
   x = 1:round(sizx)
   mux = c(mean(x), mean(x)) + muadv/ratio.xy
@@ -13,8 +30,8 @@ gausskern.isotrop=function (siz, sigma, muadv = 0,ratio.xy) {
   fx[!is.finite(fx)] = 0
   
   # y latitude
-  sizy=siz
-  sigmay=siz
+  sizy = siz
+  sigmay = siz
   if (round(sizy) < 1) sizy = 1
   y = 1:round(sizy)
   muy = c(mean(y), mean(y)) + muadv

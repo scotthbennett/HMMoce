@@ -23,7 +23,8 @@ coarse.L <- function(L, ras.list, aggregate_fact = NULL){
   
   ## coarsen / aggregate
   if (is.null(aggregate_fact)) aggregate_fact <- 5
-  L.mle <- raster::aggregate(L, fact = aggregate_fact)
+  
+  L.mle <- raster::aggregate(L.mle, fact = aggregate_fact, fun = 'max')
   
   ## output array for parameter optim
   L.mle <- aperm(raster::as.array(raster::flip(L.mle, direction = 'y')), c(3, 2, 1))

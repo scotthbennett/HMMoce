@@ -39,40 +39,31 @@ calc.sst <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.
                           dplyr::summarise(minT = min(Temperature, na.rm=T), maxT = max(Temperature, na.rm=T), .groups = 'drop_last'))
   T <- length(dateVec)
   
+  ## setup
+  nc1 <- RNetCDF::open.nc(dir(sst.dir, full.names = T)[1])
+  ncnames = NULL
+  nmax <- RNetCDF::file.inq.nc(nc1)$nvars - 1
+  for(ii in 0:nmax) ncnames[ii + 1] <- RNetCDF::var.inq.nc(nc1, ii)$name
+  nameidx <- grep('sst', ncnames, ignore.case=TRUE) - 1
+  lon <- RNetCDF::var.get.nc(nc1, 'longitude')
+  lat <- RNetCDF::var.get.nc(nc1, 'latitude')
+  # result will be array of likelihood surfaces
+  L.sst <- array(0, dim = c(length(lon), length(lat), T))
+  
   print(paste('Starting iterations through deployment period ', '...'))
 
   for(i in 1:T){
     
     print(dateVec[i])
-    
-    
+  
     # tag data for this time step T
     tag.sst.i <- tag.sst[which(tag.sst$dateVec == i),]
-    if (nrow(tag.sst.i) == 0 & i != 1) next
-    if (nrow(tag.sst.i) == 0 & i == 1){
-      sst.i <- c(NA, NA)
-    } else {
-      sst.i <- c(tag.sst.i$minT * (1 - sens.err / 100), tag.sst.i$maxT * (1 + sens.err / 100)) # sensor error
-    }
+    if (nrow(tag.sst.i) == 0) next
+    
+    sst.i <- c(tag.sst.i$minT * (1 - sens.err / 100), tag.sst.i$maxT * (1 + sens.err / 100)) # sensor error
     
     # open day's sst data
     nc <- RNetCDF::open.nc(paste(sst.dir, filename, '_', as.Date(dateVec[i]), '.nc', sep=''))
-    
-    ## first successful iteration, define additional vars
-    if (i == 1){
-      # get correct name in sst data
-      ncnames = NULL
-      nmax <- RNetCDF::file.inq.nc(nc)$nvars - 1
-      for(ii in 0:nmax) ncnames[ii + 1] <- RNetCDF::var.inq.nc(nc, ii)$name
-      nameidx <- grep('sst', ncnames, ignore.case=TRUE) - 1
-      
-      lon <- RNetCDF::var.get.nc(nc, 'longitude')
-      lat <- RNetCDF::var.get.nc(nc, 'latitude')
-      
-      # result will be array of likelihood surfaces
-      L.sst <- array(0, dim = c(length(lon), length(lat), T))
-      
-    }
    
     ## get grid
     dat <- RNetCDF::var.get.nc(nc, nameidx) # for OI SST
@@ -97,8 +88,6 @@ calc.sst <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.
     sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
     dat <- base::t(raster::as.matrix(raster::flip(r, 2)))
 
-    if (all(is.na(sst.i))) next
-    
     # compare sst to that day's tag-based ohc
     lik.sst <- likint3(dat, sdx, sst.i[1], sst.i[2])
     

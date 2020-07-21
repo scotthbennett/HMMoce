@@ -19,8 +19,8 @@
 #' @importFrom dplyr summarise
 #' @importFrom dplyr n
 #'   
-#' @return a list containing: the data read as a data.frame and a date vector of
-#'   unique dates in that data
+#' @return a the data read as a data.frame
+#' 
 #' @examples
 #' # example data in the package
 #' sstFile <- system.file("extdata", "141259-SST.csv", package = "HMMoce")
@@ -152,7 +152,8 @@ read.wc <- function(filename, tag, pop, type = 'sst', dateFormat=NULL, verbose=F
     
   }
   
-  return(list(data = data, udates = udates))
+  #return(list(data = data, udates = udates))
+  return(data)
   
 }
 

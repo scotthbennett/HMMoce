@@ -58,14 +58,14 @@ make.L <- function(ras.list, iniloc, dateVec, known.locs = NULL){
   ## for each day:
   for (i in 1:length(dateVec)){
     
-    print(i)
+    #print(i)
     
     ## get relevant likelihoods across the list
     for (bb in 1:length(ras.list)){
       if (bb == 1){
-        s <- stack(ras.list[[bb]][[i]])
+        s <- raster::stack(ras.list[[bb]][[i]])
       } else{
-        s <- stack(s, ras.list[[bb]][[i]])
+        s <- raster::stack(s, ras.list[[bb]][[i]])
       }
     }
     
@@ -73,32 +73,32 @@ make.L <- function(ras.list, iniloc, dateVec, known.locs = NULL){
     sum_NA <- raster::cellStats(!is.na(s), sum, na.rm=T) == 0
     
     ## check for layers that sum to 0
-    sum_zero <- rep(NA, nlayers(s))
-    for (bb in 1:nlayers(s)){
+    sum_zero <- rep(NA, raster::nlayers(s))
+    for (bb in 1:raster::nlayers(s)){
       s_bb <- s[[bb]]
       s_bb[s_bb == 0] <- 1
       
-      sum_zero[bb] <- ifelse(cellStats(s_bb, 'sum') == ncell(s), TRUE, FALSE)
+      sum_zero[bb] <- ifelse(raster::cellStats(s_bb, 'sum') == ncell(s), TRUE, FALSE)
       
     }
     
     ## if all layers are NA, just fill with a 0 raster
-    if (length(which(sum_NA)) == nlayers(s)){
+    if (length(which(sum_NA)) == raster::nlayers(s)){
       ## nothing left for this iteration
       next
       
       ## if a layer is all NA, drop it
-    } else if (length(which(sum_NA)) < nlayers(s) & length(which(sum_NA)) > 0){
+    } else if (length(which(sum_NA)) < raster::nlayers(s) & length(which(sum_NA)) > 0){
       s <- s[[-which(sum_NA)]]
     } else{
       ## do nothing
     }
     
     ## sum & normalize whatever layers remain
-    if (nlayers(s) == 1){
-      L[[i]] <- s / cellStats(s, 'max') ## do not remove NA yet
+    if (raster::nlayers(s) == 1){
+      L[[i]] <- s / raster::cellStats(s, 'max') ## do not remove NA yet
     } else{
-      L[[i]] <- sum(s) / cellStats(sum(s), 'max') ## do not remove NA yet  
+      L[[i]] <- sum(s) / raster::cellStats(sum(s), 'max') ## do not remove NA yet  
     }
     
   }

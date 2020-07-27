@@ -43,14 +43,14 @@ Braun, C. D., Galuardi, B., and Thorrold, S. R. (2018). HMMoce: An R package for
 
 ## Package Structure
 The package is structured as follows:
-  * Load the relevant tag data and establish a study area of interest.
-  * Get the environmental data to base the likelihood calculations on.
-  * Calculate the desired likelihoods (e.g. depth-temperature profiles, SST, etc)
-  * Estimate parameters and run the model. Results are written out along the way.
-  * Perform model checking and choose a final model.
+* Load the relevant tag data and establish a study area of interest.
+* Get the environmental data to base the likelihood calculations on.
+* Calculate the desired likelihoods (e.g. depth-temperature profiles, SST, etc)
+* Estimate parameters and run the model. Results are written out along the way.
+* Perform model checking and choose a final model.
  
 ## Installation Instructions
-`HMMoce` can be installed from CRAN from within `R` using `install.packages('HMMoce')`. To get the latest developments, get it from GitHub using `devtools::install_github('camrinbraun/HMMoce', ref='dev')`
+`HMMoce` must be installed from Github as it is no longer available on CRAN. Install it using `devtools::install_github('camrinbraun/HMMoce')` or get the latest development version using `devtools::install_github('camrinbraun/HMMoce', ref='dev')`
 
 ## Examples
 For an example use of the package, please see the vignette using `vignette('HMMoce')`.

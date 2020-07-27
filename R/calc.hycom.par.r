@@ -89,11 +89,12 @@ calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.
   
   # BEGIN PARALLEL STUFF  
   
-  print('Processing in parallel... ')
   
   # ncores = detectCores()  # should be an input argument
   cl = parallel::makeCluster(ncores)
   doParallel::registerDoParallel(cl, cores = ncores)
+  
+  print(paste0('Processing in parallel using ', ncores, ' cores... '))
   
   ans = foreach::foreach(i = 1:T) %dopar%{
     

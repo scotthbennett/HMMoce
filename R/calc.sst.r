@@ -17,6 +17,7 @@
 #'   approximately incorporate 0.25 degrees.
 #' @param sens.err is numeric indicating the percent sensor error in the tag sst
 #'   sensor. Default is 1.
+#' @param auto.aggr is logical indicating whether to automatically aggregate the calculated likelihood raster if the resolution is higher than 0.1.
 #'   
 #' @return likelihood is raster brick of likelihood surfaces representing
 #'   matches between tag-based sst and remotely sensed sst maps
@@ -26,7 +27,7 @@
 #' @seealso \code{\link{calc.ohc}}
 #'   
 
-calc.sst <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.err = 1){
+calc.sst <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.err = 1, auto.aggr = TRUE){
   
   print(paste('Starting SST likelihood calculation...'))
   t0 <- Sys.time()
@@ -49,7 +50,6 @@ calc.sst <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.
   lat <- RNetCDF::var.get.nc(nc1, 'latitude')
   # result will be array of likelihood surfaces
   L.sst <- array(0, dim = c(length(lon), length(lat), T))
-  
   print(paste('Starting iterations through deployment period ', '...'))
 
   for(i in 1:T){
@@ -67,15 +67,16 @@ calc.sst <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.
    
     ## get grid
     dat <- RNetCDF::var.get.nc(nc, nameidx) # for OI SST
-    
     # calc sd of SST
     # focal calc on mean temp and write to sd var
     r <- raster::flip(raster::raster(t(dat), xmn=min(lon), xmx=max(lon),
                                     ymn=min(lat), ymx=max(lat)), 2)
     
     if(round(raster::res(r)[1], 2) < 0.1){
+      print('Raster is very high resolution. Automatically coarsening using raster::aggregate. If you do not want this behavior, set auto.aggr = FALSE')
       aggFact <- round(0.1 / round(raster::res(r)[1], 2), 0)
       if(aggFact != 1) r <- raster::aggregate(r, fact = aggFact)
+      if (i == 1) L.sst <- array(0, dim = c(dim(r)[2], dim(r)[1], T))
     } 
     
     if (is.null(focalDim)){
@@ -90,7 +91,6 @@ calc.sst <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.
 
     # compare sst to that day's tag-based ohc
     lik.sst <- likint3(dat, sdx, sst.i[1], sst.i[2])
-    
     #idx <- which(dateVec == time)
     L.sst[,,i] = lik.sst / max(lik.sst, na.rm=T)
     

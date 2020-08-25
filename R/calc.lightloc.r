@@ -6,11 +6,9 @@
 #' Light errors are parameterized using elliptical error values output in 
 #' '-Locations.csv' (WC tags).
 #' 
-#' @param lightloc is data frame from -Locations file output from DAP/Tag Portal for
-#'   WC tags and contains GPS, Argos, and GPE locations as applicable.
-#' @param llDates is vector of dates from locs dataframe
+#' @param lightloc is data frame of light-based location estimates. If errEll is FALSE, only Date (POSIXct), Longitude, Latitude, and Error.Semi.minor.axis are required. If errEll is TRUE, additional required columns are Offset, Offset.orientation, and Error.Semi.major.axis.
 #' @param locs.grid is list output from \code{setup.locs.grid}
-#' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
+#' @param dateVec is vector of POSIXct dates for each time step of the likelihood
 #' @param errEll is logical indicating whether error ellipses should be 
 #'   generated for light-based likelihoods as given from output of WC-GPE. False
 #'   if only longitude should be used. If False, standard deviation on light 

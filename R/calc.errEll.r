@@ -3,8 +3,7 @@
 #' Error ellipses are generated around WC tag based positions using
 #' tag-calculated error structure.
 #' 
-#' @param locs is data frame of locations typically read from -Locations.csv output
-#'   from Wildlife Computers
+#' @param locs is data frame of light-based location estimates containing columns for Date (POSIXct), Longitude, Latitude, Error.Semi.minor.axis, Error.Semi.major.axis, Offset, and Offset.orientation.
 #' @param locs.grid is list output from \code{setup.locs.grid}
 #' 
 #' @return an array of error ellipses for input light-based locations  

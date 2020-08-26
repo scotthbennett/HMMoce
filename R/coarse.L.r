@@ -25,11 +25,13 @@ coarse.L <- function(L, ras.list, aggregate_fact = NULL){
   if (is.null(aggregate_fact)) aggregate_fact <- 5
   
   L.mle <- raster::aggregate(L.mle, fact = aggregate_fact, fun = 'max')
+  g.mle <- setup.grid.raster(L.mle)
   
   ## output array for parameter optim
   L.mle <- aperm(raster::as.array(raster::flip(L.mle, direction = 'y')), c(3, 2, 1))
   
-  return(L.mle)  
+  return(list(L.mle = L.mle, g.mle = g.mle))
+
 }
 
 

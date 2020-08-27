@@ -143,7 +143,7 @@ opt.params <- function(pars.init, lower.bounds, upper.bounds, g, L, alg.opt = 'o
                  popSize = p_size,
                  maxiter = max_iter,
                  run = run,
-                 names = c('sigma1.ncell','sigma2.ncell','pswitch11','pswitch22'),
+                 #names = c('sigma1.ncell','sigma2.ncell','pswitch11','pswitch22'),
                  keepBest = T,
                  parallel = ncores
     )

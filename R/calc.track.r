@@ -78,7 +78,11 @@ calc.track <- function(distr, g, dateVec, iniloc, method = 'mean'){
   }
   
   # calculate the estimated behavior state
-  p.resid <- apply(distr, c(1,2), sum)[2,]
+  if(dim(distr)[1] > 1){
+    p.resid <- apply(distr, c(1,2), sum)[2,]
+  } else{
+    p.resid <- rep(NA, length.out = length(dateVec))
+  }
   
   track <- data.frame(cbind(date = dateVec, lon = lon, lat = lat, p = p.resid))
   track$date <- dateVec

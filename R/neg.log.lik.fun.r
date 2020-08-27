@@ -16,17 +16,24 @@
 
 neg.log.lik.fun <- function(pars, g, L, maskL = TRUE, bound.thr = 0.1, minBounds = 10, kernel = 'normal'){
   
-  sigmas = pars[1:2]
-  sizes = rep(ceiling(sigmas[1]*4),2)
-  pb = pars[3:4]
-  muadvs = c(0,0)
+  if (length(pars) == 4){
+    sigmas = pars[1:2]
+    sizes = rep(ceiling(sigmas[1]*4),2)
+    pb = pars[3:4]
+    muadvs = c(0,0)
+  } else if (length(pars) == 1){
+    sigmas = pars[1]
+    sizes = rep(ceiling(sigmas[1]*4),2)
+    pb = NULL
+    muadvs = c(0)
+  }
   
   if (kernel == 'normal'){
     # behav 1
     K1 = gausskern.pg(sizes[1], sigmas[1], muadv = muadvs[1])
     
     # behav 2
-    K2 = gausskern.pg(sizes[2], sigmas[2], muadv = muadvs[2])
+    if (!is.null(pb)) K2 = gausskern.pg(sizes[2], sigmas[2], muadv = muadvs[2])
     
   } else if (kernel == 'isotropic'){
     
@@ -34,13 +41,22 @@ neg.log.lik.fun <- function(pars, g, L, maskL = TRUE, bound.thr = 0.1, minBounds
     K1 = gausskern.isotrop(sizes[1], sigmas[1], muadv = muadvs[1], ratio.xy = 1)
     
     # behav 2
-    K2 = gausskern.isotrop(sizes[2], sigmas[2], muadv = muadvs[2], ratio.xy = 1)
+    if (!is.null(pb)) K2 = gausskern.isotrop(sizes[2], sigmas[2], muadv = muadvs[2], ratio.xy = 1)
     
   }
 
-  P <- matrix(c(pb[1], 1 - pb[1], 1 - pb[2], pb[2]), 2, 2, byrow = TRUE)
+  if (!is.null(pb)) {
+    P <- matrix(c(pb[1], 1 - pb[1], 1 - pb[2], pb[2]), 2, 2, byrow = TRUE)
+  } else {
+    P <- NULL
+  }
   
-  f. <- hmm.filter(g, L, K1, K2, P, maskL = maskL, bound.thr = bound.thr, minBounds = minBounds)
+  if (!is.null(pb)) {
+    f. <- hmm.filter(g=g, L=L, K = list(K1, K2), P=P, m=2, maskL = maskL, bound.thr = bound.thr, minBounds = minBounds)
+  } else{
+    f. <- hmm.filter(g=g, L=L, K = list(K1), P=P, m=1, maskL = maskL, bound.thr = bound.thr, minBounds = minBounds)
+  }
+  
   nllf. <- -sum(log(f.$psi))
   return(nllf.)
 }

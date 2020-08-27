@@ -57,8 +57,7 @@ hmm.filter <- function(g, L, K, P, m, maskL = FALSE, bound.thr = 0.1, minBounds 
   }
 
   psi <- rep(0, T - 1) # sum of the probability of states at each step
-  psi_old <- rep(0, T - 1) # sum of the probability of states at each step
-  
+
   ## create empty lists for upcoming vars
   p <- list(); q <- list(); post <- list()
   
@@ -78,17 +77,17 @@ hmm.filter <- function(g, L, K, P, m, maskL = FALSE, bound.thr = 0.1, minBounds 
       #q2 = t(as.matrix(q2))
     }
       
-      # multiply by transition probability 
-      if (m == 1){
-        pred[1,t,,] <- q[[1]]
-        
-      } else if (m == 2){
-        pred[1,t,,] <- P[1,1] * q[[1]] + P[2,1] * q[[2]]
-        pred[2,t,,] <- P[1,2] * q[[1]] + P[2,2] * q[[2]]
-        
-      } else if (m > 2){
-        stop('More than 2 behavior states is not currently supported.')
-      }
+    # multiply by transition probability 
+    if (m == 1){
+      pred[1,t,,] <- q[[1]]
+      
+    } else if (m == 2){
+      pred[1,t,,] <- P[1,1] * q[[1]] + P[2,1] * q[[2]]
+      pred[2,t,,] <- P[1,2] * q[[1]] + P[2,2] * q[[2]]
+      
+    } else if (m > 2){
+      stop('More than 2 behavior states is not currently supported.')
+    }
     
     for (ii in 1:m){
       # is there a data-based likelihood observation for this day, t?

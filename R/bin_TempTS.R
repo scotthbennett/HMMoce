@@ -38,7 +38,7 @@ bin_TempTS <- function (ts, out_dates, bin_res = 8)
 	
 	for (d in ud) {
 		idx <- which(ts$time_idx %in% d)
-	  print(out_dates[d])
+	  #print(out_dates[d])
 		#i <- which(as.character(ts$date) == d)
 		x <- ts[idx, ]
 		depth.range <- range(x$Depth)

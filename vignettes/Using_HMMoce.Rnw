@@ -15,6 +15,22 @@
 \usepackage{url}
 \usepackage[margin=1in]{geometry}
 \usepackage{natbib}
+\usepackage{comment}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+}
+
+\urlstyle{same}
+
+%%% the eg ie and in situ shortcuts
+\newcommand{\eg}{\textit{e.g.} }
+\newcommand{\ie}{\textit{i.e.} }
+\newcommand{\is}{\textit{in situ} }
 
 \title{\textbf{\texttt{HMMoce}: An R package for improved geolocation of archival‐tagged fishes using a hidden Markov method}}
 \author{Camrin Braun, Ben Galuardi, Paul Gatti \& Simon Thorrold}
@@ -25,7 +41,7 @@
 <<init, echo=FALSE, message=FALSE>>=
 library(sp)
 #library(HMMoce)
-devtools::load_all('../HMMoce')
+devtools::load_all('../../HMMoce')
 library(raster)
 library(fields)
 library(tidyverse)
@@ -33,6 +49,11 @@ options(tidy=TRUE)
 knitr::opts_chunk$set(
   comment = '', fig.width = 6, fig.height = 6, tidy = TRUE)
 dir <- getwd()
+
+L.rasters <- readRDS('./141259_L.rasters_20200727.rds')
+res <- readRDS('./10_3_2-HMMoce_res_20200828.rds')
+
+  
 @
 
 \tableofcontents
@@ -57,7 +78,7 @@ There are many approaches to estimating animal movements from various types of t
 
 \texttt{HMMoce} is an R package...% which implements HMMs and associated tools for state decoding, model selection etc.\ specifically tailored to animal movement modelling. Particular attention was paid to computational efficiency with the fitting algorithm implemented in C++. The high computational speed makes it feasible to analyze very large data sets --- e.g.\ tens of thousands of positions collected for each of a dozen individual animals --- on standard desktop PCs. The package also allows users to incorporate covariate data into their models, which is particularly useful when inferring the drivers of changes in behaviour.
 
-Our hope is that the \texttt{moveHMM} package will provide users who collect movement data with an interface to sophisticated and adequate methods for a statistical analysis of their data. The package is structured so as to allow the users to prepare their data for analysis, fit a variety of HMMs to their data and perform diagnostics on these fitted models.
+%Our hope is that the \texttt{moveHMM} package will provide users who collect movement data with an interface to sophisticated and adequate methods for a statistical analysis of their data. The package is structured so as to allow the users to prepare their data for analysis, fit a variety of HMMs to their data and perform diagnostics on these fitted models.
 
 The package is presented in %\cite{braun2018a},
 where its use is illustrated on example blue and mako shark PSAT data as well as compared to other commonly employed methods for geolocation of these and similar data. A subset of the data used in that paper is included as example data in the package.
@@ -70,9 +91,10 @@ where its use is illustrated on example blue and mako shark PSAT data as well as
 
 Here we illustrate the use of the package with an example dataset from a blue shark tagged with a Wildlife Computers miniPAT in the NW Atlantic. Depending on which observation likelihoods (Sec. \ref{sec:lik}) you choose to generate for your species of interest, various tag-based data streams (e.g. light, SST) may be more or less useful. Our example dataset is from a blue shark which tends to occupy the epipelagic where the tag is able to consistently record high quality light and SST data that can be used for geolocation. Furthermore, this species tends to also make daily excursions, sometimes to $>$1000 m, which yields water column temperature profiles that can also be leveraged to improve geolocation estimates. Thus, it probably makes sense to take the time to build the 3D depth-temperature likelihoods in addition to the 2D, surface-only SST, for example. For other species or behaviors, such as benthic species that rarely interact with the sea surface, a bathymetry-based likelihood is probably more appropriate and perhaps SST is less informative.
 
-\subsection{Loading and prepare the tag data} \label{sec:tag-data}
+\subsection{Load and prepare the tag data} \label{sec:tag-data}
 
 First, setup the start and end dates and locations. These are then used to build a vector of \texttt{POSIXct} timestamps that represent the desired time steps of the likelihoods and, ultimately, most probable track.
+
 <<iniloc,size='small', tidy=TRUE>>=
 
 # SET START/END LOCATIONS
@@ -89,7 +111,7 @@ dateVec <- seq.POSIXt(tag, pop, by = '24 hours')
 
 \subsubsection{Sea surface temperature data}
 
-Next, we load some tag data. Raw example data is included with the package and can be read by pointing to the "extdata" directory associated with the install of the \texttt{HMMoce} package. Helper functions are provided for directly reading data from Wildlife Computers tags, however \texttt{HMMoce} works with any tag data that can be coerced to the minimum required input data for the various observation likelihoods. Over time, these have been generalized from WC-specific to more flexible implementations for use with other manufacturers. The minimum required SST data for use in \texttt{HMMoce}, and thus the output from the WC helper function, is "Date", "Depth", and "Temperature". Date must be of class POSIXct. Depth represents the depth at which the corresponding sea surface temperature ("Temperature") was taken. Currently the column "Depth" is not used but is retained here for user convenience in case, for example, it makes sense to filter the SST data due to SSTs being recorded deeper than what makes sense given the oceanography the tagged animal is in.
+Next, we load some tag data. Raw example data is included with the package and can be read by pointing to the "extdata" directory associated with the install of the \texttt{HMMoce} package. Helper functions are provided for directly reading data from Wildlife Computers tags, however \texttt{HMMoce} works with any tag data that can be coerced to the minimum required input data for the various observation likelihoods. Over time, these have been generalized from WC-specific to more flexible implementations for use with other manufacturers. The minimum required SST data for use in \texttt{HMMoce}, and thus the output from the WC helper function, is "Date", "Depth", and "Temperature". Date must be of class POSIXct. Depth represents the depth at which the corresponding sea surface temperature ("Temperature") was taken. These data requirements are easily fulfilled when working with other tag types (e.g. daily max temperature from Microwave X-tag). Currently the column "Depth" is not used but is retained here for user convenience in case, for example, it makes sense to filter the SST data due to SSTs being recorded deeper than what makes sense given the oceanography the tagged animal is in. 
 
 <<load_sst,size='small'>>=
 sstFile <- system.file("extdata", "141259-SST.csv", package = "HMMoce")
@@ -101,9 +123,10 @@ head(tag.sst)
 
 \subsubsection{Depth-temperature data}
 
-Next is some representation of water column structure. There are many options here based on tag model, animal behavior, etc. but ultimately the goal is to create a tag-based dataset that represents the thermal structure of the water column and contains columns at least for: "Date" (again POSIXct), "Depth", "MinTemp", and "MaxTemp". A fifth column called "MeanTemp" can be included which will be used as the temperature to for likelihood construction. If "MeanTemp" doesn't exist, \texttt{HMMoce} will by default calculate the midpoint between min and max temperature for each timepoint and use that.
+Next is some representation of water column structure. There are many options here based on tag model, animal behavior, etc. but ultimately the goal is to create a tag-based dataset that represents the thermal structure of the water column and contains columns at least for: "Date" (again POSIXct), "Depth", "MinTemp", and "MaxTemp". A fifth column called "MeanTemp" can be included which will be used as the temperature for likelihood construction. If "MeanTemp" doesn't exist, \texttt{HMMoce} will by default calculate the midpoint between min and max temperature for each measurement and use that for subsequent calculations.
 
-By comparing tag-recorded thermal structure to the oceanographic environment, we can often add a very rich set of information for geolocation. For example, a tag sampling the thermal structure of the Sargasso Sea would yield very different results from that of the Gulf Stream or Labrador Sea. Tags like the example miniPAT used here provide summaries of depth-temperature profiles as a .csv called "-PDTs" for which there's a helper function.
+By comparing tag-recorded thermal structure to the oceanographic environment, we can often add a very rich set of information for geolocation. For example, a tag sampling the thermal structure of the Sargasso Sea would yield very different results from that of the Gulf Stream or Labrador Sea \citep[\eg basking sharks][]{Braun2018b}. Tags like the example miniPAT used here provide summaries of depth-temperature profiles as a .csv called "-PDTs" for which there's a helper function.
+
 <<load_pdt,size='small'>>=
 # DEPTH-TEMPERATURE PROFILE DATA
 ## example is output from Wildlife Computer Portal
@@ -120,24 +143,37 @@ pdt <- pdt[,c('Date','Depth','MinTemp','MaxTemp')]
 head(pdt)
 @
 
-Depending on tag type, there are many ways to represent this vertical structure. For example, miniPATs can also report summaries of depth-temperature time series which could be used to re-construct custom depth-temperature profiles. Similarly, other models such as archival tags from Wildlife Computers or Lotek report a high-resolution time series of depth and temperature. These can be used to construct custom depth-temperature profiles. A few things to keep in mind for building custom summaries of this type of data:
+Depending on tag type, there are many ways to represent this vertical structure. For example, miniPATs can also report summaries of depth-temperature time series which could be used to re-construct custom depth-temperature profiles. Similarly, other models such as the Microwave X-tag or various archival tags from Wildlife Computers or Lotek report high-resolution time series of depth and temperature. These can be used to construct custom depth-temperature profiles. A few things to keep in mind for building custom summaries of this type of data:
 \begin{itemize}
 \item vertical depth levels are ultimately compared to whatever depth levels are available in the environmental dataset you compare to for building likelihoods. Thus, it might make sense to make your custom depth levels match, for example, the HYCOM depth levels you will compare the tag data to
-\item temporal resolution of your summarized dataset can only be as high as the resolution of your `dateVec` object that is the "temporal backbone" of this entire modeling process. Thus, it makes sense that the timescales and resolution of these match, if possible.
+\item temporal resolution of your summarized dataset can only be as high as the resolution of your `dateVec` object that is the "temporal backbone" of this entire modeling process. Thus, it makes sense that the timescales and resolution of these match as much as possible.
 \end{itemize}
+
+The example below shows HMMoce functionality for coercing time series data to depth-temperature summary data using transmitted data from the example miniPAT; however, a similar approach can be used for time series from other tags. Note that the resulting data from this reformatting matches the format of the depth-temperature output above as we're assuming these are equivalent data products. Only one of these is necessary for subsequent likelihood construction. Due to data transmission constraints, it is usually best to use the summarized data for tags that report them (e.g. miniPAT), but constructing custom summaries like this can be useful for certain situations and are necessary for datasets that only have time series (e.g. archival tags).
 
 <<load_series,size='small'>>=
 # DEPTH-TEMPERATURE TIME SERIES DATA
 ## exampling showing how to coerce depth-temp time series to a PDT-like summarized product
 
-## microwave or lotek, for example
+tsFile <- system.file("extdata", "141259-Series.csv", package = "HMMoce")
+## bandaid to access the series data without installing new HMMoce
+tsFile <- '~/work/RCode/HMMoce/inst/extdata/141259-Series.csv'
+ts <- read.table(tsFile, sep=',', header=T)
+ts$Date <- as.POSIXct(paste(ts$Day, ts$Time), format='%d-%b-%Y %H:%M:%S', tz='UTC')
+ts <- ts[,c('Date','Depth','Temperature')]
 
+pdt_dates <- seq.POSIXt(tag, pop, by = 'day') ## generate example daily summary of depth-temp profiles
+
+## generate depth-temp summary from time series
+pdt <- bin_TempTS(ts, out_dates = pdt_dates, bin_res = 25)
+pdt <- pdt[,c('Date','Depth','MinTemp','MaxTemp')]
+head(pdt)
 @
 
 
 \subsubsection{Light data} \label{sec:light-data}
 
-Light data has been at the core of geolocation estimates in marine and terrestrial environments for decades (hill ref). As such, there are a number of methods for going from tag-based light measurements to likelihoods of where on Earth those light measurements were recorded. Taking light measurements from the back of a marine animal can be particularly error-prone as that animal is moving through a range of turbid to clear water, diving from the photic zone to great depths, and at least indirectly experiencing cloud cover and many other factors that can affect light measurements. Here, we focus on two main general types of light data one might get from an archival tag in the marine environment: raw light levels and light-based position estimates. This can be an important distinction as you'll see later when building likelihoods based on light (Sec. \ref{sec:lik}).
+Light data has been at the core of geolocation estimates in marine and terrestrial environments for decades (hill ref). As such, there are a number of methods for using tag-based light measurements to generate likelihoods of where on Earth those light measurements were recorded. Taking light measurements from the back of a marine animal can be particularly error-prone as that animal is moving through a range of turbid to clear water, diving from the photic zone to great depths, and at least indirectly experiencing cloud cover and many other factors that can affect light measurements. Here, we focus on two main types of light data one might get from an archival tag in the marine environment: raw light levels and light-based position estimates. This can be an important distinction when building likelihoods based on light (Sec. \ref{sec:lik}).
 
 \vspace{2mm}
 \noindent \textbf{"Raw" light data}
@@ -152,11 +188,13 @@ light$Date <- lubridate::dmy_hms(paste(light$Day, light$Time, sep = ' '))
 light <- light[,c('Date','Type')]
 @
 
-\noindent Our example miniPAT looks like this:
+Our example miniPAT looks like this:
 
 <<light_raw_ex,size='small'>>=
 head(light)
 @
+
+Similar measurements are taken by nearly every other archival or pop-up tag we're aware of and can thus be coerced to the same format as above.
 
 \vspace{2mm}
 \noindent \textbf{Light-based position estimates}
@@ -173,12 +211,24 @@ lightloc$Date <- as.POSIXct(lightloc$Date, format = findDateFormat(lightloc$Date
 head(lightloc)
 @
 
+** show what the ellipse looks like **
+
+The column names above are derived from Wildlife Computers outputs but data from other manufacturers can be readily coerced to match this format. For example, Microwave Telemetry provides estimated latitude/longitude values based on their proprietary post-processing methods (in 'Lat\&Long' sheet in an x-tag report). Since these aren't provided with error estimates, we can use empirical error estimates fixed at 0.7$^\circ$ longitude following \cite{Musyl2011} (although note that such error seems rather generous and is likely higher).
+
+<<mwtlight_err,size='small', eval=FALSE>>=
+
+MWTdata ## from Lat&Long sheet from x-tag
+names(MWTdata) = c('Date','Latitude','Longitude')
+## set fixed longitude error estimate in METERS
+MWTdata$Error.Semi.minor.axis = .7 * 1000 * 111
+  
+@
 
 \subsubsection{Depth-only data} \label{sec:depth-data}
 
 Most archival tags collect data on depth and many report statistics for depth, such as min and max, over a given summary period. It can often be useful to use at least the maximum depth over, for example, each day of a deployment to inform geolocation estimates. For benthic or bottom-oriented species, we can leverage both the max and min depths to constrain an animal's possible movements. To do this, we need some kind of summary of the depth data.
 
-Our example miniPAT actually reports a summary sheet that already contains these values:
+Our example miniPAT reports a summary sheet that already contains these values:
 
 <<mmd,size='small'>>=
 mmdFile <- system.file("extdata", "141259-MinMaxDepth.csv", package = "HMMoce")
@@ -199,43 +249,45 @@ head(mmd)
 
 @
 
+\subsection{Environmental data} \label{sec:env}
+
+Now that the tag data is prepared, the next major step is to acquire all the necessary environmental data to compare the tag data to. Depending on which likelihoods you choose to build, the required environmental data will vary. Light-based likelihoods require no environmental data as the spatial variation in sunrise and sunset times are known.
+
 \subsubsection{Spatial limits}
-The last data preparation step is to establish the spatial bounds of this model run. How you do this can vary widely based on species, their movement ecology, and the quality of the tag data used. This step is critical in the model setup because it \textbf{must} incorporate the complete geographic limits of your animal(s) movements! These limits are used for downloading environmental data and, ultimately, serve as the bounds for the model. Thus, err on the side of making the bounds too large to be sure the extent of movements are adequately captured.
-If they aren't, the estimated movements will likely run into the edges of your spatial limits (specified here), and you will have to start over. The tradeoff as model bounds expand is, of course, computational demands increase as larger grids are computed. In the end, the choice of spatial bounds comes down to expert opinion so choose carefully.
+First, establish the spatial bounds of this model run. How you do this can vary widely based on species, their movement ecology, and the quality of the tag data used. This step is \textbf{critical} in the model setup because it \textbf{must} incorporate the complete geographic limits of your animal(s) movements! These limits are used for downloading environmental data and, ultimately, serve as the bounds for the model. Thus, err on the side of making the bounds too large to be sure the extent of movements are adequately captured. If they aren't, the estimated movements will likely run into the edges of your spatial limits (specified here), and you will have to start over. The tradeoff as model bounds expand is, of course, computational demands increase as larger grids are computed. In the end, the choice of spatial bounds comes down to expert opinion so choose carefully.
 
 This step is typically accomplished best by a combination of expert opinion (thats you!) and by looking at the spatial bounds of tagging and pop-up locations and longitude estimates (if you have them). If you don't have position estimates to start with, do some preliminary plotting of tag data (such as SST) to try to constrain where you think the animal went. There's no harm in having to come back to this when your model runs into the boundaries except that you'll have to download all the environmental data again which, you will soon find out, takes time. To that end, be smart about setting spatial limits when you plan to analyze data for a group of tag datasets. Find the largest common grid and use that for all analyses. That means you only have to download the oceanographic data once!
 
-\noindent Here, we set our bounds over an extensive portion of the NW Atlantic as blue sharks are known to be highly migratory, and this individual could easily cover much of this area over the duration of the tag deployment. This decision was ultimately made by comparing the tag and pop-up locations to the depth-temperature information recorded onboard the tag to explore the likely water masses the animal encountered and thus the extent of movement.
+Here, we set our bounds over a large portion of the NW Atlantic as blue sharks are known to be highly migratory, and this individual could easily cover much of this area over the duration of the tag deployment. This decision was ultimately made by comparing the tag and pop-up locations to the depth-temperature information recorded onboard the tag to explore the likely water masses the animal encountered and thus the extent of movement.
+
 <<splim,size='small'>>=
 # SET SPATIAL LIMITS
 # these are the lat/lon bounds of your study area (e.g. where you think the animal went)
-sp.lim <- list(lonmin = -82,
+sp.lim <- list(lonmin = -80,
                lonmax = -25,
                latmin = 15,
                latmax = 50)
-
-sp.lim_small <- list(lonmin = -72,
-                     lonmax = -66,
-                     latmin = 38,
-                     latmax = 43)
 
 ## setup the spatial grid to base likelihoods on
 locs.grid <- setup.locs.grid(sp.lim, res='quarter')
 
 @
 
-\subsection{Environmental data} \label{sec:env}
-
-Now that the tag data is prepared, the next major step is to acquire all the necessary environmental data to compare the tag data to. Depending on which likelihoods you choose to build, the required environmental data will vary. Light-based likelihoods require no environmental data.
-
-If you plan to analyze multiple tag datasets over a similar time period and spatial domain, consider that before downloading the environmental datasets to save yourself from having to change spatial/temporal bounds later and download everything again. For a group of tags, combine the unique dates and movement extents across all tags and find a common spatial grid before downloading the dynamic environmental data (e.g. SST).
+If you plan to analyze multiple tag datasets over a similar time period and spatial domain, consider that before downloading the environmental datasets to save yourself from having to change spatial/temporal bounds later and download everything again. For a group of tags, combine the unique dates and expected spatial bounds across all tags to find a common spatial extent before downloading the environmental data (e.g. SST).
 
 \subsubsection{SST data}
 
-There are a number of SST products out there that meet our needs. While modeled SST products work fine, we typically use remote-sensing products. There are 3 products currently built into the \texttt{get.env} functionality within \texttt{HMMoce}. Here we'll use the Optimum Interpolation SST (OISST) from NOAA. Note the tradeoffs associated with different SST products such as gaps, gap-filling techniques/interpolations, and product resolution. Here we get one file as an example:
+There are a number of SST products out there that meet our needs. While modeled SST products work fine, we typically use remote-sensing products. There are 3 products currently built into the \texttt{get.env} functionality within \texttt{HMMoce} (see \texttt{?get.env}). Here we'll use the Optimum Interpolation SST (OISST) from NOAA. Note the tradeoffs associated with different SST products such as gaps, gap-filling techniques/interpolations, product resolution and temporal coverage/availability of a given product. Here we get one file as an example:
+
+<<sp.lim_small, size='small', eval=TRUE, message=FALSE, echo=FALSE>>=
+sp.lim_small <- list(lonmin = -72,
+               lonmax = -66,
+               latmin = 38,
+               latmax = 43)
+@
 
 <<env-sst,size='small', cache=TRUE, eval=TRUE>>=
-## a ridculously small grid for this species, just to show the examples
+## here we get use a ridculously small spatial extent for this species, just to show some example environmental data
 udates <- seq.Date(as.Date(tag), as.Date(pop), by = 'day')
 sst.dir <- paste0(dir, '/EnvData/sst/')
 if (!dir.exists(sst.dir)) dir.create(sst.dir, recursive = TRUE)
@@ -248,12 +300,17 @@ world(add=T)
 
 \subsubsection{Depth-temperature data}
 
-As with SST above, there are a number of ways to represent temperature of the 3D ocean. While observations are nice, they are typically too sparse to generate a reliable grid on which we can calculated likelihoods. Thus, our only good option is to use oceanographic models. Data-assimilating models constantly "nudge" the model outputs to match reality and \texttt{HMMoce} includes functionality for accessing outputs of the HYbrid Coordinate Ocean Model (HYCOM). For most applications, models such as HYCOM are more likely to generate realistic likelihood results when comparing \textit{in situ} tag data to a dynamic ocean.
+As with SST above, there are a number of ways to represent temperature of the 3D ocean. While observations are nice, they are typically too sparse to generate a reliable grid on which we can calculate likelihoods. Thus, our only good option (usually) is to use oceanographic models. Data-assimilating models constantly "nudge" the model outputs to match reality and \texttt{HMMoce} includes functionality for accessing outputs of the HYbrid Coordinate Ocean Model (HYCOM). For most applications, models such as HYCOM are more likely to generate realistic likelihood results when comparing \textit{in situ} tag data to a dynamic ocean. In principle, any representation of the 3D ocean can be used for likelihood construction as is done here with HYCOM.
 
 <<env-hycom,size='small', eval=TRUE, cache=TRUE>>=
 ## you need some representation of environmental depth-temperature
 ## in this case we're using hycom
 
+sp.lim_small <- list(lonmin = -72,
+               lonmax = -66,
+               latmin = 38,
+               latmax = 43)
+dir <- getwd()
 hycom.dir <- paste0(dir,'/EnvData/hycom/')
 if (!dir.exists(hycom.dir)) dir.create(hycom.dir, recursive = TRUE)
 if (!file.exists(paste0(hycom.dir, 'hycom_', udates[1], '.nc'))) get.env(udates[1], filename='hycom', type = 'hycom', spatLim = sp.lim_small, save.dir = hycom.dir)
@@ -261,12 +318,16 @@ if (!file.exists(paste0(hycom.dir, 'hycom_', udates[1], '.nc'))) get.env(udates[
 b <- raster::brick(paste0(hycom.dir, 'hycom_', udates[1], '.nc'))
 
 ## plot top 5 depth levels from HYCOM
-plot(b[[c(1,10,20)]])
+#par(mfrow=c(3,1))
+for (i in c(1,10,20)){
+  plot(b[[i]])
+  world(add=T)
+}
 @
 
 \subsubsection{Bathymetry}
 
-The last "environmental" dataset we need is bathymetry. Bathymetry has multiple uses in \texttt{HMMoce} but is primarily used as a mask that eliminates portions of a likelihood grid that are shallower than the maximum depth the tag recorded during a given timestep. For primarily benthic species, bathymetry can also be used to generate a likelihood based on the tag-recorded depth compared to bottom depth.
+The last "environmental" dataset we need is bathymetry. Bathymetry has multiple uses in \texttt{HMMoce} but is primarily used as a mask that eliminates portions of a likelihood grid that are shallower than the maximum depth the tag recorded during a given timestep (\ie the likelihood has to incorporate bottom depth at least as deep as the animal's tag recorded). For primarily benthic species, bathymetry can also be used to generate a likelihood based on the tag-recorded depth compared to bottom depth.
 
 <<env-bathy, size='small', eval=TRUE>>=
 
@@ -287,11 +348,11 @@ world(add=T)
 
 \subsection{Observation likelihoods} \label{sec:lik}
 
-The basic premise of the observation likelihoods is that we compare a tag-based data stream to some representation of the environment to generate a likelihood surface. This comparison generates information about the likely location of the animal in the global ocean. Light levels and SST are the current paradigm for fish tracking and are the most straightforward to use for positioning. Three-dimensional depth-temperature data are more complex but provide rich information about oceanographic characteristics and water masses that animals experience as they move. Each data type has its own likelihood function(s) that does the grunt work for you. It often makes sense to build all the appropriate likelihoods given your tag data and study species and use model selection to determine the "best" combination of likelihoods \citep[for example, see][and section \ref{sec:multiple}]{Braun2018b}.
+The basic premise of the observation likelihoods is that we compare a tag-based data stream to some representation of the environment to generate a likelihood surface. This comparison generates information about the likely location of the animal in the global ocean. Light levels and SST are the current paradigm for fish tracking and are the most straightforward to use for positioning. Three-dimensional depth-temperature data are more complex and computationally intensive but can provide rich information about oceanographic characteristics and water masses that animals experience as they move \citep[\eg][]{Braun2018b}. Each data type has its own likelihood function(s) that does the grunt work for you. It often makes sense to build all the appropriate likelihoods given your tag data and study species and use model selection to determine the "best" combination of likelihoods \citep[for example, see][and section \ref{sec:multiple}]{Braun2018a}.
 
 \subsubsection{Light likelihood}
 
-Light-based geolocation is a complicated topic with a myriad of potential implementations for generating light-based likelihoods. For now, \texttt{HMMoce} has two main treatments of light to inform geolocation estimates (Sec. \ref{sec:light-data}). The simplest is using tag-based light levels to estimate sunrise and sunset times and thus position (\texttt{calc.srss}). This is often an overly simplistic treatment of this data so we often 1) throw out latitude estimates and only keep longitude and 2) get a lot of bad location information, particularly from species that don't frequent the photic zone. For example, a surface-oriented species that dives below the photic zone 30 minutes before sunset would generate an artificial sunset time 30 minutes early, causing $\sim$8$^\circ$ longitudinal difference in position estimate! The other approach currently implemented in \texttt{HMMoce} generates likelihoods based on existing light-based position estimates(\texttt{calc.lightloc}). Most manufacturers either provide the analysis or the analysis software to generate light-based position estimates. For example, Wildlife Computers uses a thresholding algorithm (hill ref) in their GPE2 software that allows user-controlled QC of light curves in a GUI. While this software has been replaced by their cloud-based GPE3 algorithm, GPE2 remains the tool of choice for this specific analysis as the user retains some control over the conversion of light curves to location estimates. Other manufacturers generate similar light-based position outputs such as Lotek's daily summary for archival tags. Additional light-based options will be implemented in the future as they become available and proven for marine animal telemetry.
+Light-based geolocation is a complicated topic with a myriad of potential implementations for generating light-based likelihoods. For now, \texttt{HMMoce} has two main treatments of light to inform geolocation estimates (Sec. \ref{sec:light-data}). The simplest is using tag-based light levels to estimate sunrise and sunset times and thus position (\texttt{calc.srss}). This is usually an overly simplistic treatment of this data so we often 1) throw out latitude estimates and only keep longitude and 2) get a lot of bad location information, particularly from species that don't frequent the photic zone. For example, a surface-oriented species that dives below the photic zone 30 minutes before sunset would generate an artificial sunset time 30 minutes early, causing $\sim$8$^\circ$ longitudinal difference in position estimate! The other approach currently implemented in \texttt{HMMoce} generates likelihoods based on existing light-based position estimates(\texttt{calc.lightloc}). Most manufacturers either provide the analysis or the analysis software to generate light-based position estimates. For example, Wildlife Computers uses a thresholding algorithm (hill ref) in their GPE2 software that allows user-controlled QC of light curves in a GUI. While this software has been replaced by their cloud-based GPE3 algorithm, GPE2 remains the tool of choice for this specific analysis as the user retains some control over the conversion of light curves to location estimates and the ability to visually check the quality of these curves. Other manufacturers generate similar light-based position outputs such as Lotek's daily summary for archival tags. Additional light-based options will be implemented in the future as they become available and proven for marine animal telemetry. To that end, we are happy to receive feedback via Github on methods to include or simply submit a pull request.
 
 <<lik-light, size='small', eval=FALSE>>=
 
@@ -299,12 +360,11 @@ Light-based geolocation is a complicated topic with a myriad of potential implem
   L.light.srss <- calc.srss(light, locs.grid = locs.grid, dateVec = dateVec, res = 1, focalDim = 15)
   L.light <- calc.lightloc(lightloc, locs.grid = locs.grid, dateVec = dateVec, errEll = TRUE)
 
-  ## other options?
-
 @
 
+\begin{comment}
 Here's an example of what these look like:
-<<lik-light-plot, size='small', eval=TRUE>>=
+<<lik-light3-plot, size='small', eval=FALSE>>=
 
   load('./example_blueshark_lik_srss.rds')
   load('./example_blueshark_lik_lightloc_noEll.rds')
@@ -317,10 +377,18 @@ Here's an example of what these look like:
   plot(L.light.ell[[12]], main='Light-based location likelihood - Lon + Lat'); world(add=T)
 
 @
+\end{comment}
+
+Here's an example of what the lon-only likelihoods look like:
+<<lik-light-plot, size='small', eval=TRUE>>=
+
+  plot(L.rasters$L.light[[12]], main='Light-based location likelihood - Lon-only'); world(add=T)
+  
+@
 
 \subsubsection{SST likelihood}
 
-SST-based likelihoods are perhaps among the most simple, and often informative, for geolocation as SST can be highly dynamic and exhibit strong gradients over relatively small spatial scales. If your study animal regularly visits the surface and thus collects SST data, it's likely including that information will dramatically improve your results. In \texttt{HMMoce}, tag-based SST data is represented as a daily range in SST $\pm$ error (currently defaults to 1\%) and that SST envelope is then compared to a remotely-sensed SST product to generate a likelihood surface.
+SST-based likelihoods are perhaps among the most simple, and often informative, for geolocation as SST can be highly dynamic and exhibit strong gradients over relatively small spatial scales. If your study animal regularly visits the surface and thus collects SST data, it's likely that including that information will improve your geolocation results. In \texttt{HMMoce}, tag-based SST data is represented as a daily range in SST $\pm$ error (currently defaults to 1\%) and that SST envelope is then compared to a remotely-sensed SST product to generate a likelihood surface.
 
 <<lik-sst, size='small', eval=FALSE>>=
 
@@ -333,31 +401,40 @@ SST-based likelihoods are perhaps among the most simple, and often informative, 
 Here's an example of what these look like:
 <<lik-sst-plot, size='small', eval=TRUE>>=
 
-  load('./example_blueshark_lik_sst.rds')
-
   ## here's what the likelihoods look like
-  plot(L.sst[[12]], main='SST-based likelihood'); world(add=T)
+  plot(L.rasters$L.sst[[12]], main='SST-based likelihood'); world(add=T)
 
 @
 
 \subsubsection{3D depth-temperature likelihood}
 
-The depth-temperature based likelihoods allow users to generate 3D likelihoods for tagged animals to improve position estimates, which is particularly useful for study species that rarely visit the photic zone during the day \citep[(e.g. swordfish,][]{Neilson2009} or spend considerable periods of time in the mesopelagic \citep[e.g. basking sharks,][]{Skomal2009}. In \texttt{HMMoce}, there are currently two approaches to using the 3D data for geolocation. The first follows \citep{Luo2015} by integrating profile data to calculate Ocean Heat Content (OHC). We integrate tag-based depth-temperature data from a certain isotherm to the surface to calculate the "heat content" of that layer measured by the tagged animal. Similarly, we perform the same integration on the model ocean as represented in the HYbrid Coordinate Ocean Model ([HYCOM](http://hycom.org/)) and compare the two integrated metrics to generate a likelihood surface representing the animal's estimated daily position. The second approach is to use the profile in 3D space and compare it to oceanography at measured depth levels. This uses the same tag-based depth-temperature data (not integrated) and compares it to modeled oceanography (such as HYCOM). In either case, we use a linear regression to predict the tag-based temperature at the standard depth levels measured in the oceanographic datasets. Then a likelihood is calculated in the same fashion by comparing temperature from the tag to ocean temperature at each depth level and resulting likelihood layers are multiplied across depth levels to result in a single daily likelihood layer based on the tagged animal's dive data. Because these can be very computationally demanding, parallelized calculation functions are available for all three depth-temperature based likelihood functions (Sec. \ref{sec:comp}).
+The depth-temperature based likelihoods allow users to generate 3D likelihoods for tagged animals to improve position estimates, which is particularly useful for study species that rarely visit the photic zone during the day \citep[(e.g. swordfish,][]{Neilson2009, Braun2019} or spend considerable periods of time in the mesopelagic \citep[e.g. basking sharks,][]{Skomal2009, Braun2018b}. In \texttt{HMMoce}, there are currently two approaches to using the 3D data for geolocation. The first follows \citep{Luo2015} by integrating profile data to calculate Ocean Heat Content (OHC). We integrate tag-based depth-temperature data from a given isotherm (default or user-selected) to the surface to calculate the "heat content" of that layer measured by the tagged animal. Similarly, we perform the same integration on the model ocean as represented in the HYbrid Coordinate Ocean Model ([HYCOM](http://hycom.org/)) and compare the two integrated metrics to generate a likelihood surface representing the animal's estimated daily position. The second approach is to use the profile in 3D space and compare it to oceanography at measured depth levels. This uses the same tag-based depth-temperature data (not integrated) and compares it to modeled oceanography (such as HYCOM). In either case, we use a linear regression to predict the tag-based temperature at the standard depth levels measured in the oceanographic datasets (this is why we generate custom depth-temperature tag data to match oceanographic depth levels whenever possible, \ref{sec:tag-data}). Then a likelihood is calculated in the same fashion by comparing temperature from the tag to ocean temperature at each depth level and resulting likelihood layers are multiplied across depth levels to result in a single daily likelihood layer based on the tagged animal's dive data. Because these can be very computationally demanding, parallelized calculation functions are available for all three depth-temperature based likelihood functions.
 
 <<lik-3d, size='small', eval=FALSE>>=
 
   # OCEAN HEAT CONTENT (INTEGRATED PDTS)
-  #L.ohc <- calc.ohc(pdt, filename='hycom', ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = F)
-  L.ohc <- calc.ohc.par(pdt, filename='hycom', ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = F)
+  L.ohc <- calc.ohc(pdt, filename='hycom', ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = F)
+  ## the parallel version:
+  #L.ohc <- calc.ohc.par(pdt, filename='hycom', ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = F)
 
   # HYCOM PROFILE BASED LIKELIHOODS
-  #L.hycom <- calc.hycom(pdt, filename='hycom', hycom.dir, focalDim = 9, dateVec = as.POSIXct(dateVec), use.se = T)
-  L.hycom <- calc.hycom.par(pdt, filename='hycom', hycom.dir, focalDim = 9, dateVec = as.POSIXct(dateVec), use.se = T)
+  L.hycom <- calc.hycom(pdt, filename='hycom', hycom.dir, focalDim = 9, dateVec = as.POSIXct(dateVec), use.se = T)
+  ## the parallel version:
+  #L.hycom <- calc.hycom.par(pdt, filename='hycom', hycom.dir, focalDim = 9, dateVec = as.POSIXct(dateVec), use.se = T)
+@
+
+Here's an example of what these look like:
+<<lik-pdt-plot, size='small', eval=TRUE>>=
+
+  ## here's what the likelihoods look like
+  plot(L.rasters$L.ohc[[13]], main='OHC-based likelihood'); world(add=T)
+  plot(L.rasters$L.hycom.se[[13]], main='HYCOM-based likelihood'); world(add=T)
+
 @
 
 \subsubsection{Bathymetry likelihood}
 
-Bathymetry can be used to further constrain the likely location of a tagged animal. The most common implementation of this is to use the maximum measured depth in each time step, compared to available bathymetry, to ensure the most probable track occupies water deep enough for the animal to make the observed vertical movements (in the implementation of \texttt{calc.bathy} this is referred to as \texttt{lik.type = 'max'}). The same approach could be used for a benthic species, but it may often make more sense for those species with reasonable certainty of interacting with the bottom to use the same approach as previous likelihoods and calculate a formal likelihood (\texttt{lik.type = 'dnorm'}). Since most bathymetry data is rather high resolution relative to the other environmental variables used here to calculate liklihoods, it usually will speed things up to down-sample the bathymetry before calculating the likelihoods, rather than waiting to resample prior to the actual modeling.
+Bathymetry can be used to further constrain the likely location of a tagged animal. The most common implementation of this is to use the maximum measured depth in each time step, compared to available bathymetry, to ensure the most probable track occupies water deep enough for the animal to make the observed vertical movements (in the implementation of \texttt{calc.bathy} this is referred to as \texttt{lik.type = 'max'}). The same approach could be used for a benthic species, but it may often make more sense for those species with reasonable certainty of interacting with the bottom to use the same approach as previous likelihoods and calculate a formal likelihood (\texttt{lik.type = 'dnorm'}). Since most bathymetry data is rather high resolution relative to the other environmental variables used here to calculate liklihoods, it usually will speed things up to down-sample the bathymetry before calculating the likelihoods. The resulting likelihood will have to be re-sampled later anyway to match other likelihood grids.
 
 <<lik-bathy, size='small', eval=FALSE>>=
 
@@ -370,8 +447,16 @@ Bathymetry can be used to further constrain the likely location of a tagged anim
 
 @
 
+Here's an example of what these look like:
+<<lik-bathy-plot, size='small', eval=TRUE>>=
+
+  ## here's what the likelihoods look like
+  plot(L.rasters$L.bathy[[12]], main='Bathy-based likelihood'); world(add=T)
+
+@
 
 \subsubsection{Bottom temperature likelihood}
+Gradients in bottom temperature have been used to inform geolocation of benthic species, particularly in relatively shallow and/or enclosed basins \citep[\eg cod][]{LeBris2013}. The implementation of this likelihood in \texttt{HMMoce} is similar to SST-based likelihoods but the surface temperature grid has simply been exchanged for a bottom temperature grid. Typically the environmental data for generating these likelihoods is derived from oceanographic models or some aggregate (often interpolated) set of observations.
 
 <<lik-bt, size='small', eval=FALSE>>=
 
@@ -383,31 +468,230 @@ Bathymetry can be used to further constrain the likely location of a tagged anim
 
 \subsubsection{Overall observation likelihood}
 
-The final step in generating likelihoods is to combine the likelihoods of interest to generate an overall observation-based likelihood for each time step.
-<<makeL, size='small', eval=FALSE>>=
+The final step in generating likelihoods is to combine the likelihoods of interest to generate an overall observation-based likelihood for each time step. This is another key decision point in the geolocation process as there are a number of likelihood combinations that might make sense to base the geolocation estimates on. Here, we show just an example of one combination of likelihoods but in practice we usually iterate through multiple combinations and use a model selection approach to determine the "best" model. The final step in this section is to generate the overall observation likelihood as a combination of the selected likelihoods. At this point, you can also supply any other known locations (\eg from sightings, acoustic detections, etc).
 
-# COMBINE LIKELIHOOD MATRICES
-# L.idx combination indicates likelihood surfaces to consider
-ras.list <- list(L.light, L.sst, L.ohc)
+<<makeL_run, size='small', cache=TRUE, eval=FALSE, echo=FALSE, message=FALSE>>=
+resamp.idx <- which.max(lapply(L.rasters, FUN=function(x) raster::res(x)[1]))
+L.res <- resample.grid(L.rasters, L.rasters[[resamp.idx]])
+L <- make.L(L.res$L.rasters[1:3], iniloc, dateVec, known.locs = NULL)
 
-  #lik = L.res[[1]][L.idx[[tt]]],
-L <- make.L(lik = ras.list,
-            L.mle.res = L.res$L.mle.res, dateVec = dateVec,
-            locs.grid = locs.grid, iniloc = iniloc, bathy = bathy,
-            pdt = pdt)
 @
 
 
-\subsection{Computation}
+<<makeL, size='small', eval=FALSE>>=
 
-AWS
+# COMBINE LIKELIHOOD MATRICES
+# make list of rasters
+L.rasters <- list(L.light, L.sst, L.ohc)
 
-all of the calc functions that have significant computational demands have a .par equivalent. just use the par arg for those funs
+## typically these will need to be resampled to have matching resolution and extent
+resamp.idx <- which.max(lapply(L.rasters, FUN=function(x) raster::res(x)[1]))
+L.res <- resample.grid(L.rasters, L.rasters[[resamp.idx]])
 
-\subsection{Building models for multiple individuals} \label{sec:multiple}
-pieces of an example script showing one approach to efficiently building multiple models for multiple individuals of the same study species that are expected to exhibit relatively similar mvoements and behaviors
+## good idea to save these likelihood rasters at some point to keep from having to re-calculate them if (when) R crashes
+
+## finally, combine the likelihoods into a master observation likelihood that will be used for the modeling
+L <- make.L(ras.list,
+            iniloc,
+            dateVec,
+            known.locs = NULL)
+@
+
+Here's an example of what these look like:
+<<lik-L-plot, size='small', eval=FALSE>>=
+
+  ## here's what the likelihoods look like
+  image.plot(g$lon[1,], g$lat[,1], L, main='Example overall likelihood at single time step'); world(add=T)
+
+## not working yet
+
+@
+
+\subsection{Model fitting}
+
+\subsubsection{Parameter estimation}
+\texttt{HMMoce} currently incorporates a handful of parameters in the HMM modeling steps. The framework currently allows 1-2 behavior states and the necessary associated parameters: diffusion or movement speed (sigmas) and state-switching probability. Obviously if only 1 behavior state is desired, state-switching probability becomes not applicable.
+
+We currently include two general approaches to parameter estimation: gradient-based (\eg \texttt{optim}, \texttt{nlminb}) or an evolutionary / genetic algorithm. The former is faster while the latter appears to result in better estimates.
+
+In this example, we show each of the available parameter estimation methods using a two-state model followed by one example of a single state model. In most cases, we provide upper and lower bounds on the parameters as well as initial values (the latter is not required in the genetic algorithm). Finally, parameters can be estimated much more rapidly using a more coarse grid than full resolution, however results are rarely as robust as the full resolution grids.
+
+<<param, size='small', eval=FALSE>>=
+
+## if you want to try coarse grids for parameter estimation
+## use coarse.L() and supply the outputs in place of L and g below
+L.mle <- coarse.L(L, L.res$L.rasters)$L.mle
+g.mle <- coarse.L(L, L.res$L.rasters)$g.mle
+
+## opt.params is a wrapper for the various optimization routines in HMMoce
+pars.optim <- opt.params(pars.init = c(2,.2,.6,.8), 
+                           lower.bounds = c(0.1, 0.001, .1, .1),  
+                           upper.bounds = c(6, .6, .9, .9), 
+                           g = L.res$g, 
+                           #g = g.mle, 
+                           L = L, 
+                           #L = L.mle, 
+                           alg.opt = 'optim', 
+                           write.results = FALSE)
+## about 22 mins on example blue shark 141259 with full grid
+  
+pars.optim.mle <- opt.params(pars.init = c(2,.2,.6,.8), 
+                           lower.bounds = c(0.1, 0.001, .1, .1),  
+                           upper.bounds = c(6, .6, .9, .9), 
+                           #g = L.res$g, 
+                           g = g.mle, 
+                           #L = L, 
+                           L = L.mle, 
+                           alg.opt = 'optim', 
+                           write.results = FALSE)
+
+## about 1.5 mins on example blue shark 141259 with coarse grid
+
+## nlminb is also supported in HMMoce but testing suggests this is rarely the best choice due to lack of convergence and other issues
+pars.nlminb <- opt.params(pars.init = c(2,.2,.6,.8), 
+                            lower.bounds = c(0.1, 0.001, .1, .1), 
+                            upper.bounds = c(5, .5, .9, .9), 
+                            g = L.res$g, 
+                            #g = g.mle, 
+                            L = L, 
+                            #L = L.mle, 
+                            alg.opt = 'nlminb', 
+                            write.results = FALSE)
+## about 30 mins on blue shark 141259
+  
+pars.ga <- opt.params(pars.init = c(2,.2,.6,.8), 
+                          lower.bounds = c(0.1, 0.001, .1, .1), 
+                            upper.bounds = c(6, .6, .9, .9), 
+                            g = L.res$g, 
+                            #g = g.mle, 
+                            L = L, 
+                            #L = L.mle, 
+                            alg.opt = 'ga', 
+                            write.results = FALSE,
+                            ncores = ceiling(parallel::detectCores() * .9))
+  ## about 1.6 hrs on blue shark 141259 w 15 cores
+
+  pars.ga.mle <- opt.params(pars.init = c(2,.2,.6,.8), 
+                        lower.bounds = c(0.1, 0.001, .1, .1), 
+                        upper.bounds = c(6, .6, .9, .9), 
+                        #g = L.res$g, 
+                        g = g.mle, 
+                        #L = L, 
+                        L = L.mle, 
+                        alg.opt = 'ga', 
+                        write.results = FALSE,
+                        ncores = ceiling(parallel::detectCores() * .9))
+   ## about 2 mins with MLE grid but results way different
+
+  ## example using the genetic algorithm and only one behavior state
+  pars.ga.one <- opt.params(pars.init = c(2), 
+                        lower.bounds = c(1), 
+                        upper.bounds = c(8), 
+                        g = L.res$g, 
+                        #g = g.mle, 
+                        L = L, 
+                        #L = L.mle, 
+                        alg.opt = 'ga', 
+                        write.results = FALSE,
+                        ncores = 4)
+  ## about 7 hrs on blue shark 141259 w 4 cores
+@
+
+\subsubsection{HMM Filter / Smoother}
+
+Once the parameter estimation routine(s) are finished, finalize those for input to the HMM filter/smoother. This primarily involves 1) converting movement parameters into kernels for convolution (K1/K2) and 2) converting state switching probabilities into a transition matrix (P). Once those steps are complete, everything is in place for the filter and smoother steps that generate the posterior state distributions. From that, we calculate most probable tracks by, in this case, finding the max of each posterior distribution. Other methods could be used here and may be implemented in the future (\eg Viterbi).
+
+<<hmm, size='small', eval=FALSE>>=
+
+## as an example, grab the pars from the GA using both states
+#pars <- pars.ga$par
+
+## or use values from a previous run
+pars <- c(4.964, 0.217, 0.367, 0.484)
+
+## if only one state is used in the estimation routines (above), this will catch that here and set the parameters accordingly
+if (length(pars) == 4){
+  sigmas = pars[1:2]
+  sizes = rep(ceiling(sigmas[1]*4),2)
+  pb = pars[3:4]
+  muadvs = c(0,0)
+} else if (length(pars) == 1){
+  sigmas = pars[1]
+  sizes = rep(ceiling(sigmas[1]*4),2)
+  pb = NULL
+  muadvs = c(0)
+}
+
+K1 <- gausskern.pg(sizes[1], sigmas[1], muadv=muadvs[1])
+if (!is.null(pb)) K2 <- gausskern.pg(sizes[2], sigmas[2], muadv=muadvs[2])
+  
+      
+## set transition matrix, if applicable
+if (!is.null(pb)){
+  P <- matrix(c(pb[1], 1- pb[1], 1 - pb[2], pb[2]), 2, 2, byrow=TRUE)
+} else{
+  P <- NULL
+}
+      
+# RUN THE FILTER STEP
+if (!is.null(pb)){
+  K <- list(K1,K2)
+  f <- hmm.filter(g = L.res$g, L = L, K = K, P = P, m = 2)
+} else{
+  K <- list(K1)
+  f <- hmm.filter(g = L.res$g, L = L, K = K, P = P, m = 1)
+}
+nllf <- -sum(log(f$psi[f$psi>0])) # negative log-likelihood
+      
+# RUN THE SMOOTHING STEP
+s <- hmm.smoother(f, K = K, L = L, P = P)
+      
+# GET THE MOST PROBABLE TRACK
+tr <- calc.track(s, g=L.res$g, dateVec, iniloc)
+@
+
+\subsubsection{Plotting results}
+
+<<plot-hmm-F, size='small', eval=FALSE>>=
+
+plotHMM(s, tr, dateVec, ptt='141259_example', save.plot = F)
+
+plotRD(s, tr, ptt='141259_example', g = g, xlims = c(sp.lim$xmin, sp.lim$xmax), ylims = c(sp.lim$ymin, sp.lim$ymax), makePlot = TRUE, save.plot=FALSE)
+
+@
+
+<<plot-hmm, size='small', eval=FALSE, message=FALSE, echo=FALSE>>=
+
+plotHMM(res$s, res$tr, dateVec, ptt='141259_example', save.plot = T)
+
+plotRD(res$s, res$tr, ptt='141259_example', g = res$g, xlims = c(sp.lim$lonmin, sp.lim$lonmax), ylims = c(sp.lim$latmin, sp.lim$latmax), makePlot = TRUE, save.plot=TRUE)
+
+@
 
 
+\includegraphics{./figure/141259_example_track_results.png}
+
+
+%\includegraphics{./figure/141259_example_RD.png}
+
+
+
+\subsubsection{Comparing models and selection}
+
+Info here on NLL/AIC and model scoring
+
+
+\subsection{Resources}
+
+While the above is a nice simple introduction to \texttt{HMMoce} using 1 example tag dataset, rarely are we running only 1 model and for just a single individual. Often we want to iterate through a bunch of different potential likelihood combinations and parameters (\ie 1 state vs 2). Comparing and selecting models is covered above, but some "real world" example run scripts may also be helpful to show how we might tackle applying this model framework to multiple datasets for a given study, for example.
+
+Here's an example run script for a set of bigeye tuna tagged with Microwave X-tags:
+\url{https://github.com/camrinbraun/HMMoce_run/blob/master/run_GoletBET.r}
+
+Here's an example run script for a handful of porbeagle tagged with PSATs, some of which were physically recovered:
+\url{https://github.com/camrinbraun/HMMoce_run/blob/master/run_porbeagle_archival.r}
+
+Note that the Github repo (\url{https://github.com/camrinbraun/HMMoce_run}) where a lot of these run scripts live is messy and contains many outdated (likely disfunctional) scripts. The best resources will be the newest or most recently modified such as those linked above.
 
 \bibliographystyle{apalike}
 \bibliography{hmm_ms}

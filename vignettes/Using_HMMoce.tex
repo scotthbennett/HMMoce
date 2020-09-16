@@ -872,6 +872,7 @@ Once the parameter estimation routine(s) are finished, finalize those for input 
     \hlstd{f} \hlkwb{<-} \hlkwd{hmm.filter}\hlstd{(}\hlkwc{g} \hlstd{= L.res}\hlopt{$}\hlstd{g,} \hlkwc{L} \hlstd{= L,} \hlkwc{K} \hlstd{= K,} \hlkwc{P} \hlstd{= P,} \hlkwc{m} \hlstd{=} \hlnum{1}\hlstd{)}
 \hlstd{\}}
 \hlstd{nllf} \hlkwb{<-} \hlopt{-}\hlkwd{sum}\hlstd{(}\hlkwd{log}\hlstd{(f}\hlopt{$}\hlstd{psi[f}\hlopt{$}\hlstd{psi} \hlopt{>} \hlnum{0}\hlstd{]))}  \hlcom{# negative log-likelihood}
+\hlstd{AIC} \hlkwb{<-} \hlnum{2} \hlopt{*} \hlstd{nllf} \hlopt{+} \hlnum{2} \hlopt{*} \hlkwd{length}\hlstd{(}\hlkwd{which}\hlstd{(}\hlopt{!}\hlkwd{is.na}\hlstd{(pars)))}
 
 \hlcom{# RUN THE SMOOTHING STEP}
 \hlstd{s} \hlkwb{<-} \hlkwd{hmm.smoother}\hlstd{(f,} \hlkwc{K} \hlstd{= K,} \hlkwc{L} \hlstd{= L,} \hlkwc{P} \hlstd{= P)}

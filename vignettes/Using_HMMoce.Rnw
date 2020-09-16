@@ -642,7 +642,8 @@ if (!is.null(pb)){
   f <- hmm.filter(g = L.res$g, L = L, K = K, P = P, m = 1)
 }
 nllf <- -sum(log(f$psi[f$psi>0])) # negative log-likelihood
-      
+AIC <- 2 * nllf + 2 * length(which(!is.na(pars)))
+  
 # RUN THE SMOOTHING STEP
 s <- hmm.smoother(f, K = K, L = L, P = P)
       

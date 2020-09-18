@@ -201,12 +201,12 @@ calc.ohc.par <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy =
       
       if (class(lik.try) == 'try-error'){
         lik.try <- ohc * 0
-        warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral for ', time, '...', sep=''))
+        warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral...', sep=''))
       }
       
     } else if (class(lik.try) == 'try-error' & use.se == TRUE){
       lik.try <- ohc * 0
-      warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral for ', time, '...', sep=''))
+      warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral...', sep=''))
     }
     
     lik.try

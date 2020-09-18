@@ -4,7 +4,7 @@
 \alias{gausskern.isotrop}
 \title{Create isotropic Gaussian Kernel}
 \usage{
-gausskern.isotrop(siz, sigma, muadv = 0, ratio.xy)
+gausskern.isotrop(siz, sigma, muadv = 0, ratio.xy = 1)
 }
 \arguments{
 \item{siz}{size of the kernel, siz x siz. Must be a positive integer.}

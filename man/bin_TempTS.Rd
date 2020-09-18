@@ -29,7 +29,8 @@ ts <- read.table(tsFile, sep=',', header=T)
 ts$Date <- as.POSIXct(paste(ts$Day, ts$Time), format='\%d-\%b-\%Y \%H:\%M:\%S', tz='UTC')
 ts <- ts[,c('Date','Depth','Temperature')]
 
-pdt_dates <- seq.POSIXt(tag, pop, by = 'day') ## generate example daily summary of depth-temp profiles
+## generate example daily summary of depth-temp profiles
+pdt_dates <- seq.POSIXt(tag, pop, by = 'day') 
 
 ## generate depth-temp summary from time series
 pdt <- bin_TempTS(ts, out_dates = pdt_dates, bin_res = 25)

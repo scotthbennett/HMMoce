@@ -22,6 +22,7 @@
 #' @return a the data read as a data.frame
 #' 
 #' @examples
+#' \dontrun{
 #' # example data in the package
 #' sstFile <- system.file("extdata", "141259-SST.csv", package = "HMMoce")
 #' ptt <- 141259
@@ -37,6 +38,7 @@
 #'
 #' # read and format the example data
 #' tag.sst <- read.wc(ptt, sstFile, type = 'sst', tag=tag, pop=pop)
+#' }
 #' @export
 
 read.wc <- function(filename, tag, pop, type = 'sst', dateFormat=NULL, verbose=FALSE){

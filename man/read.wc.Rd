@@ -33,6 +33,7 @@ a the data read as a data.frame
 Portal
 }
 \examples{
+\dontrun{
 # example data in the package
 sstFile <- system.file("extdata", "141259-SST.csv", package = "HMMoce")
 ptt <- 141259
@@ -48,4 +49,5 @@ iniloc <- data.frame(matrix(c(13, 10, 2015, 41.3, -69.27, 10, 4, 2016, 40.251, -
 
 # read and format the example data
 tag.sst <- read.wc(ptt, sstFile, type = 'sst', tag=tag, pop=pop)
+}
 }

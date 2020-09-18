@@ -39,12 +39,12 @@
 \maketitle
 
 <<init, echo=FALSE, message=FALSE>>=
-library(sp)
+#library(sp)
 #library(HMMoce)
 devtools::load_all('../../HMMoce')
-library(raster)
-library(fields)
-library(tidyverse)
+#library(raster)
+#library(fields)
+#library(tidyverse)
 options(tidy=TRUE)
 knitr::opts_chunk$set(
   comment = '', fig.width = 6, fig.height = 6, tidy = TRUE)
@@ -485,9 +485,7 @@ pars.optim <- opt.params(pars.init = c(2,.2,.6,.8),
                            lower.bounds = c(0.1, 0.001, .1, .1),  
                            upper.bounds = c(6, .6, .9, .9), 
                            g = L.res$g, 
-                           #g = g.mle, 
                            L = L, 
-                           #L = L.mle, 
                            alg.opt = 'optim', 
                            write.results = FALSE)
 ## about 22 mins on example blue shark 141259 with full grid
@@ -495,23 +493,20 @@ pars.optim <- opt.params(pars.init = c(2,.2,.6,.8),
 pars.optim.mle <- opt.params(pars.init = c(2,.2,.6,.8), 
                            lower.bounds = c(0.1, 0.001, .1, .1),  
                            upper.bounds = c(6, .6, .9, .9), 
-                           #g = L.res$g, 
-                           g = g.mle, 
-                           #L = L, 
+                           g = g.mle,
                            L = L.mle, 
                            alg.opt = 'optim', 
                            write.results = FALSE)
 
 ## about 1.5 mins on example blue shark 141259 with coarse grid
 
-## nlminb is also supported in HMMoce but testing suggests this is rarely the best choice due to lack of convergence and other issues
+## nlminb is also supported in HMMoce but testing suggests
+## this is rarely the best choice due to lack of convergence and other issues
 pars.nlminb <- opt.params(pars.init = c(2,.2,.6,.8), 
                             lower.bounds = c(0.1, 0.001, .1, .1), 
                             upper.bounds = c(5, .5, .9, .9), 
                             g = L.res$g, 
-                            #g = g.mle, 
                             L = L, 
-                            #L = L.mle, 
                             alg.opt = 'nlminb', 
                             write.results = FALSE)
 ## about 30 mins on blue shark 141259
@@ -520,9 +515,7 @@ pars.ga <- opt.params(pars.init = c(2,.2,.6,.8),
                           lower.bounds = c(0.1, 0.001, .1, .1), 
                             upper.bounds = c(6, .6, .9, .9), 
                             g = L.res$g, 
-                            #g = g.mle, 
                             L = L, 
-                            #L = L.mle, 
                             alg.opt = 'ga', 
                             write.results = FALSE,
                             ncores = ceiling(parallel::detectCores() * .9))
@@ -531,9 +524,7 @@ pars.ga <- opt.params(pars.init = c(2,.2,.6,.8),
   pars.ga.mle <- opt.params(pars.init = c(2,.2,.6,.8), 
                         lower.bounds = c(0.1, 0.001, .1, .1), 
                         upper.bounds = c(6, .6, .9, .9), 
-                        #g = L.res$g, 
-                        g = g.mle, 
-                        #L = L, 
+                        g = g.mle,
                         L = L.mle, 
                         alg.opt = 'ga', 
                         write.results = FALSE,
@@ -545,9 +536,7 @@ pars.ga <- opt.params(pars.init = c(2,.2,.6,.8),
                         lower.bounds = c(1), 
                         upper.bounds = c(8), 
                         g = L.res$g, 
-                        #g = g.mle, 
                         L = L, 
-                        #L = L.mle, 
                         alg.opt = 'ga', 
                         write.results = FALSE,
                         ncores = 4)
@@ -593,10 +582,11 @@ image.plot(K2, main='Diffusion kernel for "resident" state')
 
 @
  
-\includegraphics[width=5in, keepaspectratio](./pars1.pdf)
-\includegraphics[width=5in, keepaspectratio](./pars2.pdf)
+\includegraphics[width=5in, keepaspectratio]{./pars1.png}
 
- <<pars2, size='small', eval=TRUE>>=
+\includegraphics[width=5in, keepaspectratio]{./pars2.pdf}
+
+ <<pars2, size='small', eval=FALSE>>=
      
 ## set transition matrix, if applicable
 if (!is.null(pb)){
@@ -604,8 +594,6 @@ if (!is.null(pb)){
 } else{
   P <- NULL
 }
-  
-P
 
 @
 

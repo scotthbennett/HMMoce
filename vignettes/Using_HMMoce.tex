@@ -227,10 +227,8 @@ The example below shows HMMoce functionality for coercing time series data to de
     \hlkwc{tz} \hlstd{=} \hlstr{"UTC"}\hlstd{)}
 \hlstd{ts} \hlkwb{<-} \hlstd{ts[,} \hlkwd{c}\hlstd{(}\hlstr{"Date"}\hlstd{,} \hlstr{"Depth"}\hlstd{,} \hlstr{"Temperature"}\hlstd{)]}
 
-\hlstd{pdt_dates} \hlkwb{<-} \hlkwd{seq.POSIXt}\hlstd{(tag, pop,} \hlkwc{by} \hlstd{=} \hlstr{"day"}\hlstd{)}  \hlcom{## generate example daily summary of depth-temp profiles}
-
 \hlcom{## generate depth-temp summary from time series}
-\hlstd{pdt} \hlkwb{<-} \hlkwd{bin_TempTS}\hlstd{(ts,} \hlkwc{out_dates} \hlstd{= pdt_dates,} \hlkwc{bin_res} \hlstd{=} \hlnum{25}\hlstd{)}
+\hlstd{pdt} \hlkwb{<-} \hlkwd{bin_TempTS}\hlstd{(ts,} \hlkwc{out_dates} \hlstd{= dateVec,} \hlkwc{bin_res} \hlstd{=} \hlnum{25}\hlstd{)}
 \hlstd{pdt} \hlkwb{<-} \hlstd{pdt[,} \hlkwd{c}\hlstd{(}\hlstr{"Date"}\hlstd{,} \hlstr{"Depth"}\hlstd{,} \hlstr{"MinTemp"}\hlstd{,} \hlstr{"MaxTemp"}\hlstd{)]}
 \hlkwd{head}\hlstd{(pdt)}
 \end{alltt}
@@ -323,7 +321,9 @@ Many models of archival tag require manufacturer-specific post-processing which 
 \end{kframe}
 \end{knitrout}
 
-** show what the ellipse looks like **
+
+
+\includegraphics[width=5in, keepaspectratio]{./light_ell.pdf}
 
 The column names above are derived from Wildlife Computers outputs but data from other manufacturers can be readily coerced to match this format. For example, Microwave Telemetry provides estimated latitude/longitude values based on their proprietary post-processing methods (in 'Lat\&Long' sheet in an x-tag report). Since these aren't provided with error estimates, we can use empirical error estimates fixed at 0.7$^\circ$ longitude following \cite{Musyl2011} (although note that such error seems rather generous and is likely higher).
 
@@ -424,8 +424,6 @@ If you plan to analyze multiple tag datasets over a similar time period and spat
 
 There are a number of SST products out there that meet our needs. While modeled SST products work fine, we typically use remote-sensing products. There are 3 products currently built into the \texttt{get.env} functionality within \texttt{HMMoce} (see \texttt{?get.env}). Here we'll use the Optimum Interpolation SST (OISST) from NOAA. Note the tradeoffs associated with different SST products such as gaps, gap-filling techniques/interpolations, product resolution and temporal coverage/availability of a given product. Here we get one file as an example:
 
-
-
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -438,20 +436,13 @@ There are a number of SST products out there that meet our needs. While modeled 
     \hlkwc{filename} \hlstd{=} \hlstr{"oisst"}\hlstd{,} \hlkwc{type} \hlstd{=} \hlstr{"sst"}\hlstd{,} \hlkwc{sst.type} \hlstd{=} \hlstr{"oi"}\hlstd{,} \hlkwc{spatLim} \hlstd{= sp.lim,} \hlkwc{save.dir} \hlstd{= sst.dir)}
 
 \hlstd{sst} \hlkwb{<-} \hlstd{raster}\hlopt{::}\hlkwd{raster}\hlstd{(}\hlkwd{paste0}\hlstd{(sst.dir,} \hlstr{"oisst_"}\hlstd{, udates[}\hlnum{1}\hlstd{],} \hlstr{".nc"}\hlstd{))}
-\end{alltt}
-
-
-{\ttfamily\noindent\itshape\color{messagecolor}{Loading required namespace: ncdf4}}\begin{verbatim}
-Error in as.Date(time, origin = startDate) : object 'startDate' not found
-\end{verbatim}
-\begin{alltt}
 \hlkwd{plot}\hlstd{(sst,} \hlkwc{main} \hlstd{=} \hlstr{"Example SST field"}\hlstd{)}
 \hlkwd{world}\hlstd{(}\hlkwc{add} \hlstd{= T)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/env-sst-1} 
-
 \end{knitrout}
+
+\includegraphics[width=5in, keepaspectratio]{./example_sst.png}
 
 \subsubsection{Depth-temperature data}
 
@@ -463,7 +454,6 @@ As with SST above, there are a number of ways to represent temperature of the 3D
 \hlcom{## you need some representation of environmental depth-temperature in this}
 \hlcom{## case we're using hycom}
 
-\hlstd{sp.lim_small} \hlkwb{<-} \hlkwd{list}\hlstd{(}\hlkwc{lonmin} \hlstd{=} \hlopt{-}\hlnum{72}\hlstd{,} \hlkwc{lonmax} \hlstd{=} \hlopt{-}\hlnum{66}\hlstd{,} \hlkwc{latmin} \hlstd{=} \hlnum{38}\hlstd{,} \hlkwc{latmax} \hlstd{=} \hlnum{43}\hlstd{)}
 \hlstd{dir} \hlkwb{<-} \hlkwd{getwd}\hlstd{()}
 \hlstd{hycom.dir} \hlkwb{<-} \hlkwd{paste0}\hlstd{(dir,} \hlstr{"/EnvData/hycom/"}\hlstd{)}
 \hlkwa{if} \hlstd{(}\hlopt{!}\hlkwd{dir.exists}\hlstd{(hycom.dir))} \hlkwd{dir.create}\hlstd{(hycom.dir,} \hlkwc{recursive} \hlstd{=} \hlnum{TRUE}\hlstd{)}
@@ -471,24 +461,17 @@ As with SST above, there are a number of ways to represent temperature of the 3D
     \hlkwc{filename} \hlstd{=} \hlstr{"hycom"}\hlstd{,} \hlkwc{type} \hlstd{=} \hlstr{"hycom"}\hlstd{,} \hlkwc{spatLim} \hlstd{= sp.lim_small,} \hlkwc{save.dir} \hlstd{= hycom.dir)}
 
 \hlstd{b} \hlkwb{<-} \hlstd{raster}\hlopt{::}\hlkwd{brick}\hlstd{(}\hlkwd{paste0}\hlstd{(hycom.dir,} \hlstr{"hycom_"}\hlstd{, udates[}\hlnum{1}\hlstd{],} \hlstr{".nc"}\hlstd{))}
-\end{alltt}
 
-
-{\ttfamily\noindent\itshape\color{messagecolor}{Loading required namespace: ncdf4}}\begin{alltt}
-\hlcom{## plot top 5 depth levels from HYCOM par(mfrow=c(3,1))}
+\hlcom{## plot top 3 depth levels from HYCOM par(mfrow=c(3,1))}
 \hlkwa{for} \hlstd{(i} \hlkwa{in} \hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,} \hlnum{10}\hlstd{,} \hlnum{20}\hlstd{)) \{}
     \hlkwd{plot}\hlstd{(b[[i]])}
     \hlkwd{world}\hlstd{(}\hlkwc{add} \hlstd{= T)}
 \hlstd{\}}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/env-hycom-1} 
-
-\includegraphics[width=\maxwidth]{figure/env-hycom-2} 
-
-\includegraphics[width=\maxwidth]{figure/env-hycom-3} 
-
 \end{knitrout}
+
+\includegraphics[width=5in, keepaspectratio]{./example_hycom.png}
 
 \subsubsection{Bathymetry}
 
@@ -513,10 +496,9 @@ The last "environmental" dataset we need is bathymetry. Bathymetry has multiple 
 \hlkwd{world}\hlstd{(}\hlkwc{add} \hlstd{= T)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/env-bathy-1} 
-
 \end{knitrout}
 
+\includegraphics[width=5in, keepaspectratio]{./example_bathy.png}
 
 \subsection{Observation likelihoods} \label{sec:lik}
 
@@ -538,39 +520,8 @@ Light-based geolocation is a complicated topic with a myriad of potential implem
 \end{kframe}
 \end{knitrout}
 
-\begin{comment}
-Here's an example of what these look like:
-\begin{knitrout}\small
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{load}\hlstd{(}\hlstr{"./example_blueshark_lik_srss.rds"}\hlstd{)}
-\hlkwd{load}\hlstd{(}\hlstr{"./example_blueshark_lik_lightloc_noEll.rds"}\hlstd{)}
-\hlkwd{load}\hlstd{(}\hlstr{"./example_blueshark_lik_lightloc_wEll.rds"}\hlstd{)}
 
-\hlcom{## here's what the likelihoods look like}
-\hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{3}\hlstd{,} \hlnum{1}\hlstd{))}
-\hlkwd{plot}\hlstd{(L.light.srss[[}\hlnum{12}\hlstd{]],} \hlkwc{main} \hlstd{=} \hlstr{"Sunrise/sunset based likelihood"}\hlstd{)}
-\hlkwd{world}\hlstd{(}\hlkwc{add} \hlstd{= T)}
-\hlkwd{plot}\hlstd{(L.light.noell[[}\hlnum{12}\hlstd{]],} \hlkwc{main} \hlstd{=} \hlstr{"Light-based location likelihood - Lon-only"}\hlstd{)}
-\hlkwd{world}\hlstd{(}\hlkwc{add} \hlstd{= T)}
-\hlkwd{plot}\hlstd{(L.light.ell[[}\hlnum{12}\hlstd{]],} \hlkwc{main} \hlstd{=} \hlstr{"Light-based location likelihood - Lon + Lat"}\hlstd{)}
-\hlkwd{world}\hlstd{(}\hlkwc{add} \hlstd{= T)}
-\end{alltt}
-\end{kframe}
-\end{knitrout}
-\end{comment}
-
-Here's an example of what the lon-only likelihoods look like:
-\begin{knitrout}\small
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{plot}\hlstd{(L.rasters}\hlopt{$}\hlstd{L.light[[}\hlnum{12}\hlstd{]],} \hlkwc{main} \hlstd{=} \hlstr{"Light-based location likelihood - Lon-only"}\hlstd{)}
-\hlkwd{world}\hlstd{(}\hlkwc{add} \hlstd{= T)}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/lik-light-plot-1} 
-
-\end{knitrout}
+\includegraphics[width=5in, keepaspectratio]{./example_light_lik.png}
 
 \subsubsection{SST likelihood}
 
@@ -580,26 +531,19 @@ SST-based likelihoods are perhaps among the most simple, and often informative, 
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlcom{# SST LIKELIHOODS}
-\hlstd{L.sst} \hlkwb{<-} \hlkwd{calc.sst}\hlstd{(tag.sst,} \hlkwc{filename} \hlstd{=} \hlstr{"oisst"}\hlstd{,} \hlkwc{sst.dir} \hlstd{= sst.dir,} \hlkwc{dateVec} \hlstd{= dateVec[}\hlnum{1}\hlopt{:}\hlnum{5}\hlstd{],}
+\hlstd{L.sst} \hlkwb{<-} \hlkwd{calc.sst}\hlstd{(tag.sst,} \hlkwc{filename} \hlstd{=} \hlstr{"oisst"}\hlstd{,} \hlkwc{sst.dir} \hlstd{= sst.dir,} \hlkwc{dateVec} \hlstd{= dateVec,}
     \hlkwc{sens.err} \hlstd{=} \hlnum{1}\hlstd{)}
+
+\hlcom{## identical to above but in parallel}
 \hlstd{L.sst} \hlkwb{<-} \hlkwd{calc.sst.par}\hlstd{(tag.sst,} \hlkwc{filename} \hlstd{=} \hlstr{"oisst"}\hlstd{,} \hlkwc{sst.dir} \hlstd{= sst.dir,} \hlkwc{dateVec} \hlstd{= dateVec,}
-    \hlkwc{sens.err} \hlstd{=} \hlnum{1}\hlstd{,} \hlkwc{focalDim} \hlstd{=} \hlnum{3}\hlstd{,} \hlkwc{ncores} \hlstd{=} \hlnum{2}\hlstd{)}
+    \hlkwc{sens.err} \hlstd{=} \hlnum{1}\hlstd{,} \hlkwc{ncores} \hlstd{=} \hlnum{2}\hlstd{)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
 
-Here's an example of what these look like:
-\begin{knitrout}\small
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlcom{## here's what the likelihoods look like}
-\hlkwd{plot}\hlstd{(L.rasters}\hlopt{$}\hlstd{L.sst[[}\hlnum{12}\hlstd{]],} \hlkwc{main} \hlstd{=} \hlstr{"SST-based likelihood"}\hlstd{)}
-\hlkwd{world}\hlstd{(}\hlkwc{add} \hlstd{= T)}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/lik-sst-plot-1} 
 
-\end{knitrout}
+\includegraphics[width=5in, keepaspectratio]{./example_sst_lik.png}
+
 
 \subsubsection{3D depth-temperature likelihood}
 
@@ -613,7 +557,14 @@ The depth-temperature based likelihoods allow users to generate 3D likelihoods f
     \hlkwc{isotherm} \hlstd{=} \hlstr{""}\hlstd{,} \hlkwc{use.se} \hlstd{= F)}
 \hlcom{## the parallel version: L.ohc <- calc.ohc.par(pdt, filename='hycom', ohc.dir}
 \hlcom{## = hycom.dir, dateVec = dateVec, isotherm = '', use.se = F)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+\includegraphics[width=5in, keepaspectratio]{./example_ohc_lik.png}
 
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
 \hlcom{# HYCOM PROFILE BASED LIKELIHOODS}
 \hlstd{L.hycom} \hlkwb{<-} \hlkwd{calc.hycom}\hlstd{(pdt,} \hlkwc{filename} \hlstd{=} \hlstr{"hycom"}\hlstd{, hycom.dir,} \hlkwc{focalDim} \hlstd{=} \hlnum{9}\hlstd{,} \hlkwc{dateVec} \hlstd{=} \hlkwd{as.POSIXct}\hlstd{(dateVec),}
     \hlkwc{use.se} \hlstd{= T)}
@@ -623,24 +574,8 @@ The depth-temperature based likelihoods allow users to generate 3D likelihoods f
 \end{kframe}
 \end{knitrout}
 
-Here's an example of what these look like:
-\begin{knitrout}\small
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlcom{## here's what the likelihoods look like}
-\hlkwd{plot}\hlstd{(L.rasters}\hlopt{$}\hlstd{L.ohc[[}\hlnum{13}\hlstd{]],} \hlkwc{main} \hlstd{=} \hlstr{"OHC-based likelihood"}\hlstd{)}
-\hlkwd{world}\hlstd{(}\hlkwc{add} \hlstd{= T)}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/lik-pdt-plot-1} 
-\begin{kframe}\begin{alltt}
-\hlkwd{plot}\hlstd{(L.rasters}\hlopt{$}\hlstd{L.hycom.se[[}\hlnum{13}\hlstd{]],} \hlkwc{main} \hlstd{=} \hlstr{"HYCOM-based likelihood"}\hlstd{)}
-\hlkwd{world}\hlstd{(}\hlkwc{add} \hlstd{= T)}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/lik-pdt-plot-2} 
+\includegraphics[width=5in, keepaspectratio]{./example_hycom_lik.png}
 
-\end{knitrout}
 
 \subsubsection{Bathymetry likelihood}
 
@@ -661,18 +596,8 @@ Bathymetry can be used to further constrain the likely location of a tagged anim
 \end{kframe}
 \end{knitrout}
 
-Here's an example of what these look like:
-\begin{knitrout}\small
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlcom{## here's what the likelihoods look like}
-\hlkwd{plot}\hlstd{(L.rasters}\hlopt{$}\hlstd{L.bathy[[}\hlnum{12}\hlstd{]],} \hlkwc{main} \hlstd{=} \hlstr{"Bathy-based likelihood"}\hlstd{)}
-\hlkwd{world}\hlstd{(}\hlkwc{add} \hlstd{= T)}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/lik-bathy-plot-1} 
+\includegraphics[width=5in, keepaspectratio]{./example_bathy_lik.png}
 
-\end{knitrout}
 
 \subsubsection{Bottom temperature likelihood}
 Gradients in bottom temperature have been used to inform geolocation of benthic species, particularly in relatively shallow and/or enclosed basins \citep[\eg cod][]{LeBris2013}. The implementation of this likelihood in \texttt{HMMoce} is similar to SST-based likelihoods but the surface temperature grid has simply been exchanged for a bottom temperature grid. Typically the environmental data for generating these likelihoods is derived from oceanographic models or some aggregate (often interpolated) set of observations.
@@ -695,9 +620,6 @@ Gradients in bottom temperature have been used to inform geolocation of benthic 
 
 The final step in generating likelihoods is to combine the likelihoods of interest to generate an overall observation-based likelihood for each time step. This is another key decision point in the geolocation process as there are a number of likelihood combinations that might make sense to base the geolocation estimates on. Here, we show just an example of one combination of likelihoods but in practice we usually iterate through multiple combinations and use a model selection approach to determine the "best" model. The final step in this section is to generate the overall observation likelihood as a combination of the selected likelihoods. At this point, you can also supply any other known locations (\eg from sightings, acoustic detections, etc).
 
-
-
-
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
@@ -719,18 +641,8 @@ The final step in generating likelihoods is to combine the likelihoods of intere
 \end{kframe}
 \end{knitrout}
 
-Here's an example of what these look like:
-\begin{knitrout}\small
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlcom{## here's what the likelihoods look like}
-\hlkwd{image.plot}\hlstd{(g}\hlopt{$}\hlstd{lon[}\hlnum{1}\hlstd{, ], g}\hlopt{$}\hlstd{lat[,} \hlnum{1}\hlstd{], L,} \hlkwc{main} \hlstd{=} \hlstr{"Example overall likelihood at single time step"}\hlstd{)}
-\hlkwd{world}\hlstd{(}\hlkwc{add} \hlstd{= T)}
+\includegraphics[width=5in, keepaspectratio]{./example_L.png}
 
-\hlcom{## not working yet}
-\end{alltt}
-\end{kframe}
-\end{knitrout}
 
 \subsection{Model fitting}
 
@@ -744,83 +656,45 @@ In this example, we show each of the available parameter estimation methods usin
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlcom{## if you want to try coarse grids for parameter estimation}
-\hlcom{## use coarse.L() and supply the outputs in place of L and g below}
+\hlcom{## if you want to try coarse grids for parameter estimation use coarse.L()}
+\hlcom{## and supply the outputs in place of L and g below}
 \hlstd{L.mle} \hlkwb{<-} \hlkwd{coarse.L}\hlstd{(L, L.res}\hlopt{$}\hlstd{L.rasters)}\hlopt{$}\hlstd{L.mle}
 \hlstd{g.mle} \hlkwb{<-} \hlkwd{coarse.L}\hlstd{(L, L.res}\hlopt{$}\hlstd{L.rasters)}\hlopt{$}\hlstd{g.mle}
 
 \hlcom{## opt.params is a wrapper for the various optimization routines in HMMoce}
-\hlstd{pars.optim} \hlkwb{<-} \hlkwd{opt.params}\hlstd{(}\hlkwc{pars.init} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{,}\hlnum{.2}\hlstd{,}\hlnum{.6}\hlstd{,}\hlnum{.8}\hlstd{),}
-                           \hlkwc{lower.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{0.1}\hlstd{,} \hlnum{0.001}\hlstd{,} \hlnum{.1}\hlstd{,} \hlnum{.1}\hlstd{),}
-                           \hlkwc{upper.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{6}\hlstd{,} \hlnum{.6}\hlstd{,} \hlnum{.9}\hlstd{,} \hlnum{.9}\hlstd{),}
-                           \hlkwc{g} \hlstd{= L.res}\hlopt{$}\hlstd{g,}
-                           \hlcom{#g = g.mle, }
-                           \hlkwc{L} \hlstd{= L,}
-                           \hlcom{#L = L.mle, }
-                           \hlkwc{alg.opt} \hlstd{=} \hlstr{'optim'}\hlstd{,}
-                           \hlkwc{write.results} \hlstd{=} \hlnum{FALSE}\hlstd{)}
+\hlstd{pars.optim} \hlkwb{<-} \hlkwd{opt.params}\hlstd{(}\hlkwc{pars.init} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{,} \hlnum{0.2}\hlstd{,} \hlnum{0.6}\hlstd{,} \hlnum{0.8}\hlstd{),} \hlkwc{lower.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{0.1}\hlstd{,}
+    \hlnum{0.001}\hlstd{,} \hlnum{0.1}\hlstd{,} \hlnum{0.1}\hlstd{),} \hlkwc{upper.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{6}\hlstd{,} \hlnum{0.6}\hlstd{,} \hlnum{0.9}\hlstd{,} \hlnum{0.9}\hlstd{),} \hlkwc{g} \hlstd{= L.res}\hlopt{$}\hlstd{g,} \hlkwc{L} \hlstd{= L,}
+    \hlkwc{alg.opt} \hlstd{=} \hlstr{"optim"}\hlstd{,} \hlkwc{write.results} \hlstd{=} \hlnum{FALSE}\hlstd{)}
 \hlcom{## about 22 mins on example blue shark 141259 with full grid}
 
-\hlstd{pars.optim.mle} \hlkwb{<-} \hlkwd{opt.params}\hlstd{(}\hlkwc{pars.init} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{,}\hlnum{.2}\hlstd{,}\hlnum{.6}\hlstd{,}\hlnum{.8}\hlstd{),}
-                           \hlkwc{lower.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{0.1}\hlstd{,} \hlnum{0.001}\hlstd{,} \hlnum{.1}\hlstd{,} \hlnum{.1}\hlstd{),}
-                           \hlkwc{upper.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{6}\hlstd{,} \hlnum{.6}\hlstd{,} \hlnum{.9}\hlstd{,} \hlnum{.9}\hlstd{),}
-                           \hlcom{#g = L.res$g, }
-                           \hlkwc{g} \hlstd{= g.mle,}
-                           \hlcom{#L = L, }
-                           \hlkwc{L} \hlstd{= L.mle,}
-                           \hlkwc{alg.opt} \hlstd{=} \hlstr{'optim'}\hlstd{,}
-                           \hlkwc{write.results} \hlstd{=} \hlnum{FALSE}\hlstd{)}
+\hlstd{pars.optim.mle} \hlkwb{<-} \hlkwd{opt.params}\hlstd{(}\hlkwc{pars.init} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{,} \hlnum{0.2}\hlstd{,} \hlnum{0.6}\hlstd{,} \hlnum{0.8}\hlstd{),} \hlkwc{lower.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{0.1}\hlstd{,}
+    \hlnum{0.001}\hlstd{,} \hlnum{0.1}\hlstd{,} \hlnum{0.1}\hlstd{),} \hlkwc{upper.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{6}\hlstd{,} \hlnum{0.6}\hlstd{,} \hlnum{0.9}\hlstd{,} \hlnum{0.9}\hlstd{),} \hlkwc{g} \hlstd{= g.mle,} \hlkwc{L} \hlstd{= L.mle,}
+    \hlkwc{alg.opt} \hlstd{=} \hlstr{"optim"}\hlstd{,} \hlkwc{write.results} \hlstd{=} \hlnum{FALSE}\hlstd{)}
 
 \hlcom{## about 1.5 mins on example blue shark 141259 with coarse grid}
 
-\hlcom{## nlminb is also supported in HMMoce but testing suggests this is rarely the best choice due to lack of convergence and other issues}
-\hlstd{pars.nlminb} \hlkwb{<-} \hlkwd{opt.params}\hlstd{(}\hlkwc{pars.init} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{,}\hlnum{.2}\hlstd{,}\hlnum{.6}\hlstd{,}\hlnum{.8}\hlstd{),}
-                            \hlkwc{lower.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{0.1}\hlstd{,} \hlnum{0.001}\hlstd{,} \hlnum{.1}\hlstd{,} \hlnum{.1}\hlstd{),}
-                            \hlkwc{upper.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{5}\hlstd{,} \hlnum{.5}\hlstd{,} \hlnum{.9}\hlstd{,} \hlnum{.9}\hlstd{),}
-                            \hlkwc{g} \hlstd{= L.res}\hlopt{$}\hlstd{g,}
-                            \hlcom{#g = g.mle, }
-                            \hlkwc{L} \hlstd{= L,}
-                            \hlcom{#L = L.mle, }
-                            \hlkwc{alg.opt} \hlstd{=} \hlstr{'nlminb'}\hlstd{,}
-                            \hlkwc{write.results} \hlstd{=} \hlnum{FALSE}\hlstd{)}
+\hlcom{## nlminb is also supported in HMMoce but testing suggests this is rarely the}
+\hlcom{## best choice due to lack of convergence and other issues}
+\hlstd{pars.nlminb} \hlkwb{<-} \hlkwd{opt.params}\hlstd{(}\hlkwc{pars.init} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{,} \hlnum{0.2}\hlstd{,} \hlnum{0.6}\hlstd{,} \hlnum{0.8}\hlstd{),} \hlkwc{lower.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{0.1}\hlstd{,}
+    \hlnum{0.001}\hlstd{,} \hlnum{0.1}\hlstd{,} \hlnum{0.1}\hlstd{),} \hlkwc{upper.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{5}\hlstd{,} \hlnum{0.5}\hlstd{,} \hlnum{0.9}\hlstd{,} \hlnum{0.9}\hlstd{),} \hlkwc{g} \hlstd{= L.res}\hlopt{$}\hlstd{g,} \hlkwc{L} \hlstd{= L,}
+    \hlkwc{alg.opt} \hlstd{=} \hlstr{"nlminb"}\hlstd{,} \hlkwc{write.results} \hlstd{=} \hlnum{FALSE}\hlstd{)}
 \hlcom{## about 30 mins on blue shark 141259}
 
-\hlstd{pars.ga} \hlkwb{<-} \hlkwd{opt.params}\hlstd{(}\hlkwc{pars.init} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{,}\hlnum{.2}\hlstd{,}\hlnum{.6}\hlstd{,}\hlnum{.8}\hlstd{),}
-                          \hlkwc{lower.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{0.1}\hlstd{,} \hlnum{0.001}\hlstd{,} \hlnum{.1}\hlstd{,} \hlnum{.1}\hlstd{),}
-                            \hlkwc{upper.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{6}\hlstd{,} \hlnum{.6}\hlstd{,} \hlnum{.9}\hlstd{,} \hlnum{.9}\hlstd{),}
-                            \hlkwc{g} \hlstd{= L.res}\hlopt{$}\hlstd{g,}
-                            \hlcom{#g = g.mle, }
-                            \hlkwc{L} \hlstd{= L,}
-                            \hlcom{#L = L.mle, }
-                            \hlkwc{alg.opt} \hlstd{=} \hlstr{'ga'}\hlstd{,}
-                            \hlkwc{write.results} \hlstd{=} \hlnum{FALSE}\hlstd{,}
-                            \hlkwc{ncores} \hlstd{=} \hlkwd{ceiling}\hlstd{(parallel}\hlopt{::}\hlkwd{detectCores}\hlstd{()} \hlopt{*} \hlnum{.9}\hlstd{))}
-  \hlcom{## about 1.6 hrs on blue shark 141259 w 15 cores}
+\hlstd{pars.ga} \hlkwb{<-} \hlkwd{opt.params}\hlstd{(}\hlkwc{pars.init} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{,} \hlnum{0.2}\hlstd{,} \hlnum{0.6}\hlstd{,} \hlnum{0.8}\hlstd{),} \hlkwc{lower.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{0.1}\hlstd{,}
+    \hlnum{0.001}\hlstd{,} \hlnum{0.1}\hlstd{,} \hlnum{0.1}\hlstd{),} \hlkwc{upper.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{6}\hlstd{,} \hlnum{0.6}\hlstd{,} \hlnum{0.9}\hlstd{,} \hlnum{0.9}\hlstd{),} \hlkwc{g} \hlstd{= L.res}\hlopt{$}\hlstd{g,} \hlkwc{L} \hlstd{= L,}
+    \hlkwc{alg.opt} \hlstd{=} \hlstr{"ga"}\hlstd{,} \hlkwc{write.results} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{ncores} \hlstd{=} \hlkwd{ceiling}\hlstd{(parallel}\hlopt{::}\hlkwd{detectCores}\hlstd{()} \hlopt{*}
+        \hlnum{0.9}\hlstd{))}
+\hlcom{## about 1.6 hrs on blue shark 141259 w 15 cores}
 
-  \hlstd{pars.ga.mle} \hlkwb{<-} \hlkwd{opt.params}\hlstd{(}\hlkwc{pars.init} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{,}\hlnum{.2}\hlstd{,}\hlnum{.6}\hlstd{,}\hlnum{.8}\hlstd{),}
-                        \hlkwc{lower.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{0.1}\hlstd{,} \hlnum{0.001}\hlstd{,} \hlnum{.1}\hlstd{,} \hlnum{.1}\hlstd{),}
-                        \hlkwc{upper.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{6}\hlstd{,} \hlnum{.6}\hlstd{,} \hlnum{.9}\hlstd{,} \hlnum{.9}\hlstd{),}
-                        \hlcom{#g = L.res$g, }
-                        \hlkwc{g} \hlstd{= g.mle,}
-                        \hlcom{#L = L, }
-                        \hlkwc{L} \hlstd{= L.mle,}
-                        \hlkwc{alg.opt} \hlstd{=} \hlstr{'ga'}\hlstd{,}
-                        \hlkwc{write.results} \hlstd{=} \hlnum{FALSE}\hlstd{,}
-                        \hlkwc{ncores} \hlstd{=} \hlkwd{ceiling}\hlstd{(parallel}\hlopt{::}\hlkwd{detectCores}\hlstd{()} \hlopt{*} \hlnum{.9}\hlstd{))}
-   \hlcom{## about 2 mins with MLE grid but results way different}
+\hlstd{pars.ga.mle} \hlkwb{<-} \hlkwd{opt.params}\hlstd{(}\hlkwc{pars.init} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{,} \hlnum{0.2}\hlstd{,} \hlnum{0.6}\hlstd{,} \hlnum{0.8}\hlstd{),} \hlkwc{lower.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{0.1}\hlstd{,}
+    \hlnum{0.001}\hlstd{,} \hlnum{0.1}\hlstd{,} \hlnum{0.1}\hlstd{),} \hlkwc{upper.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{6}\hlstd{,} \hlnum{0.6}\hlstd{,} \hlnum{0.9}\hlstd{,} \hlnum{0.9}\hlstd{),} \hlkwc{g} \hlstd{= g.mle,} \hlkwc{L} \hlstd{= L.mle,}
+    \hlkwc{alg.opt} \hlstd{=} \hlstr{"ga"}\hlstd{,} \hlkwc{write.results} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{ncores} \hlstd{=} \hlkwd{ceiling}\hlstd{(parallel}\hlopt{::}\hlkwd{detectCores}\hlstd{()} \hlopt{*}
+        \hlnum{0.9}\hlstd{))}
+\hlcom{## about 2 mins with MLE grid but results way different}
 
-  \hlcom{## example using the genetic algorithm and only one behavior state}
-  \hlstd{pars.ga.one} \hlkwb{<-} \hlkwd{opt.params}\hlstd{(}\hlkwc{pars.init} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{),}
-                        \hlkwc{lower.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{),}
-                        \hlkwc{upper.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{8}\hlstd{),}
-                        \hlkwc{g} \hlstd{= L.res}\hlopt{$}\hlstd{g,}
-                        \hlcom{#g = g.mle, }
-                        \hlkwc{L} \hlstd{= L,}
-                        \hlcom{#L = L.mle, }
-                        \hlkwc{alg.opt} \hlstd{=} \hlstr{'ga'}\hlstd{,}
-                        \hlkwc{write.results} \hlstd{=} \hlnum{FALSE}\hlstd{,}
-                        \hlkwc{ncores} \hlstd{=} \hlnum{4}\hlstd{)}
-  \hlcom{## about 7 hrs on blue shark 141259 w 4 cores}
+\hlcom{## example using the genetic algorithm and only one behavior state}
+\hlstd{pars.ga.one} \hlkwb{<-} \hlkwd{opt.params}\hlstd{(}\hlkwc{pars.init} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{),} \hlkwc{lower.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{),} \hlkwc{upper.bounds} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{8}\hlstd{),}
+    \hlkwc{g} \hlstd{= L.res}\hlopt{$}\hlstd{g,} \hlkwc{L} \hlstd{= L,} \hlkwc{alg.opt} \hlstd{=} \hlstr{"ga"}\hlstd{,} \hlkwc{write.results} \hlstd{=} \hlnum{FALSE}\hlstd{,} \hlkwc{ncores} \hlstd{=} \hlnum{4}\hlstd{)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -829,13 +703,16 @@ In this example, we show each of the available parameter estimation methods usin
 
 Once the parameter estimation routine(s) are finished, finalize those for input to the HMM filter/smoother. This primarily involves 1) converting movement parameters into kernels for convolution (K1/K2) and 2) converting state switching probabilities into a transition matrix (P). Once those steps are complete, everything is in place for the filter and smoother steps that generate the posterior state distributions. From that, we calculate most probable tracks by, in this case, finding the max of each posterior distribution. Other methods could be used here and may be implemented in the future (\eg Viterbi).
 
+** explain why these values are here **
+
+
 \begin{knitrout}\small
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlcom{## as an example, grab the pars from the GA using both states pars <-}
 \hlcom{## pars.ga$par}
 
-\hlcom{## or use values from a previous run}
+\hlcom{## or use values from a previous run as done here:}
 \hlstd{pars} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlnum{4.964}\hlstd{,} \hlnum{0.217}\hlstd{,} \hlnum{0.367}\hlstd{,} \hlnum{0.484}\hlstd{)}
 
 \hlcom{## if only one state is used in the estimation routines (above), this will}
@@ -855,14 +732,35 @@ Once the parameter estimation routine(s) are finished, finalize those for input 
 \hlstd{K1} \hlkwb{<-} \hlkwd{gausskern.pg}\hlstd{(sizes[}\hlnum{1}\hlstd{], sigmas[}\hlnum{1}\hlstd{],} \hlkwc{muadv} \hlstd{= muadvs[}\hlnum{1}\hlstd{])}
 \hlkwa{if} \hlstd{(}\hlopt{!}\hlkwd{is.null}\hlstd{(pb)) K2} \hlkwb{<-} \hlkwd{gausskern.pg}\hlstd{(sizes[}\hlnum{2}\hlstd{], sigmas[}\hlnum{2}\hlstd{],} \hlkwc{muadv} \hlstd{= muadvs[}\hlnum{2}\hlstd{])}
 
+\hlkwd{image.plot}\hlstd{(K1,} \hlkwc{main} \hlstd{=} \hlstr{"Diffusion kernel for \textbackslash{}"migratory\textbackslash{}" state"}\hlstd{)}
+\hlkwd{image.plot}\hlstd{(K2,} \hlkwc{main} \hlstd{=} \hlstr{"Diffusion kernel for \textbackslash{}"resident\textbackslash{}" state"}\hlstd{)}
 
+\hlcom{# ** show kernel and how it works ** convolution?}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+ 
+\includegraphics[width=5in, keepaspectratio]{./pars1.png}
+
+\includegraphics[width=5in, keepaspectratio]{./pars2.pdf}
+
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
 \hlcom{## set transition matrix, if applicable}
 \hlkwa{if} \hlstd{(}\hlopt{!}\hlkwd{is.null}\hlstd{(pb)) \{}
     \hlstd{P} \hlkwb{<-} \hlkwd{matrix}\hlstd{(}\hlkwd{c}\hlstd{(pb[}\hlnum{1}\hlstd{],} \hlnum{1} \hlopt{-} \hlstd{pb[}\hlnum{1}\hlstd{],} \hlnum{1} \hlopt{-} \hlstd{pb[}\hlnum{2}\hlstd{], pb[}\hlnum{2}\hlstd{]),} \hlnum{2}\hlstd{,} \hlnum{2}\hlstd{,} \hlkwc{byrow} \hlstd{=} \hlnum{TRUE}\hlstd{)}
 \hlstd{\}} \hlkwa{else} \hlstd{\{}
     \hlstd{P} \hlkwb{<-} \hlkwa{NULL}
 \hlstd{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
 
+
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
 \hlcom{# RUN THE FILTER STEP}
 \hlkwa{if} \hlstd{(}\hlopt{!}\hlkwd{is.null}\hlstd{(pb)) \{}
     \hlstd{K} \hlkwb{<-} \hlkwd{list}\hlstd{(K1, K2)}
@@ -877,8 +775,8 @@ Once the parameter estimation routine(s) are finished, finalize those for input 
 \hlcom{# RUN THE SMOOTHING STEP}
 \hlstd{s} \hlkwb{<-} \hlkwd{hmm.smoother}\hlstd{(f,} \hlkwc{K} \hlstd{= K,} \hlkwc{L} \hlstd{= L,} \hlkwc{P} \hlstd{= P)}
 
-\hlcom{# GET THE MOST PROBABLE TRACK}
-\hlstd{tr} \hlkwb{<-} \hlkwd{calc.track}\hlstd{(s,} \hlkwc{g} \hlstd{= L.res}\hlopt{$}\hlstd{g, dateVec, iniloc)}
+\hlcom{# GET THE MOST PROBABLE TRACK AS MEAN OF POSTERIOR DISTRIBUTION OF STATE}
+\hlstd{tr} \hlkwb{<-} \hlkwd{calc.track}\hlstd{(s,} \hlkwc{g} \hlstd{= L.res}\hlopt{$}\hlstd{g, dateVec, iniloc,} \hlkwc{method} \hlstd{=} \hlstr{"mean"}\hlstd{)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -890,19 +788,18 @@ Once the parameter estimation routine(s) are finished, finalize those for input 
 \begin{alltt}
 \hlkwd{plotHMM}\hlstd{(s, tr, dateVec,} \hlkwc{ptt} \hlstd{=} \hlstr{"141259_example"}\hlstd{,} \hlkwc{save.plot} \hlstd{= F)}
 
-\hlkwd{plotRD}\hlstd{(s, tr,} \hlkwc{ptt} \hlstd{=} \hlstr{"141259_example"}\hlstd{,} \hlkwc{g} \hlstd{= g,} \hlkwc{xlims} \hlstd{=} \hlkwd{c}\hlstd{(sp.lim}\hlopt{$}\hlstd{xmin, sp.lim}\hlopt{$}\hlstd{xmax),}
-    \hlkwc{ylims} \hlstd{=} \hlkwd{c}\hlstd{(sp.lim}\hlopt{$}\hlstd{ymin, sp.lim}\hlopt{$}\hlstd{ymax),} \hlkwc{makePlot} \hlstd{=} \hlnum{TRUE}\hlstd{,} \hlkwc{save.plot} \hlstd{=} \hlnum{FALSE}\hlstd{)}
+\hlcom{# plotRD(s, tr, ptt='141259_example', g = g, xlims = c(sp.lim$xmin,}
+\hlcom{# sp.lim$xmax), ylims = c(sp.lim$ymin, sp.lim$ymax), makePlot = TRUE,}
+\hlcom{# save.plot=FALSE)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
 
 
+\includegraphics[width=5in, keepaspectratio]{./141259_example_track_results.pdf}
 
 
-\includegraphics{./figure/141259_example_track_results.png}
-
-
-%\includegraphics{./figure/141259_example_RD.png}
+%\includegraphics[width=5in, keepaspectratio]{./figure/141259_example_RD.png}
 
 
 

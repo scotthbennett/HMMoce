@@ -5,22 +5,22 @@
 \contentsline {subsubsection}{\numberline {3.1.1}Sea surface temperature data}{3}{subsubsection.3.1.1}% 
 \contentsline {subsubsection}{\numberline {3.1.2}Depth-temperature data}{3}{subsubsection.3.1.2}% 
 \contentsline {subsubsection}{\numberline {3.1.3}Light data}{4}{subsubsection.3.1.3}% 
-\contentsline {subsubsection}{\numberline {3.1.4}Depth-only data}{6}{subsubsection.3.1.4}% 
+\contentsline {subsubsection}{\numberline {3.1.4}Depth-only data}{7}{subsubsection.3.1.4}% 
 \contentsline {subsection}{\numberline {3.2}Environmental data}{7}{subsection.3.2}% 
-\contentsline {subsubsection}{\numberline {3.2.1}Spatial limits}{7}{subsubsection.3.2.1}% 
+\contentsline {subsubsection}{\numberline {3.2.1}Spatial limits}{8}{subsubsection.3.2.1}% 
 \contentsline {subsubsection}{\numberline {3.2.2}SST data}{8}{subsubsection.3.2.2}% 
 \contentsline {subsubsection}{\numberline {3.2.3}Depth-temperature data}{9}{subsubsection.3.2.3}% 
 \contentsline {subsubsection}{\numberline {3.2.4}Bathymetry}{12}{subsubsection.3.2.4}% 
 \contentsline {subsection}{\numberline {3.3}Observation likelihoods}{13}{subsection.3.3}% 
-\contentsline {subsubsection}{\numberline {3.3.1}Light likelihood}{14}{subsubsection.3.3.1}% 
+\contentsline {subsubsection}{\numberline {3.3.1}Light likelihood}{13}{subsubsection.3.3.1}% 
 \contentsline {subsubsection}{\numberline {3.3.2}SST likelihood}{15}{subsubsection.3.3.2}% 
-\contentsline {subsubsection}{\numberline {3.3.3}3D depth-temperature likelihood}{16}{subsubsection.3.3.3}% 
-\contentsline {subsubsection}{\numberline {3.3.4}Bathymetry likelihood}{19}{subsubsection.3.3.4}% 
-\contentsline {subsubsection}{\numberline {3.3.5}Bottom temperature likelihood}{20}{subsubsection.3.3.5}% 
-\contentsline {subsubsection}{\numberline {3.3.6}Overall observation likelihood}{21}{subsubsection.3.3.6}% 
-\contentsline {subsection}{\numberline {3.4}Model fitting}{21}{subsection.3.4}% 
-\contentsline {subsubsection}{\numberline {3.4.1}Parameter estimation}{21}{subsubsection.3.4.1}% 
-\contentsline {subsubsection}{\numberline {3.4.2}HMM Filter / Smoother}{23}{subsubsection.3.4.2}% 
+\contentsline {subsubsection}{\numberline {3.3.3}3D depth-temperature likelihood}{15}{subsubsection.3.3.3}% 
+\contentsline {subsubsection}{\numberline {3.3.4}Bathymetry likelihood}{17}{subsubsection.3.3.4}% 
+\contentsline {subsubsection}{\numberline {3.3.5}Bottom temperature likelihood}{18}{subsubsection.3.3.5}% 
+\contentsline {subsubsection}{\numberline {3.3.6}Overall observation likelihood}{18}{subsubsection.3.3.6}% 
+\contentsline {subsection}{\numberline {3.4}Model fitting}{19}{subsection.3.4}% 
+\contentsline {subsubsection}{\numberline {3.4.1}Parameter estimation}{19}{subsubsection.3.4.1}% 
+\contentsline {subsubsection}{\numberline {3.4.2}HMM Filter / Smoother}{20}{subsubsection.3.4.2}% 
 \contentsline {subsubsection}{\numberline {3.4.3}Plotting results}{24}{subsubsection.3.4.3}% 
-\contentsline {subsubsection}{\numberline {3.4.4}Comparing models and selection}{25}{subsubsection.3.4.4}% 
-\contentsline {subsection}{\numberline {3.5}Resources}{26}{subsection.3.5}% 
+\contentsline {subsubsection}{\numberline {3.4.4}Comparing models and selection}{24}{subsubsection.3.4.4}% 
+\contentsline {subsection}{\numberline {3.5}Resources}{24}{subsection.3.5}% 

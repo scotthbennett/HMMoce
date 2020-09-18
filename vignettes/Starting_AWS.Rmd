@@ -85,6 +85,7 @@ To get started, from the EC2 dashboard choose "Spot Requests" and "Request Spot 
 
 # Resources
 There are several great resources online about running R on AWS. Some of the most helpful for us have been:
+
 * A two-part series by Matt Strimas-Mackey:
   * http://strimas.com/r/rstudio-cloud-1/
   * http://strimas.com/r/rstudio-cloud-2/

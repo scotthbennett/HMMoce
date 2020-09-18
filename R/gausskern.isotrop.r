@@ -8,7 +8,7 @@
 #'   positive number.
 #' @param muadv advection of the kernel. Unit of the input is cell width. 
 #'   Defaults to 0.
-#' @param ratio.xy
+#' @param ratio.xy ratio in x:y
 #' @return Gaussian kernel as a 2D matrix of size (siz x siz)
 #' @export
 #' 
@@ -18,7 +18,7 @@
 #' 
 #' @author Paul Gatti
 
-gausskern.isotrop <- function (siz, sigma, muadv = 0, ratio.xy) {
+gausskern.isotrop <- function (siz, sigma, muadv = 0, ratio.xy = 1) {
   
   # x longitude
   sizx = siz / ratio.xy

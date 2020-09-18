@@ -78,7 +78,7 @@ make.L <- function(ras.list, iniloc, dateVec, known.locs = NULL){
       s_bb <- s[[bb]]
       s_bb[s_bb == 0] <- 1
       
-      sum_zero[bb] <- ifelse(raster::cellStats(s_bb, 'sum') == ncell(s), TRUE, FALSE)
+      sum_zero[bb] <- ifelse(raster::cellStats(s_bb, 'sum') == raster::ncell(s), TRUE, FALSE)
       
     }
     
@@ -111,7 +111,7 @@ make.L <- function(ras.list, iniloc, dateVec, known.locs = NULL){
     # get lat/lon vectors
     #lon <- seq(raster::extent(L)[1], raster::extent(L)[2], length.out=dim(L)[2])
     #lat <- seq(raster::extent(L)[3], raster::extent(L)[4], length.out=dim(L)[1])
-    
+    iniloc$date <- as.POSIXct(paste(iniloc$year, iniloc$month, iniloc$day, sep='-'), format='%Y-%m-%d', tz='UTC')
     if (class(iniloc$date)[1] != class(dateVec)[1]) stop('dateVec and known.locs$date both need to be of class POSIXct.')
     iniloc$dateVec <- findInterval(iniloc$date, dateVec)
     

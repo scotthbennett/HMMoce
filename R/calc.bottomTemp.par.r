@@ -3,7 +3,7 @@
 #' \code{calc.bottomTemp.par} compares tag-measured bottom temperature to a bottom temperature grid and calculates 
 #' likelihoods in parallel
 #' 
-#' @param bt is data frame containing tag-collected bottom temperature data. Requires at least cols: Date (POSIXct), Temperature
+#' @param tag.bt is data frame containing tag-collected bottom temperature data. Requires at least cols: Date (POSIXct), Temperature
 #' @param filename is the first part of the filename specified to the download 
 #'   function \code{\link{get.env}}. For example, if downloaded files were 
 #'   specific to a particular dataset, you may want to identify that with a name

@@ -5,11 +5,11 @@
 #'
 #' @param mmd is dataframe containing at least cols: "Date" (POSIXct) and "MaxDepth" in meters (positive values are wet)
 #' @param bathy.grid is raster of bathymetry. If the minimum bathymetry values are < 0, the function automatically converts in-water values to positive and masks land.
-#' @dateVec is vector of POSIXct dates for each time step of the likelihood
+#' @param dateVec is vector of POSIXct dates for each time step of the likelihood
 #' @param focalDim is integer for dimensions of raster::focal used to calculate
 #'   sd() of env grid cell. If left to NULL (default), this dimension will
 #'   approximately incorporate 0.25 degrees.
-#' @param sens.err is numeric indicating the percent sensor error in the tag-measured max depth. This allows some uncertainty when calculating the integral for the likelihood and doesnt have to necessarily reflect the actual sensor error. Default is 5%.
+#' @param sens.err is numeric indicating the percent sensor error in the tag-measured max depth. This allows some uncertainty when calculating the integral for the likelihood and doesnt have to necessarily reflect the actual sensor error. Default is 5 percent.
 #' @param lik.type is character indicating which likelihood type to use in the bathymetry calculation. Options are dnorm (a traditional likelihood bounded by tag measurement +/- sens.err; experimental) or max ("one-sided" likelihood >= tag-measured max depth; DEFAULT). The latter choice acts more like a mask in that it doesnt allow likelihoods in water shallower than the max depth for each time point.
 #' @param ncores is integer indicating number of cores used in this parallel
 #'  computation. Defaults to using a detection function that chooses cores for
@@ -25,7 +25,7 @@
 calc.bathy.par <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err = 5, lik.type = 'max', ncores = NULL){
   
   ## convert a negative bathy grid to positive to match expectations and mask land
-  if (cellStats(bathy.grid, 'min', na.rm=TRUE) < 0){
+  if (raster::cellStats(bathy.grid, 'min', na.rm=TRUE) < 0){
     bathy.grid <- bathy.grid * -1
     bathy.grid[bathy.grid < 0] <- NA
   }
@@ -102,7 +102,7 @@ calc.bathy.par <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err =
   lik.bathy <- lapply(ans, function(x) x / max(x, na.rm = TRUE))
   
   for (i in 1:T){
-    L.bathy[,,i] <- lik.bathy[[ii]]
+    L.bathy[,,i] <- lik.bathy[[i]]
   }
   
   L.bathy <- aperm(L.bathy,c(2,1,3))

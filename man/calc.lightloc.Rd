@@ -7,20 +7,17 @@
 calc.lightloc(lightloc, locs.grid, dateVec, errEll = TRUE)
 }
 \arguments{
-\item{lightloc}{is data frame from -Locations file output from DAP/Tag Portal for
-WC tags and contains GPS, Argos, and GPE locations as applicable.}
+\item{lightloc}{is data frame of light-based location estimates. If errEll is FALSE, only Date (POSIXct), Longitude, Latitude, and Error.Semi.minor.axis are required. If errEll is TRUE, additional required columns are Offset, Offset.orientation, and Error.Semi.major.axis.}
 
 \item{locs.grid}{is list output from \code{setup.locs.grid}}
 
-\item{dateVec}{is vector of dates from tag to pop-up in 1 day increments.}
+\item{dateVec}{is vector of POSIXct dates for each time step of the likelihood}
 
 \item{errEll}{is logical indicating whether error ellipses should be 
 generated for light-based likelihoods as given from output of WC-GPE. False
 if only longitude should be used. If False, standard deviation on light 
 measurements is currently fixed at 0.7 deg longitude following Musyl et al 
 2011. Default is FALSE and will use longitude only.}
-
-\item{llDates}{is vector of dates from locs dataframe}
 }
 \value{
 L is an array of lon x lat likelihood surfaces (matrices) for each 
@@ -35,9 +32,10 @@ Light errors are parameterized using elliptical error values output in
 '-Locations.csv' (WC tags).
 }
 \examples{
+\dontrun{
 ## Setup for calculating light likelihood
 # Read the data
-locsFile <- system.file("extdata", "141259-Locations-lightloc.csv", package = "HMMoce")
+locsFile <- system.file("extdata", "141259-Locations-GPE2.csv", package = "HMMoce")
 locs <- read.table(locsFile, sep = ',', header = TRUE, blank.lines.skip = FALSE)
 
 # Set spatial and temporal limits
@@ -52,10 +50,6 @@ pop <- as.POSIXct(paste(iniloc[2,1], '/', iniloc[2,2], '/', iniloc[2,3], sep='')
 format = '\%d/\%m/\%Y', tz='UTC')
 dateVec <- as.Date(seq(tag, pop, by = 'day')) 
 
-# Try a calculation
-L.light <- calc.lightloc(locs[1,], iniloc, locs.grid, dateVec, errEll=TRUE, gpeOnly=TRUE)
-
-\dontrun{
 # Full example light calculation
 L.light <- calc.lightloc(locs, iniloc = iniloc, locs.grid = locs.grid,
                      dateVec = dateVec, errEll = TRUE, gpeOnly = TRUE)

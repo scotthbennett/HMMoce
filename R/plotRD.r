@@ -22,7 +22,7 @@
 plotRD <- function(distr, track, ptt, known=NULL, g, xlims, ylims, makePlot = TRUE, save.plot=FALSE){
   
   crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
-  rd.cols <- colorRampPalette(rev(RColorBrewer::brewer.pal(11, 'RdYlGn')))
+  rd.cols <- grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(11, 'RdYlGn')))
   
   p.1 <- apply(distr[1,,,], 1, sum)
   p.2 <- apply(distr[2,,,], 1, sum)
@@ -64,8 +64,8 @@ plotRD <- function(distr, track, ptt, known=NULL, g, xlims, ylims, makePlot = TR
     y.labels <- parse(text=paste(abs(y.at), "*degree~N", sep=""))
     
     # set margins
-    old.mar <- par()$mar
-    mar.default <- par('mar')
+    old.mar <- graphics::par()$mar
+    mar.default <- graphics::par('mar')
     mar.bottom <- mar.default
     mar.bottom[1] <- 0
     
@@ -77,58 +77,58 @@ plotRD <- function(distr, track, ptt, known=NULL, g, xlims, ylims, makePlot = TR
     if(save.plot) grDevices::pdf(paste(ptt, '_RD.pdf', sep = ''), width = 7, height = 12)
     
     # BUILD IT
-    nf <- layout(matrix(c(1,2,
+    nf <- graphics::layout(matrix(c(1,2,
                           3,4,
                           5,6), 3, 2, byrow=T), widths=c(7,2), heights=c(4,4,4))
     #layout.show(nf)
     
     # COMBINED PANEL
-    par (mar=mar.bottom)
+    graphics::par(mar=mar.bottom)
     
     raster::image(all, maxpixels=raster::ncell(all), xlim=xlims, ylim=ylims, axes=F,
                   col=plot.rd.col, breaks=norm.breaks, xlab='', ylab='')#, main='All')#, zlim=c(.05,1))#, axes=F)#, main=dt.idx) #, breaks=zbreaks
-    axis(1, at=x.at, labels=FALSE)
-    axis(2, at=y.at, labels=y.labels);
+    graphics::axis(1, at=x.at, labels=FALSE)
+    graphics::axis(2, at=y.at, labels=y.labels);
     world(add=T, fill=T, col='grey60')
-    box()
-    if(!is.null(known)) lines(known$lon, known$lat)
+    graphics::box()
+    if(!is.null(known)) graphics::lines(known$lon, known$lat)
     
     # COLORBAR
-    image(1, norm.mid, t(as.matrix(norm.mid)), breaks=norm.breaks, col=plot.rd.col, axes=FALSE, xlab="",
+    graphics::image(1, norm.mid, t(as.matrix(norm.mid)), breaks=norm.breaks, col=plot.rd.col, axes=FALSE, xlab="",
           ylab='Expected Proportion of Time Spent')
-    axis(2, at=c(.05, .25, .5, .75, .95), labels=paste(rev(c(5, 25, 50, 75, 95)), '%'));box();
+    graphics::axis(2, at=c(.05, .25, .5, .75, .95), labels=paste(rev(c(5, 25, 50, 75, 95)), '%'));graphics::box();
     
     # MIGRATORY PANEL
-    par (mar=mar.bottom)
+    graphics::par(mar=mar.bottom)
     raster::image(norm[[1]], maxpixels=raster::ncell(norm[[1]]), xlim=xlims, ylim=ylims, axes=F,
                   col=plot.rd.col, breaks=norm.breaks, xlab='', ylab='')#, main='Migratory')#, zlim=c(.05,1))#, axes=F)#, main=dt.idx) #, breaks=zbreaks
-    axis(1, at=x.at, labels=FALSE)
-    axis(2, at=y.at, labels=y.labels)
+    graphics::axis(1, at=x.at, labels=FALSE)
+    graphics::axis(2, at=y.at, labels=y.labels)
     world(add=T, fill=T, col='grey60')
-    box()
-    mtext('Migratory behavior', 4, line=2)
+    graphics::box()
+    graphics::mtext('Migratory behavior', 4, line=2)
     graphics::points(track$lon[idx1], track$lat[idx1], bg='white', pch=21, cex=1.25)
     graphics::points(track$lon[1], track$lat[1], bg = 'green', pch = 21, cex=1.75)
     graphics::points(track$lon[TT], track$lat[TT], bg = 'red', pch = 21, cex=1.75)
     
     # FILL COLORBAR SPACE
-    plot.new()
+    graphics::plot.new()
     
     # RESIDENT PANEL
-    par (mar=mar.default)
+    graphics::par(mar=mar.default)
     raster::image(norm[[2]], maxpixels=raster::ncell(norm[[2]]), xlim=xlims, ylim=ylims, axes=F,
                   col=plot.rd.col, breaks=norm.breaks, xlab='', ylab='')#, main='Resident')#, zlim=c(.05,1))#, axes=F)#, main=dt.idx) #, breaks=zbreaks
-    axis(1, at=x.at, labels=x.labels)
-    axis(2, at=y.at, labels=y.labels);
+    graphics::axis(1, at=x.at, labels=x.labels)
+    graphics::axis(2, at=y.at, labels=y.labels);
     world(add=T, fill=T, col='grey60')
-    box()
-    mtext('Resident behavior', 4, line=2)
+    graphics::box()
+    graphics::mtext('Resident behavior', 4, line=2)
     graphics::points(track$lon[idx2], track$lat[idx2], bg='grey60', pch=21, cex=1.25)
     graphics::points(track$lon[1], track$lat[1], bg = 'green', pch = 21, cex=1.75)
     graphics::points(track$lon[TT], track$lat[TT], bg = 'red', pch = 21, cex=1.75)
     
     # FILL COLORBAR SPACE
-    plot.new()
+    graphics::plot.new()
     
     if(save.plot) grDevices::dev.off()
   }

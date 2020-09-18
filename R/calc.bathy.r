@@ -9,7 +9,7 @@
 #' @param focalDim is integer for dimensions of raster::focal used to calculate 
 #'   sd() of env grid cell. If left to NULL (default), this dimension will
 #'   approximately incorporate 0.25 degrees.
-#' @param sens.err is numeric indicating the percent sensor error in the tag-measured max depth. This allows some uncertainty when calculating the integral for the likelihood and doesnt have to necessarily reflect the actual sensor error. Default is 5%.
+#' @param sens.err is numeric indicating the percent sensor error in the tag-measured max depth. This allows some uncertainty when calculating the integral for the likelihood and doesnt have to necessarily reflect the actual sensor error. Default is 5 percent.
 #' @param lik.type is character indicating which likelihood type to use in the bathymetry calculation. Options are dnorm (a traditional likelihood bounded by tag measurement +/- sens.err; experimental) or max ("one-sided" likelihood >= tag-measured max depth; DEFAULT). The latter choice acts more like a mask in that it doesnt allow likelihoods in water shallower than the max depth for each time point.
 #' 
 #' @return likelihood is raster brick of likelihood surfaces representing
@@ -24,7 +24,7 @@ calc.bathy <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err = 5, 
   if (lik.type == 'dnorm') warning('Bathymetry likelihood calculation with lik.type = normal is experimental. If you use it, please send feedback on your experience as we work to improve it.')
   
   ## convert a negative bathy grid to positive to match expectations and mask land
-  if (cellStats(bathy.grid, 'min', na.rm=T) < 0){
+  if (raster::cellStats(bathy.grid, 'min', na.rm=T) < 0){
     bathy.grid <- bathy.grid * -1
     bathy.grid[bathy.grid < 0] <- NA
   }

@@ -8,6 +8,8 @@ calc.bottomTemp(tag.bt, filename, bt.dir, dateVec, focalDim = NULL,
   sens.err = 1, varName = "Temperature")
 }
 \arguments{
+\item{tag.bt}{is data frame containing tag-collected bottom temperature data. Requires at least cols: Date (POSIXct), Temperature}
+
 \item{filename}{is the first part of the filename specified to the download 
 function \code{\link{get.env}}. For example, if downloaded files were 
 specific to a particular dataset, you may want to identify that with a name
@@ -27,8 +29,6 @@ approximately incorporate 0.25 degrees.}
 sensor. Default is 1.}
 
 \item{varName}{is name of temperature variable in the bottom temperature nc grids. Default is "Temperature".}
-
-\item{bt}{is data frame containing tag-collected bottom temperature data. Requires at least cols: Date (POSIXct), Temperature}
 }
 \value{
 likelihood is raster brick of likelihood surfaces representing

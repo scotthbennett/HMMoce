@@ -18,7 +18,8 @@
 #' @param run optional. see \code{run} input to \code{GA::ga()}. Default is 100.
 #' @param p_size optional. see \code{popSize} input to \code{GA::ga()}. Default is 100.
 #' @param ncores optional. see \code{parallel} input to \code{GA::ga()}. Default is FALSE, therefore not parallelized.
-#' @authors Paul Gatti and Camrin Braun
+#' @author Paul Gatti
+#' @author Camrin Braun
 #' @examples 
 #' \dontrun{
 #' pars.init=c(2,.2,.6,.8)
@@ -66,7 +67,7 @@ opt.params <- function(pars.init, lower.bounds, upper.bounds, g, L, alg.opt = 'o
   
   if(alg.opt == 'optim'){
     t0 = Sys.time()
-    res <- optim(par = pars.init, 
+    res <- stats::optim(par = pars.init, 
                     fn = neg.log.lik.fun, 
                     g = g, 
                     L = L, 
@@ -92,7 +93,7 @@ opt.params <- function(pars.init, lower.bounds, upper.bounds, g, L, alg.opt = 'o
   if(alg.opt == 'nlminb'){
     t0 = Sys.time()
     
-    res <- tryCatch({nlminb(pars.init, 
+    res <- tryCatch({stats::nlminb(pars.init, 
                             objective = neg.log.lik.fun,
                             maskL = maskL, 
                             gradient = NULL, 
@@ -167,7 +168,7 @@ opt.params <- function(pars.init, lower.bounds, upper.bounds, g, L, alg.opt = 'o
     
     par.inits <- ifelse(reformat, res$par, res@solution)
     
-    res <- optim(par = par.inits,
+    res <- stats::optim(par = par.inits,
                        fn = neg.log.lik.fun,
                        g = g,
                        L = L,

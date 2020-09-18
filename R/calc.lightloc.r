@@ -22,9 +22,10 @@
 #'   time point (3rd dimension)
 #' @seealso \code{\link{calc.srss}}
 #' @examples
+#' \dontrun{
 #' ## Setup for calculating light likelihood
 #' # Read the data
-#' locsFile <- system.file("extdata", "141259-Locations-lightloc.csv", package = "HMMoce")
+#' locsFile <- system.file("extdata", "141259-Locations-GPE2.csv", package = "HMMoce")
 #' locs <- read.table(locsFile, sep = ',', header = TRUE, blank.lines.skip = FALSE)
 #' 
 #' # Set spatial and temporal limits
@@ -39,10 +40,6 @@
 #' format = '%d/%m/%Y', tz='UTC')
 #' dateVec <- as.Date(seq(tag, pop, by = 'day')) 
 #' 
-#' # Try a calculation
-#' L.light <- calc.lightloc(locs[1,], iniloc, locs.grid, dateVec, errEll=TRUE, gpeOnly=TRUE)
-#' 
-#' \dontrun{
 #' # Full example light calculation
 #' L.light <- calc.lightloc(locs, iniloc = iniloc, locs.grid = locs.grid,
 #'                      dateVec = dateVec, errEll = TRUE, gpeOnly = TRUE)

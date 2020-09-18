@@ -86,7 +86,7 @@ read.wc <- function(filename, tag, pop, type = 'sst', dateFormat=NULL, verbose=F
     #print(paste('Data gaps are ', paste(gaps[gaps > 1], collapse=', '), ' days in PDT...'))
     gaps <- diff(c(as.Date(tag), udates, as.Date(pop)), units='days')
     if(verbose){
-      print(head(data))
+      print(utils::head(data))
       print(paste(length(which(as.Date(seq(tag, pop, 'day')) %in% udates)), ' of ', length(seq(tag, pop, 'day')), ' deployment days have PDT data...', sep=''))
       print(paste('Data gaps are ', paste(gaps[gaps > 1], collapse=', '), ' days in PDT...'))
     }
@@ -116,7 +116,7 @@ read.wc <- function(filename, tag, pop, type = 'sst', dateFormat=NULL, verbose=F
     # get data gaps
     gaps <- diff(c(as.Date(tag), udates, as.Date(pop)), units='days')
     if (verbose){
-      print(head(data))
+      print(utils::head(data))
       print(paste(length(which(as.Date(seq(tag, pop, 'day')) %in% udates)), ' of ', length(seq(tag, pop, 'day')), ' deployment days have SST data...', sep=''))
       print(paste('Data gaps are ', paste(gaps[gaps > 1], collapse=', '), ' days...'))
     }
@@ -145,7 +145,7 @@ read.wc <- function(filename, tag, pop, type = 'sst', dateFormat=NULL, verbose=F
     # get data gaps
     gaps <- diff(c(as.Date(tag), udates, as.Date(pop)), units='days')
     if (verbose){
-      print(head(data))
+      print(utils::head(data))
       print(paste(length(which(as.Date(seq(tag, pop, 'day')) %in% udates)), ' of ', length(seq(tag, pop, 'day')), ' deployment days have light data...', sep=''))
       print(paste('Data gaps are ', paste(gaps[gaps > 1], collapse=', '), ' days...'))
     }

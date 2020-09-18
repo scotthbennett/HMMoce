@@ -38,5 +38,5 @@ georeferenced SRSS times that the tag-measured times are compared to in order
 to generate a likelihood.
 }
 \seealso{
-\code{\link{calc.gpe2}}
+\code{\link{calc.lightloc}}
 }

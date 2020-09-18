@@ -14,6 +14,17 @@
 #' 
 #' @examples
 #' \dontrun{
+#' tsFile <- system.file("extdata", "141259-Series.csv", package = "HMMoce")
+#' ts <- read.table(tsFile, sep=',', header=T)
+#' ts$Date <- as.POSIXct(paste(ts$Day, ts$Time), format='%d-%b-%Y %H:%M:%S', tz='UTC')
+#' ts <- ts[,c('Date','Depth','Temperature')]
+#' 
+#' ## generate example daily summary of depth-temp profiles
+#' pdt_dates <- seq.POSIXt(tag, pop, by = 'day') 
+#' 
+#' ## generate depth-temp summary from time series
+#' pdt <- bin_TempTS(ts, out_dates = pdt_dates, bin_res = 25)
+#' pdt <- pdt[,c('Date','Depth','MinTemp','MaxTemp')]
 #' }
 
 bin_TempTS <- function (ts, out_dates, bin_res = 8) 
@@ -50,7 +61,7 @@ bin_TempTS <- function (ts, out_dates, bin_res = 8)
 		x$Depth <- depth
 		unique_depths <- unique(depth)
 		if (length(unique_depths) > 2) {
-			h <- hist(depth, breaks = unique_depths, plot = F)
+			h <- graphics::hist(depth, breaks = unique_depths, plot = F)
 			#identifiers <- c("DeployID", "Serial", "Ptt")
 			#identifiers <- identifiers[which(identifiers %in% names(ts))]
 			add <- plyr::ddply(x[, which(names(x) %in% c("Depth", "Temperature"))], c("Depth"), function(x) c(nrecs = nrow(x), MeanTemp = mean(round(x$Temp, 2)), MinTemp = min(round(x$Temp, 2)), MaxTemp = max(round(x$Temp, 2))))

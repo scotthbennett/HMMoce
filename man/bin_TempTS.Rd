@@ -4,31 +4,35 @@
 \alias{bin_TempTS}
 \title{Convert time series to PDT-like data for use in HMMoce.}
 \usage{
-bin_TempTS(ts, tsDates = NULL, res = 8)
+bin_TempTS(ts, out_dates, bin_res = 8)
 }
 \arguments{
-\item{ts}{is data frame of time series data. Currently this is built for WC 
-tags but can handle others if you know what youre doing (e.g. proper input 
-format). Required inputs cols are just date, Depth and Temperature.}
+\item{ts}{is data frame of time series data. Required inputs cols are Date (POSIX), Depth and Temperature. Note that its up to you to use the appropriate columns with these names. For example, Microwave X-tags can have a "Corrected Depth" column. You should re-name that to "Depth" and provide it as input here.}
 
-\item{tsDates}{is vector of desired dates as output. This is designed to be
-used for creating higher temporal resolution PDT datasets from time series
-data.}
+\item{out_dates}{is POSIX vector of desired dates as output.}
 
-\item{res}{is numeric indicating desired depth bin resolution. Default is 8 
+\item{bin_res}{is numeric indicating desired depth bin resolution. Default is 8 
 to match native PDT format on WC tags; however, theres no reason why this 
 couldnt be higher resolution, especially if consider we later match this to
-a 3D product such as HYCOM that is higher depth resolution (usually). **NOT WORKING**}
+a 3D product such as HYCOM that is higher depth resolution (usually).}
 }
 \value{
-a dataframe that matches the required format for a PDT data product 
-  for further use in HMMoce
+a dataframe of summarized depth-temperature information that can be used for likelihood calculations in HMMoce
 }
 \description{
-\code{bin_TempTS} compares tag SST to remotely sensed SST and calculates 
-likelihoods
+\code{bin_TempTS} converts time series data (such as from MT tags) to PDT-like data for use in HMMoce
 }
 \examples{
 \dontrun{
+tsFile <- system.file("extdata", "141259-Series.csv", package = "HMMoce")
+ts <- read.table(tsFile, sep=',', header=T)
+ts$Date <- as.POSIXct(paste(ts$Day, ts$Time), format='\%d-\%b-\%Y \%H:\%M:\%S', tz='UTC')
+ts <- ts[,c('Date','Depth','Temperature')]
+
+pdt_dates <- seq.POSIXt(tag, pop, by = 'day') ## generate example daily summary of depth-temp profiles
+
+## generate depth-temp summary from time series
+pdt <- bin_TempTS(ts, out_dates = pdt_dates, bin_res = 25)
+pdt <- pdt[,c('Date','Depth','MinTemp','MaxTemp')]
 }
 }

@@ -22,7 +22,7 @@
 #' @export
 #' @return L is a raster of dim(lon x lat x dateVec) containing likelihood
 #'   surfaces for each time point
-#' @seealso \code{\link{calc.gpe2}}
+#' @seealso \code{\link{calc.lightloc}}
 #' 
 
 calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){

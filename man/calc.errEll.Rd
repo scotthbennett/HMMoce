@@ -7,8 +7,7 @@
 calc.errEll(locs, locs.grid)
 }
 \arguments{
-\item{locs}{is data frame of locations typically read from -Locations.csv output
-from Wildlife Computers}
+\item{locs}{is data frame of light-based location estimates containing columns for Date (POSIXct), Longitude, Latitude, Error.Semi.minor.axis, Error.Semi.major.axis, Offset, and Offset.orientation.}
 
 \item{locs.grid}{is list output from \code{setup.locs.grid}}
 }

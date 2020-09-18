@@ -14,6 +14,8 @@ positive number.}
 
 \item{muadv}{advection of the kernel. Unit of the input is cell width. 
 Defaults to 0.}
+
+\item{ratio.xy}{ratio in x:y}
 }
 \value{
 Gaussian kernel as a 2D matrix of size (siz x siz)

@@ -8,6 +8,8 @@ calc.bottomTemp.par(tag.bt, filename, bt.dir, dateVec, focalDim = NULL,
   sens.err = 1, varName = "Temperature", ncores = NULL)
 }
 \arguments{
+\item{tag.bt}{is data frame containing tag-collected bottom temperature data. Requires at least cols: Date (POSIXct), Temperature}
+
 \item{filename}{is the first part of the filename specified to the download 
 function \code{\link{get.env}}. For example, if downloaded files were 
 specific to a particular dataset, you may want to identify that with a name
@@ -31,8 +33,6 @@ sensor. Default is 1.}
 \item{ncores}{is integer indicating number of cores used in this parallel
 computation. Defaults to using a detection function that chooses cores for
 you.}
-
-\item{bt}{is data frame containing tag-collected bottom temperature data. Requires at least cols: Date (POSIXct), Temperature}
 }
 \value{
 likelihood is raster brick of likelihood surfaces representing

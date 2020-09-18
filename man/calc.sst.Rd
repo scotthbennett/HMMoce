@@ -5,7 +5,7 @@
 \title{Calculate SST-based likelihood}
 \usage{
 calc.sst(tag.sst, filename, sst.dir, dateVec, focalDim = NULL,
-  sens.err = 1)
+  sens.err = 1, auto.aggr = TRUE)
 }
 \arguments{
 \item{tag.sst}{is data frame containing tag-collected SST data. Requires at least cols: Date (POSIXct), Temperature}
@@ -27,6 +27,8 @@ approximately incorporate 0.25 degrees.}
 
 \item{sens.err}{is numeric indicating the percent sensor error in the tag sst
 sensor. Default is 1.}
+
+\item{auto.aggr}{is logical indicating whether to automatically aggregate the calculated likelihood raster if the resolution is higher than 0.1.}
 }
 \value{
 likelihood is raster brick of likelihood surfaces representing

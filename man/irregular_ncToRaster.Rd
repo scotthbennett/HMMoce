@@ -8,10 +8,17 @@ irregular_ncToRaster(fname, varid)
 }
 \arguments{
 \item{fname}{is input filename of the .nc file}
+
+\item{varid}{is character indicating the name of the variable of interest in the input nc variable}
 }
 \value{
 a raster version of the input .nc file coerced to regular grid
 }
 \description{
 Main purpose of this function is for converting bathymetry data that is typically acquired as an irregular grid
+}
+\examples{
+\dontrun{
+bathy <- irregular_ncToRaster(paste0(bathy.dir, 'bathy.nc'), varid = 'topo')
+}
 }

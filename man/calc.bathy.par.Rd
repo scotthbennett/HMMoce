@@ -12,11 +12,13 @@ calc.bathy.par(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err = 5,
 
 \item{bathy.grid}{is raster of bathymetry. If the minimum bathymetry values are < 0, the function automatically converts in-water values to positive and masks land.}
 
+\item{dateVec}{is vector of POSIXct dates for each time step of the likelihood}
+
 \item{focalDim}{is integer for dimensions of raster::focal used to calculate
 sd() of env grid cell. If left to NULL (default), this dimension will
 approximately incorporate 0.25 degrees.}
 
-\item{sens.err}{is numeric indicating the percent sensor error in the tag-measured max depth. This allows some uncertainty when calculating the integral for the likelihood and doesnt have to necessarily reflect the actual sensor error. Default is 5%.}
+\item{sens.err}{is numeric indicating the percent sensor error in the tag-measured max depth. This allows some uncertainty when calculating the integral for the likelihood and doesnt have to necessarily reflect the actual sensor error. Default is 5 percent.}
 
 \item{lik.type}{is character indicating which likelihood type to use in the bathymetry calculation. Options are dnorm (a traditional likelihood bounded by tag measurement +/- sens.err; experimental) or max ("one-sided" likelihood >= tag-measured max depth; DEFAULT). The latter choice acts more like a mask in that it doesnt allow likelihoods in water shallower than the max depth for each time point.}
 

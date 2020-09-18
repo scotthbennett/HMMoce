@@ -5,7 +5,7 @@
 \title{Estimate parameters}
 \usage{
 opt.params(pars.init, lower.bounds, upper.bounds, g, L,
-  alg.opt = "optim", ...)
+  alg.opt = "optim", reformat = TRUE, ...)
 }
 \arguments{
 \item{pars.init}{is vector of initial parameter set: sigma1 (resident), sigma2 (migrant), p11 switch from behavior 1 to 1 (remain resident), p22 switch from behavior 2 to 2 (remain migrant)}
@@ -19,6 +19,8 @@ opt.params(pars.init, lower.bounds, upper.bounds, g, L,
 \item{L}{is likelihood array output from \code{make.L}}
 
 \item{alg.opt}{character indicating which optimization algorithm to use. Options are "optim", "nlminb", "ga", "ga_optim".}
+
+\item{reformat}{logical indicating whether to reformat and thus standardize output of the optimization algorithms}
 
 \item{write.results}{optional. logical indicating whether to write results with \code{saveRDS}.}
 
@@ -48,4 +50,9 @@ lower.bounds=c(0.1,0.001,.1,.1)
 upper.bounds=c(5,.5,.9,.9)
 
 }
+}
+\author{
+Paul Gatti
+
+Camrin Braun
 }

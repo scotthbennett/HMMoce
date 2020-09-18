@@ -17,7 +17,7 @@
 #' @param lat vector of latitude values corresponding to dims of the previous 2
 #'   layers
 #' @param par0 is vector of movement parameter values, likely output from
-#'   \code{calc.param}.
+#'   \code{opt.params}.
 #' @param bound.thr is numeric indicating the percent threshold that is added 
 #'   and subtracted from the bounding box of the filter output from the 
 #'   previous day before masking. Default is .05 (5 percent).

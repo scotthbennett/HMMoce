@@ -49,11 +49,9 @@ options(tidy=TRUE)
 knitr::opts_chunk$set(
   comment = '', fig.width = 6, fig.height = 6, tidy = TRUE)
 dir <- getwd()
-
-L.rasters <- readRDS('./141259_L.rasters_20200727.rds')
-res <- readRDS('./10_3_2-HMMoce_res_20200828.rds')
-
   
+## vignette figure generation script is at github.com/camrinbraun/HMMoce_run/vignette/
+
 @
 
 \tableofcontents
@@ -162,10 +160,8 @@ ts <- read.table(tsFile, sep=',', header=T)
 ts$Date <- as.POSIXct(paste(ts$Day, ts$Time), format='%d-%b-%Y %H:%M:%S', tz='UTC')
 ts <- ts[,c('Date','Depth','Temperature')]
 
-pdt_dates <- seq.POSIXt(tag, pop, by = 'day') ## generate example daily summary of depth-temp profiles
-
 ## generate depth-temp summary from time series
-pdt <- bin_TempTS(ts, out_dates = pdt_dates, bin_res = 25)
+pdt <- bin_TempTS(ts, out_dates = dateVec, bin_res = 25)
 pdt <- pdt[,c('Date','Depth','MinTemp','MaxTemp')]
 head(pdt)
 @
@@ -211,7 +207,19 @@ lightloc$Date <- as.POSIXct(lightloc$Date, format = findDateFormat(lightloc$Date
 head(lightloc)
 @
 
-** show what the ellipse looks like **
+<<light_ell,size='small', eval=FALSE, echo=FALSE, message=FALSE>>=
+
+plot(c(-75,-65), c(25,60), type='n', xlab='Longitude', ylab='Latitude', main='Example light-based error ellipse')
+points(lightloc$Longitude[1], lightloc$Latitude[1], pch=16)
+plotrix::draw.ellipse(lightloc$Longitude[1], lightloc$Latitude[1], lightloc$Error.Semi.minor.axis[1] / 1000 / 111, lightloc$Error.Semi.major.axis[1] / 1000 / 111, col=alpha("red", 0.1))
+text(-72, 58, 'Error semi minor = 71 km')
+text(-72, 56, 'Error semi major = 1,500 km')
+text(-72, 54, 'Offset and orientation = 0')
+world(add=T)
+
+@
+
+\includegraphics[width=5in, keepaspectratio]{./light_ell.pdf}
 
 The column names above are derived from Wildlife Computers outputs but data from other manufacturers can be readily coerced to match this format. For example, Microwave Telemetry provides estimated latitude/longitude values based on their proprietary post-processing methods (in 'Lat\&Long' sheet in an x-tag report). Since these aren't provided with error estimates, we can use empirical error estimates fixed at 0.7$^\circ$ longitude following \cite{Musyl2011} (although note that such error seems rather generous and is likely higher).
 
@@ -279,14 +287,7 @@ If you plan to analyze multiple tag datasets over a similar time period and spat
 
 There are a number of SST products out there that meet our needs. While modeled SST products work fine, we typically use remote-sensing products. There are 3 products currently built into the \texttt{get.env} functionality within \texttt{HMMoce} (see \texttt{?get.env}). Here we'll use the Optimum Interpolation SST (OISST) from NOAA. Note the tradeoffs associated with different SST products such as gaps, gap-filling techniques/interpolations, product resolution and temporal coverage/availability of a given product. Here we get one file as an example:
 
-<<sp.lim_small, size='small', eval=TRUE, message=FALSE, echo=FALSE>>=
-sp.lim_small <- list(lonmin = -72,
-               lonmax = -66,
-               latmin = 38,
-               latmax = 43)
-@
-
-<<env-sst,size='small', cache=TRUE, eval=TRUE>>=
+<<env-sst,size='small', cache=FALSE, eval=FALSE>>=
 ## here we get use a ridculously small spatial extent for this species, just to show some example environmental data
 udates <- seq.Date(as.Date(tag), as.Date(pop), by = 'day')
 sst.dir <- paste0(dir, '/EnvData/sst/')
@@ -298,18 +299,16 @@ plot(sst, main='Example SST field')
 world(add=T)
 @
 
+\includegraphics[width=5in, keepaspectratio]{./example_sst.png}
+
 \subsubsection{Depth-temperature data}
 
 As with SST above, there are a number of ways to represent temperature of the 3D ocean. While observations are nice, they are typically too sparse to generate a reliable grid on which we can calculate likelihoods. Thus, our only good option (usually) is to use oceanographic models. Data-assimilating models constantly "nudge" the model outputs to match reality and \texttt{HMMoce} includes functionality for accessing outputs of the HYbrid Coordinate Ocean Model (HYCOM). For most applications, models such as HYCOM are more likely to generate realistic likelihood results when comparing \textit{in situ} tag data to a dynamic ocean. In principle, any representation of the 3D ocean can be used for likelihood construction as is done here with HYCOM.
 
-<<env-hycom,size='small', eval=TRUE, cache=TRUE>>=
+<<env-hycom,size='small', eval=FALSE, cache=FALSE>>=
 ## you need some representation of environmental depth-temperature
 ## in this case we're using hycom
 
-sp.lim_small <- list(lonmin = -72,
-               lonmax = -66,
-               latmin = 38,
-               latmax = 43)
 dir <- getwd()
 hycom.dir <- paste0(dir,'/EnvData/hycom/')
 if (!dir.exists(hycom.dir)) dir.create(hycom.dir, recursive = TRUE)
@@ -317,7 +316,7 @@ if (!file.exists(paste0(hycom.dir, 'hycom_', udates[1], '.nc'))) get.env(udates[
 
 b <- raster::brick(paste0(hycom.dir, 'hycom_', udates[1], '.nc'))
 
-## plot top 5 depth levels from HYCOM
+## plot top 3 depth levels from HYCOM
 #par(mfrow=c(3,1))
 for (i in c(1,10,20)){
   plot(b[[i]])
@@ -325,11 +324,13 @@ for (i in c(1,10,20)){
 }
 @
 
+\includegraphics[width=5in, keepaspectratio]{./example_hycom.png}
+
 \subsubsection{Bathymetry}
 
 The last "environmental" dataset we need is bathymetry. Bathymetry has multiple uses in \texttt{HMMoce} but is primarily used as a mask that eliminates portions of a likelihood grid that are shallower than the maximum depth the tag recorded during a given timestep (\ie the likelihood has to incorporate bottom depth at least as deep as the animal's tag recorded). For primarily benthic species, bathymetry can also be used to generate a likelihood based on the tag-recorded depth compared to bottom depth.
 
-<<env-bathy, size='small', eval=TRUE>>=
+<<env-bathy, size='small', eval=FALSE>>=
 
 bathy.dir <- paste0(dir, '/EnvData/bathy/')
 if (!dir.exists(bathy.dir)) dir.create(bathy.dir, recursive = TRUE)
@@ -345,6 +346,7 @@ plot(bathy, main='Example bathymetry field')
 world(add=T)
 @
 
+\includegraphics[width=5in, keepaspectratio]{./example_bathy.png}
 
 \subsection{Observation likelihoods} \label{sec:lik}
 
@@ -362,29 +364,8 @@ Light-based geolocation is a complicated topic with a myriad of potential implem
 
 @
 
-\begin{comment}
-Here's an example of what these look like:
-<<lik-light3-plot, size='small', eval=FALSE>>=
 
-  load('./example_blueshark_lik_srss.rds')
-  load('./example_blueshark_lik_lightloc_noEll.rds')
-  load('./example_blueshark_lik_lightloc_wEll.rds')
-
-  ## here's what the likelihoods look like
-  par(mfrow=c(3,1))
-  plot(L.light.srss[[12]], main='Sunrise/sunset based likelihood'); world(add=T)
-  plot(L.light.noell[[12]], main='Light-based location likelihood - Lon-only'); world(add=T)
-  plot(L.light.ell[[12]], main='Light-based location likelihood - Lon + Lat'); world(add=T)
-
-@
-\end{comment}
-
-Here's an example of what the lon-only likelihoods look like:
-<<lik-light-plot, size='small', eval=TRUE>>=
-
-  plot(L.rasters$L.light[[12]], main='Light-based location likelihood - Lon-only'); world(add=T)
-  
-@
+\includegraphics[width=5in, keepaspectratio]{./example_light_lik.png}
 
 \subsubsection{SST likelihood}
 
@@ -393,29 +374,31 @@ SST-based likelihoods are perhaps among the most simple, and often informative, 
 <<lik-sst, size='small', eval=FALSE>>=
 
   # SST LIKELIHOODS
-  L.sst <- calc.sst(tag.sst, filename='oisst', sst.dir = sst.dir, dateVec = dateVec[1:5], sens.err = 1)
-  L.sst <- calc.sst.par(tag.sst, filename='oisst', sst.dir = sst.dir, dateVec = dateVec, sens.err = 1, focalDim = 3, ncores=2)
+  L.sst <- calc.sst(tag.sst, filename='oisst', sst.dir = sst.dir, dateVec = dateVec, sens.err = 1)
+  
+  ## identical to above but in parallel
+  L.sst <- calc.sst.par(tag.sst, filename='oisst', sst.dir = sst.dir, dateVec = dateVec, sens.err = 1, ncores=2)
 
 @
 
-Here's an example of what these look like:
-<<lik-sst-plot, size='small', eval=TRUE>>=
 
-  ## here's what the likelihoods look like
-  plot(L.rasters$L.sst[[12]], main='SST-based likelihood'); world(add=T)
+\includegraphics[width=5in, keepaspectratio]{./example_sst_lik.png}
 
-@
 
 \subsubsection{3D depth-temperature likelihood}
 
 The depth-temperature based likelihoods allow users to generate 3D likelihoods for tagged animals to improve position estimates, which is particularly useful for study species that rarely visit the photic zone during the day \citep[(e.g. swordfish,][]{Neilson2009, Braun2019} or spend considerable periods of time in the mesopelagic \citep[e.g. basking sharks,][]{Skomal2009, Braun2018b}. In \texttt{HMMoce}, there are currently two approaches to using the 3D data for geolocation. The first follows \citep{Luo2015} by integrating profile data to calculate Ocean Heat Content (OHC). We integrate tag-based depth-temperature data from a given isotherm (default or user-selected) to the surface to calculate the "heat content" of that layer measured by the tagged animal. Similarly, we perform the same integration on the model ocean as represented in the HYbrid Coordinate Ocean Model ([HYCOM](http://hycom.org/)) and compare the two integrated metrics to generate a likelihood surface representing the animal's estimated daily position. The second approach is to use the profile in 3D space and compare it to oceanography at measured depth levels. This uses the same tag-based depth-temperature data (not integrated) and compares it to modeled oceanography (such as HYCOM). In either case, we use a linear regression to predict the tag-based temperature at the standard depth levels measured in the oceanographic datasets (this is why we generate custom depth-temperature tag data to match oceanographic depth levels whenever possible, \ref{sec:tag-data}). Then a likelihood is calculated in the same fashion by comparing temperature from the tag to ocean temperature at each depth level and resulting likelihood layers are multiplied across depth levels to result in a single daily likelihood layer based on the tagged animal's dive data. Because these can be very computationally demanding, parallelized calculation functions are available for all three depth-temperature based likelihood functions.
 
-<<lik-3d, size='small', eval=FALSE>>=
+<<lik-ohc, size='small', eval=FALSE>>=
 
   # OCEAN HEAT CONTENT (INTEGRATED PDTS)
   L.ohc <- calc.ohc(pdt, filename='hycom', ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = F)
   ## the parallel version:
   #L.ohc <- calc.ohc.par(pdt, filename='hycom', ohc.dir = hycom.dir, dateVec = dateVec, isotherm = '', use.se = F)
+@
+\includegraphics[width=5in, keepaspectratio]{./example_ohc_lik.png}
+
+<<lik-hycom, size='small', eval=FALSE>>=
 
   # HYCOM PROFILE BASED LIKELIHOODS
   L.hycom <- calc.hycom(pdt, filename='hycom', hycom.dir, focalDim = 9, dateVec = as.POSIXct(dateVec), use.se = T)
@@ -423,14 +406,8 @@ The depth-temperature based likelihoods allow users to generate 3D likelihoods f
   #L.hycom <- calc.hycom.par(pdt, filename='hycom', hycom.dir, focalDim = 9, dateVec = as.POSIXct(dateVec), use.se = T)
 @
 
-Here's an example of what these look like:
-<<lik-pdt-plot, size='small', eval=TRUE>>=
+\includegraphics[width=5in, keepaspectratio]{./example_hycom_lik.png}
 
-  ## here's what the likelihoods look like
-  plot(L.rasters$L.ohc[[13]], main='OHC-based likelihood'); world(add=T)
-  plot(L.rasters$L.hycom.se[[13]], main='HYCOM-based likelihood'); world(add=T)
-
-@
 
 \subsubsection{Bathymetry likelihood}
 
@@ -447,13 +424,8 @@ Bathymetry can be used to further constrain the likely location of a tagged anim
 
 @
 
-Here's an example of what these look like:
-<<lik-bathy-plot, size='small', eval=TRUE>>=
+\includegraphics[width=5in, keepaspectratio]{./example_bathy_lik.png}
 
-  ## here's what the likelihoods look like
-  plot(L.rasters$L.bathy[[12]], main='Bathy-based likelihood'); world(add=T)
-
-@
 
 \subsubsection{Bottom temperature likelihood}
 Gradients in bottom temperature have been used to inform geolocation of benthic species, particularly in relatively shallow and/or enclosed basins \citep[\eg cod][]{LeBris2013}. The implementation of this likelihood in \texttt{HMMoce} is similar to SST-based likelihoods but the surface temperature grid has simply been exchanged for a bottom temperature grid. Typically the environmental data for generating these likelihoods is derived from oceanographic models or some aggregate (often interpolated) set of observations.
@@ -469,14 +441,6 @@ Gradients in bottom temperature have been used to inform geolocation of benthic 
 \subsubsection{Overall observation likelihood}
 
 The final step in generating likelihoods is to combine the likelihoods of interest to generate an overall observation-based likelihood for each time step. This is another key decision point in the geolocation process as there are a number of likelihood combinations that might make sense to base the geolocation estimates on. Here, we show just an example of one combination of likelihoods but in practice we usually iterate through multiple combinations and use a model selection approach to determine the "best" model. The final step in this section is to generate the overall observation likelihood as a combination of the selected likelihoods. At this point, you can also supply any other known locations (\eg from sightings, acoustic detections, etc).
-
-<<makeL_run, size='small', cache=TRUE, eval=FALSE, echo=FALSE, message=FALSE>>=
-resamp.idx <- which.max(lapply(L.rasters, FUN=function(x) raster::res(x)[1]))
-L.res <- resample.grid(L.rasters, L.rasters[[resamp.idx]])
-L <- make.L(L.res$L.rasters[1:3], iniloc, dateVec, known.locs = NULL)
-
-@
-
 
 <<makeL, size='small', eval=FALSE>>=
 
@@ -497,15 +461,8 @@ L <- make.L(ras.list,
             known.locs = NULL)
 @
 
-Here's an example of what these look like:
-<<lik-L-plot, size='small', eval=FALSE>>=
+\includegraphics[width=5in, keepaspectratio]{./example_L.png}
 
-  ## here's what the likelihoods look like
-  image.plot(g$lon[1,], g$lat[,1], L, main='Example overall likelihood at single time step'); world(add=T)
-
-## not working yet
-
-@
 
 \subsection{Model fitting}
 
@@ -594,19 +551,22 @@ pars.ga <- opt.params(pars.init = c(2,.2,.6,.8),
                         alg.opt = 'ga', 
                         write.results = FALSE,
                         ncores = 4)
-  ## about 7 hrs on blue shark 141259 w 4 cores
+
 @
 
 \subsubsection{HMM Filter / Smoother}
 
 Once the parameter estimation routine(s) are finished, finalize those for input to the HMM filter/smoother. This primarily involves 1) converting movement parameters into kernels for convolution (K1/K2) and 2) converting state switching probabilities into a transition matrix (P). Once those steps are complete, everything is in place for the filter and smoother steps that generate the posterior state distributions. From that, we calculate most probable tracks by, in this case, finding the max of each posterior distribution. Other methods could be used here and may be implemented in the future (\eg Viterbi).
 
-<<hmm, size='small', eval=FALSE>>=
+** explain why these values are here **
+
+
+<<pars1, size='small', eval=FALSE>>=
 
 ## as an example, grab the pars from the GA using both states
 #pars <- pars.ga$par
 
-## or use values from a previous run
+## or use values from a previous run as done here:
 pars <- c(4.964, 0.217, 0.367, 0.484)
 
 ## if only one state is used in the estimation routines (above), this will catch that here and set the parameters accordingly
@@ -624,15 +584,34 @@ if (length(pars) == 4){
 
 K1 <- gausskern.pg(sizes[1], sigmas[1], muadv=muadvs[1])
 if (!is.null(pb)) K2 <- gausskern.pg(sizes[2], sigmas[2], muadv=muadvs[2])
-  
-      
+
+image.plot(K1, main='Diffusion kernel for "migratory" state')
+image.plot(K2, main='Diffusion kernel for "resident" state')
+
+# ** show kernel and how it works **
+## convolution?
+
+@
+ 
+\includegraphics[width=5in, keepaspectratio](./pars1.pdf)
+\includegraphics[width=5in, keepaspectratio](./pars2.pdf)
+
+ <<pars2, size='small', eval=TRUE>>=
+     
 ## set transition matrix, if applicable
 if (!is.null(pb)){
   P <- matrix(c(pb[1], 1- pb[1], 1 - pb[2], pb[2]), 2, 2, byrow=TRUE)
 } else{
   P <- NULL
 }
-      
+  
+P
+
+@
+
+
+<<hmm, size='small', eval=FALSE>>=
+
 # RUN THE FILTER STEP
 if (!is.null(pb)){
   K <- list(K1,K2)
@@ -647,8 +626,9 @@ AIC <- 2 * nllf + 2 * length(which(!is.na(pars)))
 # RUN THE SMOOTHING STEP
 s <- hmm.smoother(f, K = K, L = L, P = P)
       
-# GET THE MOST PROBABLE TRACK
-tr <- calc.track(s, g=L.res$g, dateVec, iniloc)
+# GET THE MOST PROBABLE TRACK AS MEAN OF POSTERIOR DISTRIBUTION OF STATE
+tr <- calc.track(s, g = L.res$g, dateVec, iniloc, method='mean')
+
 @
 
 \subsubsection{Plotting results}
@@ -657,23 +637,15 @@ tr <- calc.track(s, g=L.res$g, dateVec, iniloc)
 
 plotHMM(s, tr, dateVec, ptt='141259_example', save.plot = F)
 
-plotRD(s, tr, ptt='141259_example', g = g, xlims = c(sp.lim$xmin, sp.lim$xmax), ylims = c(sp.lim$ymin, sp.lim$ymax), makePlot = TRUE, save.plot=FALSE)
-
-@
-
-<<plot-hmm, size='small', eval=FALSE, message=FALSE, echo=FALSE>>=
-
-plotHMM(res$s, res$tr, dateVec, ptt='141259_example', save.plot = T)
-
-plotRD(res$s, res$tr, ptt='141259_example', g = res$g, xlims = c(sp.lim$lonmin, sp.lim$lonmax), ylims = c(sp.lim$latmin, sp.lim$latmax), makePlot = TRUE, save.plot=TRUE)
+#plotRD(s, tr, ptt='141259_example', g = g, xlims = c(sp.lim$xmin, sp.lim$xmax), ylims = c(sp.lim$ymin, sp.lim$ymax), makePlot = TRUE, save.plot=FALSE)
 
 @
 
 
-\includegraphics{./figure/141259_example_track_results.png}
+\includegraphics[width=5in, keepaspectratio]{./141259_example_track_results.pdf}
 
 
-%\includegraphics{./figure/141259_example_RD.png}
+%\includegraphics[width=5in, keepaspectratio]{./figure/141259_example_RD.png}
 
 
 

@@ -216,9 +216,6 @@ calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.
   
   parallel::stopCluster(cl)
   
-  # make index of dates for filling in L.hycom
-  didx <- base::match(udates, dateVec)
-  
   # lapply to put parallel answers back together
   lik.pdt = lapply(ans, function(x) x / max(x, na.rm = TRUE))
   

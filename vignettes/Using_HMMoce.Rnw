@@ -356,11 +356,14 @@ The basic premise of the observation likelihoods is that we compare a tag-based 
 
 Light-based geolocation is a complicated topic with a myriad of potential implementations for generating light-based likelihoods. For now, \texttt{HMMoce} has two main treatments of light to inform geolocation estimates (Sec. \ref{sec:light-data}). The simplest is using tag-based light levels to estimate sunrise and sunset times and thus position (\texttt{calc.srss}). This is usually an overly simplistic treatment of this data so we often 1) throw out latitude estimates and only keep longitude and 2) get a lot of bad location information, particularly from species that don't frequent the photic zone. For example, a surface-oriented species that dives below the photic zone 30 minutes before sunset would generate an artificial sunset time 30 minutes early, causing $\sim$8$^\circ$ longitudinal difference in position estimate! The other approach currently implemented in \texttt{HMMoce} generates likelihoods based on existing light-based position estimates(\texttt{calc.lightloc}). Most manufacturers either provide the analysis or the analysis software to generate light-based position estimates. For example, Wildlife Computers uses a thresholding algorithm (hill ref) in their GPE2 software that allows user-controlled QC of light curves in a GUI. While this software has been replaced by their cloud-based GPE3 algorithm, GPE2 remains the tool of choice for this specific analysis as the user retains some control over the conversion of light curves to location estimates and the ability to visually check the quality of these curves. Other manufacturers generate similar light-based position outputs such as Lotek's daily summary for archival tags. Additional light-based options will be implemented in the future as they become available and proven for marine animal telemetry. To that end, we are happy to receive feedback via Github on methods to include or simply submit a pull request.
 
+Thus, the implementation of light-based likelihoods in \texttt{HMMoce} looks like the following 3 lines where we can choose from 1) sunrise/sunset times to estimate location or light-based position estimates to estimate 2) elliptical likelihoods (lon + lat) or 3) longitude-only likelhoods. The following 3 calculations result in likelihoods that look similar to the following 3-panel figure.
+
 <<lik-light, size='small', eval=FALSE>>=
 
   # LIGHT-BASED LIKELIHOODS
   L.light.srss <- calc.srss(light, locs.grid = locs.grid, dateVec = dateVec, res = 1, focalDim = 15)
-  L.light <- calc.lightloc(lightloc, locs.grid = locs.grid, dateVec = dateVec, errEll = TRUE)
+  L.light.lonlat <- calc.lightloc(lightloc, locs.grid = locs.grid, dateVec = dateVec, errEll = TRUE)
+    L.light.lon <- calc.lightloc(lightloc, locs.grid = locs.grid, dateVec = dateVec, errEll = FALSE)
 
 @
 

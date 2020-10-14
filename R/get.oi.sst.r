@@ -32,6 +32,7 @@ get.oi.sst <- function(limits, time, filename='', download.file=TRUE, dir = getw
   
   options(warn = -1)
   
+  original_dir <- getwd()
   dir.create(file.path(dir), recursive = TRUE, showWarnings = FALSE)
   setwd(dir)
   
@@ -88,6 +89,9 @@ get.oi.sst <- function(limits, time, filename='', download.file=TRUE, dir = getw
   }
   
   options(warn = 0)
+  
+  ## reset original directory
+  setwd(original_dir)
   
   return(url)
 }

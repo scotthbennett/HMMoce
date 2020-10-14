@@ -37,6 +37,7 @@
 get.hycom <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
                       filename='', download.file=TRUE, dir = getwd(), depLevels=NULL, ...) {
   
+  original_dir <- getwd()
   dir.create(file.path(dir), recursive = TRUE, showWarnings = FALSE)
   setwd(dir)
   
@@ -126,6 +127,9 @@ get.hycom <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
       system(sprintf('curl -o "%s" "%s"', filename, url))
     }
   }
+  
+  ## reset original directory
+  setwd(original_dir)
   return(url)
 }
 

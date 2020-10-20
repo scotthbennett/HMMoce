@@ -462,6 +462,11 @@ L <- make.L(ras.list,
             iniloc,
             dateVec,
             known.locs = NULL)
+
+image.plot(res$g$lon[1,], res$g$lat[,1], L[12,,], 
+           main='Example overall likelihood at single time step', 
+           zlim=c(.01, 1),
+           xlab='Longitude', ylab='Latitude') 
 @
 
 \includegraphics[width=5in, keepaspectratio]{./example_L.png}

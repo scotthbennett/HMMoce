@@ -37,10 +37,10 @@ calc.track <- function(distr, g, dateVec, iniloc, method = 'mean'){
     
     lat.mx <- apply(apply(distr, c(2, 4), sum), 1, which.max)
     #lat.mx <- apply(apply(distr, c(2, 4), sum) * repmat(t(as.matrix(g$lat[,1])), T, 1), 1, which.max)
-    lat.mx <- g$lat[,1][lat.mx]
+    lat <- g$lat[,1][lat.mx]
     lon.mx <- apply(apply(distr, c(2, 3), sum), 1, which.max)
     #lon.mx <- apply(apply(distr, c(2, 3), sum) * repmat(t(as.matrix(g$lon[1,])), T, 1), 1, which.max)
-    lon.mx <- g$lon[1,][lon.mx]
+    lon <- g$lon[1,][lon.mx]
     
     
   } else if (method == 'mode'){

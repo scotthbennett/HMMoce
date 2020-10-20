@@ -19,7 +19,10 @@
 #' @return a list of one raster layer for the combined RD and one raster brick (2 layers) for the individual behavior RDs.
 #' @export
 
-plotRD <- function(distr, track, ptt, known=NULL, g, xlims, ylims, makePlot = TRUE, save.plot=FALSE){
+plotRD <- function(distr, track, ptt, known=NULL, g, xlims = NULL, ylims = NULL, makePlot = TRUE, save.plot=FALSE){
+  
+  if (is.null(xlims)) xlims <- c(min(g$lon) - .1 * min(g$lon), max(g$lon) + .1 * max(g$lon))
+  if (is.null(ylims)) ylims <- c(min(g$lat) - .1 * min(g$lat), max(g$lat) + .1 * max(g$lat))
   
   crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
   rd.cols <- grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(11, 'RdYlGn')))

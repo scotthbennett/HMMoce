@@ -624,11 +624,13 @@ tr <- calc.track(s, g = L.res$g, dateVec, iniloc, method='mean')
 
 \subsubsection{Plotting results}
 
+The package includes a few functions for plotting results, including `plotHMM` which plots a track and associated behavior state estimates and `plotRD` which calculates, plots and returns residency distributions associated with each behavior state and an overall RD.
+
 <<plot-hmm-F, size='small', eval=FALSE>>=
 
 plotHMM(s, tr, dateVec, ptt='141259_example', save.plot = F)
 
-#plotRD(s, tr, ptt='141259_example', g = g, xlims = c(sp.lim$xmin, sp.lim$xmax), ylims = c(sp.lim$ymin, sp.lim$ymax), makePlot = TRUE, save.plot=FALSE)
+plotRD(s, tr, ptt='141259_example', g = g, makePlot = TRUE, save.plot=FALSE)
 
 @
 

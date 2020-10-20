@@ -361,9 +361,10 @@ Thus, the implementation of light-based likelihoods in \texttt{HMMoce} looks lik
 <<lik-light, size='small', eval=FALSE>>=
 
   # LIGHT-BASED LIKELIHOODS
-  L.light.srss <- calc.srss(light, locs.grid = locs.grid, dateVec = dateVec, res = 1, focalDim = 15)
-  L.light.lonlat <- calc.lightloc(lightloc, locs.grid = locs.grid, dateVec = dateVec, errEll = TRUE)
-    L.light.lon <- calc.lightloc(lightloc, locs.grid = locs.grid, dateVec = dateVec, errEll = FALSE)
+  L.light.srss <- calc.srss(light, locs.grid = locs.grid, dateVec = dateVec, res = 1, focalDim = 15) # if using raw light data
+  L.light.lonlat <- calc.lightloc(lightloc, locs.grid = locs.grid, dateVec = dateVec, errEll = TRUE) # if using light-based positions (w/ Lat & Lon)
+
+    L.light.lon <- calc.lightloc(lightloc, locs.grid = locs.grid, dateVec = dateVec, errEll = FALSE) # if using light-based positions (w/ Lon only)
 
 @
 

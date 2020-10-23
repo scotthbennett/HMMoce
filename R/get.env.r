@@ -214,16 +214,104 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
     
   } else if(type == 'hycom'){
     
+    
     for(i in 1:length(uniqueDates)){
       time <- as.Date(uniqueDates[i])
-      repeat{
-        get.hycom(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''),
-                  download.file = TRUE, dir = save.dir, depLevels=depLevels, ...) 
-        tryCatch({
-          err <- try(RNetCDF::open.nc(paste(save.dir,'/', filename, '_', time, '.nc', sep = '')), silent = T)
-        }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})
-        if(class(err) != 'try-error') break
+      
+      if (spatLim$lonmax > 180){ ## 0 to 360
+        print('Detected input coordinates > 180, downloading multiple files.')
+        ex180 <- raster::extent(-180,180,-90,90)
+        ex360 <- raster::extent(180,360,-90,90)
+        
+        ## get part 1 - whatever is above 180
+        ex1 <- raster::intersect(raster::extent(unlist(spatLim)), ex360)
+        ex1 <- raster::extent(raster::rotate(raster::raster(ex1)))
+        #if (ex1@xmin == -180) ex1@xmin <- -179.99
+        original_dir <- getwd()
+        tdir <- tempdir()
+        repeat{
+          get.hycom(c(ex1@xmin, ex1@xmax, ex1@ymin, ex1@ymax), time, filename = paste(filename, '_', time, '_1.nc', sep = ''),
+                    download.file = TRUE, dir = tdir, depLevels=depLevels)#, ...) 
+          tryCatch({
+            err <- try(RNetCDF::open.nc(paste(tdir, '/', filename, '_', time, '_1.nc', sep = '')), silent = T)
+          }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})
+          if(class(err) != 'try-error') break
+        }
+        
+        ## get part 2 - whatever is below 180, if any
+        ex2 <- raster::intersect(raster::extent(unlist(spatLim)), ex180)
+        #if (ex1@xmax == 180) ex1@xmax <- 179.99
+        
+        repeat{
+          get.hycom(c(ex2@xmin, ex2@xmax, ex2@ymin, ex2@ymax), time, filename = paste(filename, '_', time, '_2.nc', sep = ''),
+                    download.file = TRUE, dir = tdir, depLevels=depLevels)#, ...) 
+          tryCatch({
+            err <- try(RNetCDF::open.nc(paste(tdir, '/', filename, '_', time, '_2.nc', sep = '')), silent = T)
+          }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})
+          if(class(err) != 'try-error') break
+        }
+        
+        print('merging those files to a single output file')
+        nc1 <- RNetCDF::open.nc(paste(tdir, '/', filename, '_', time, '_1.nc', sep = ''))
+        
+        ## get var names
+        ncnames = NULL
+        nmax <- RNetCDF::file.inq.nc(nc1)$nvars - 1
+        for(ii in 0:nmax) ncnames[ii + 1] <- RNetCDF::var.inq.nc(nc1, ii)$name
+        temp.idx <- grep('temp', ncnames, ignore.case=TRUE) - 1
+        lat.idx <- grep('lat', ncnames, ignore.case=TRUE) - 1
+        lon.idx <- grep('lon', ncnames, ignore.case=TRUE) - 1
+        #dep.idx <- grep('dep', ncnames, ignore.case=TRUE) - 1
+        
+        # get attributes, if they exist
+        ncatts <- NULL
+        nmax <- RNetCDF::var.inq.nc(nc1, temp.idx)$natts - 1
+        for(ii in 0:nmax) ncatts[ii + 1] <- RNetCDF::att.inq.nc(nc1, temp.idx, ii)$name
+        scale.idx <- grep('scale', ncatts, ignore.case=TRUE) - 1
+        if(length(scale.idx) != 0){
+          scale <- RNetCDF::att.get.nc(nc1, temp.idx, attribute=scale.idx)
+        } else{
+          scale <- 1
+        }
+        off.idx <- grep('off', ncatts, ignore.case=TRUE) - 1
+        if(length(off.idx) != 0){
+          offset <- RNetCDF::att.get.nc(nc1, temp.idx, attribute=off.idx)
+        } else{
+          offset <- 0
+        }
+        
+        lon1 <- RNetCDF::var.get.nc(nc1, lon.idx)
+        lat1 <- RNetCDF::var.get.nc(nc1, lat.idx)
+        dat1 <- RNetCDF::var.get.nc(nc1, temp.idx) * scale + offset
+        r1 <- raster::flip(raster::brick(aperm(dat1, c(2,1,3)), xmn=min(lon1), xmx=max(lon1),
+                                         ymn=min(lat1), ymx=max(lat1)), 2)
+        
+        nc2 <- RNetCDF::open.nc(paste(tdir, '/', filename, '_', time, '_2.nc', sep = ''))
+        lon2 <- RNetCDF::var.get.nc(nc2, lon.idx)
+        lat2 <- RNetCDF::var.get.nc(nc2, lat.idx)
+        dat2 <- RNetCDF::var.get.nc(nc2, temp.idx) * scale + offset
+        r2 <- raster::flip(raster::brick(aperm(dat2, c(2,1,3)), xmn=min(lon2), xmx=max(lon2),
+                                         ymn=min(lat2), ymx=max(lat2)), 2)
+        
+        ## reset original directory after messing w temp files
+        setwd(original_dir)
+        
+        #print(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))
+        r1r <- raster::shift(raster::rotate(raster::shift(r1, 180)), 180)
+        r3 <- raster::merge(r1r, r2)
+        raster::writeRaster(r3, paste(save.dir, '/', filename, '_', time, '.nc', sep = ''), format='CDF')
+        if (file.exists(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))) print(paste0('File output to ', paste(save.dir, '/', filename, '_', time, '.nc', sep = '')))
+        
+      } else{ ## -180 to 180
+        repeat{
+          get.mur.sst(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''), download.file = TRUE, dir = save.dir, ...) # filenames based on dates from above
+          tryCatch({
+            err <- try(RNetCDF::open.nc(paste(save.dir, filename, '_', time, '.nc', sep = '')), silent = T)
+          }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})
+          if(class(err) != 'try-error') break
+        }
       }
+      
     }
     
   } else if (type == 'woa'){

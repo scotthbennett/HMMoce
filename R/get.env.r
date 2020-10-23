@@ -65,17 +65,80 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
           if(class(err) != 'try-error') break
         }
       }
+      
+      ## GHR
     } else if(sst.type == 'ghr'){
       for(i in 1:length(uniqueDates)){
         time <- as.Date(uniqueDates[i])
-        repeat{
-          get.ghr.sst(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''), download.file = TRUE, dir = save.dir, ...) # filenames based on dates from above
-          tryCatch({
-            err <- try(RNetCDF::open.nc(paste(save.dir, filename, '_', time, '.nc', sep = '')), silent = T)
-          }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})
-          if(class(err) != 'try-error') break
+        
+        if (spatLim$lonmax > 180){ ## 0 to 360
+          print('Detected input coordinates > 180, downloading multiple files.')
+          ex180 <- raster::extent(-180,180,-90,90)
+          ex360 <- raster::extent(180,360,-90,90)
+          
+          ## get part 1 - whatever is above 180
+          ex1 <- raster::intersect(raster::extent(unlist(spatLim)), ex360)
+          ex1 <- raster::extent(raster::rotate(raster::raster(ex1)))
+          if (ex1@xmin == -180) ex1@xmin <- -179.995
+          original_dir <- getwd()
+          tdir <- tempdir()
+          repeat{
+            get.ghr.sst(c(ex1@xmin, ex1@xmax, ex1@ymin, ex1@ymax), time, filename = paste(filename, '_', time, '_1.nc', sep = ''), download.file = TRUE, dir = tdir)#, ...) # filenames based on dates from above
+            tryCatch({
+              err <- try(RNetCDF::open.nc(paste(tdir, '/', filename, '_', time, '_1.nc', sep = '')), silent = T)
+            }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})
+            if(class(err) != 'try-error') break
+          }
+          
+          ## get part 2 - whatever is below 180, if any
+          ex2 <- raster::intersect(raster::extent(unlist(spatLim)), ex180)
+          if (ex1@xmax == 180) ex1@xmax <- 179.995
+          
+          repeat{
+            get.ghr.sst(c(ex2@xmin, ex2@xmax, ex2@ymin, ex2@ymax), time, filename = paste(filename, '_', time, '_2.nc', sep = ''), download.file = TRUE, dir = tdir)#, ...) # filenames based on dates from above
+            tryCatch({
+              err <- try(RNetCDF::open.nc(paste(tdir, '/', filename, '_', time, '_2.nc', sep = '')), silent = T)
+            }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})
+            if(class(err) != 'try-error') break
+          }
+          
+          print('merging those files to a single output file')
+          nc1 <- RNetCDF::open.nc(paste(tdir, '/', filename, '_', time, '_1.nc', sep = ''))
+          lon1 <- RNetCDF::var.get.nc(nc1, 'longitude')
+          lat1 <- RNetCDF::var.get.nc(nc1, 'latitude')
+          dat1 <- RNetCDF::var.get.nc(nc1, 'SST') # for OI SST
+          r1 <- raster::flip(raster::raster(t(dat1), xmn=min(lon1), xmx=max(lon1),
+                                            ymn=min(lat1), ymx=max(lat1)), 2)
+          
+          nc2 <- RNetCDF::open.nc(paste(tdir, '/', filename, '_', time, '_2.nc', sep = ''))
+          lon2 <- RNetCDF::var.get.nc(nc2, 'longitude')
+          lat2 <- RNetCDF::var.get.nc(nc2, 'latitude')
+          dat2 <- RNetCDF::var.get.nc(nc2, 'SST') # for OI SST
+          r2 <- raster::flip(raster::raster(t(dat2), xmn=min(lon2), xmx=max(lon2),
+                                            ymn=min(lat2), ymx=max(lat2)), 2)
+          
+          ## reset original directory after messing w temp files
+          setwd(original_dir)
+          
+          #print(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))
+          r1r <- raster::shift(raster::rotate(raster::shift(r1, 180)), 180)
+          r3 <- raster::merge(r1r, r2)
+          raster::writeRaster(r3, paste(save.dir, '/', filename, '_', time, '.nc', sep = ''), format='CDF')
+          if (file.exists(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))) print(paste0('File output to ', paste(save.dir, '/', filename, '_', time, '.nc', sep = '')))
+          
+        } else{ ## -180 to 180
+          repeat{
+            get.ghr.sst(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''), download.file = TRUE, dir = save.dir, ...) # filenames based on dates from above
+            tryCatch({
+              err <- try(RNetCDF::open.nc(paste(save.dir, filename, '_', time, '.nc', sep = '')), silent = T)
+            }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})
+            if(class(err) != 'try-error') break
+          }
         }
+        
       }
+      
+      ## MUR
     } else if(sst.type == 'mur'){
       for(i in 1:length(uniqueDates)){
         time <- as.Date(uniqueDates[i])
@@ -129,7 +192,7 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
           ## reset original directory after messing w temp files
           setwd(original_dir)
           
-          print(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))
+          #print(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))
           r1r <- raster::shift(raster::rotate(raster::shift(r1, 180)), 180)
           r3 <- raster::merge(r1r, r2)
           raster::writeRaster(r3, paste(save.dir, '/', filename, '_', time, '.nc', sep = ''), format='CDF')

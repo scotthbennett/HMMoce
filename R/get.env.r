@@ -92,7 +92,7 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
           
           ## get part 2 - whatever is below 180, if any
           ex2 <- raster::intersect(raster::extent(unlist(spatLim)), ex180)
-          if (ex1@xmax == 180) ex1@xmax <- 179.995
+          if (ex2@xmax == 180) ex2@xmax <- 179.995
           
           repeat{
             get.ghr.sst(c(ex2@xmin, ex2@xmax, ex2@ymin, ex2@ymax), time, filename = paste(filename, '_', time, '_2.nc', sep = ''), download.file = TRUE, dir = tdir)#, ...) # filenames based on dates from above

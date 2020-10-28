@@ -59,6 +59,18 @@ calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.
   lon.idx <- grep('lon', ncnames, ignore.case=TRUE) - 1
   dep.idx <- grep('dep', ncnames, ignore.case=TRUE) - 1
   
+  ## better handling of depth
+  if (length(dep.idx) == 0){
+    depth <- c(0, 2, 4, 6, 8, 10, 12, 15, 20, 25,
+               30, 35, 40, 45, 50, 60, 70, 80, 90,
+               100, 125, 150, 200, 250, 300, 350, 
+               400, 500, 600, 700, 800, 900, 1000,
+               1250, 1500, 2000, 2500, 3000, 4000, 5000)
+    
+  } else{
+    depth <- RNetCDF::var.get.nc(nc1, dep.idx)
+  }
+  
   # get attributes, if they exist
   ncatts <- NULL
   nmax <- RNetCDF::var.inq.nc(nc1, temp.idx)$natts - 1

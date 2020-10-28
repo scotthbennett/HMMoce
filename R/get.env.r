@@ -44,6 +44,8 @@
 
 get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = NULL, resol = NULL, save.dir = getwd(), sst.type=NULL, depLevels=NULL, ...){
   
+  original_dir <- getwd()
+  
   if(is.null(type)){
     
     stop('Type of environmental data desired not specified.')
@@ -72,7 +74,7 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
         time <- as.Date(uniqueDates[i])
         
         if (spatLim$lonmax > 180){ ## 0 to 360
-          print('Detected input coordinates > 180, downloading multiple files.')
+          cat('Detected input coordinates > 180, downloading multiple files.','\n')
           ex180 <- raster::extent(-180,180,-90,90)
           ex360 <- raster::extent(180,360,-90,90)
           
@@ -80,7 +82,6 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
           ex1 <- raster::intersect(raster::extent(unlist(spatLim)), ex360)
           ex1 <- raster::extent(raster::rotate(raster::raster(ex1)))
           if (ex1@xmin == -180) ex1@xmin <- -179.995
-          original_dir <- getwd()
           tdir <- tempdir()
           repeat{
             get.ghr.sst(c(ex1@xmin, ex1@xmax, ex1@ymin, ex1@ymax), time, filename = paste(filename, '_', time, '_1.nc', sep = ''), download.file = TRUE, dir = tdir)#, ...) # filenames based on dates from above
@@ -102,7 +103,7 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
             if(class(err) != 'try-error') break
           }
           
-          print('merging those files to a single output file')
+          cat('merging those files to a single output file','\n')
           nc1 <- RNetCDF::open.nc(paste(tdir, '/', filename, '_', time, '_1.nc', sep = ''))
           lon1 <- RNetCDF::var.get.nc(nc1, 'longitude')
           lat1 <- RNetCDF::var.get.nc(nc1, 'latitude')
@@ -123,8 +124,8 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
           #print(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))
           r1r <- raster::shift(raster::rotate(raster::shift(r1, 180)), 180)
           r3 <- raster::merge(r1r, r2)
-          raster::writeRaster(r3, paste(save.dir, '/', filename, '_', time, '.nc', sep = ''), format='CDF')
-          if (file.exists(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))) print(paste0('File output to ', paste(save.dir, '/', filename, '_', time, '.nc', sep = '')))
+          raster::writeRaster(r3, paste(save.dir, '/', filename, '_', time, '.nc', sep = ''), format='CDF', varname = 'SST', overwrite=TRUE)
+          if (file.exists(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))) cat(paste0('File output to ', paste(save.dir, '/', filename, '_', time, '.nc', sep = '')),'\n')
           
         } else{ ## -180 to 180
           repeat{
@@ -144,7 +145,7 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
         time <- as.Date(uniqueDates[i])
         
         if (spatLim$lonmax > 180){ ## 0 to 360
-          print('Detected input coordinates > 180, downloading multiple files.')
+          cat('Detected input coordinates > 180, downloading multiple files.','\n')
           ex180 <- raster::extent(-180,180,-90,90)
           ex360 <- raster::extent(180,360,-90,90)
           
@@ -174,7 +175,7 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
             if(class(err) != 'try-error') break
           }
           
-          print('merging those files to a single output file')
+          cat('merging those files to a single output file','\n')
           nc1 <- RNetCDF::open.nc(paste(tdir, '/', filename, '_', time, '_1.nc', sep = ''))
           lon1 <- RNetCDF::var.get.nc(nc1, 'longitude')
           lat1 <- RNetCDF::var.get.nc(nc1, 'latitude')
@@ -195,8 +196,8 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
           #print(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))
           r1r <- raster::shift(raster::rotate(raster::shift(r1, 180)), 180)
           r3 <- raster::merge(r1r, r2)
-          raster::writeRaster(r3, paste(save.dir, '/', filename, '_', time, '.nc', sep = ''), format='CDF')
-          if (file.exists(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))) print(paste0('File output to ', paste(save.dir, '/', filename, '_', time, '.nc', sep = '')))
+          raster::writeRaster(r3, paste(save.dir, '/', filename, '_', time, '.nc', sep = ''), format='CDF', varname = 'SST', overwrite=TRUE)
+          if (file.exists(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))) cat(paste0('File output to ', paste(save.dir, '/', filename, '_', time, '.nc', sep = '')),'\n')
           
         } else{ ## -180 to 180
           repeat{
@@ -219,7 +220,7 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
       time <- as.Date(uniqueDates[i])
       
       if (spatLim$lonmax > 180){ ## 0 to 360
-        print('Detected input coordinates > 180, downloading multiple files.')
+        cat('Detected input coordinates > 180, downloading multiple files.','\n')
         ex180 <- raster::extent(-180,180,-90,90)
         ex360 <- raster::extent(180,360,-90,90)
         
@@ -251,7 +252,7 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
           if(class(err) != 'try-error') break
         }
         
-        print('merging those files to a single output file')
+        cat('merging those files to a single output file','\n')
         nc1 <- RNetCDF::open.nc(paste(tdir, '/', filename, '_', time, '_1.nc', sep = ''))
         
         ## get var names
@@ -297,19 +298,22 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
         setwd(original_dir)
         
         #print(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))
-        r1r <- raster::shift(raster::rotate(raster::shift(r1, 180)), 180)
-        r3 <- raster::merge(r1r, r2)
-        raster::writeRaster(r3, paste(save.dir, '/', filename, '_', time, '.nc', sep = ''), format='CDF')
-        if (file.exists(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))) print(paste0('File output to ', paste(save.dir, '/', filename, '_', time, '.nc', sep = '')))
+        #r1r <- raster::shift(raster::rotate(raster::shift(r1, 180)), 180)
+        r3 <- raster::merge(r1, r2)
+        raster::writeRaster(r3, paste(save.dir, '/', filename, '_', time, '.nc', sep = ''), format='CDF', overwrite=TRUE, varname = ncnames[grep('temp', ncnames, ignore.case=TRUE)])
+        if (file.exists(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))) cat(paste0('File output to ', paste(save.dir, '/', filename, '_', time, '.nc', sep = '')),'\n')
         
       } else{ ## -180 to 180
+        
         repeat{
-          get.mur.sst(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''), download.file = TRUE, dir = save.dir, ...) # filenames based on dates from above
+          get.hycom(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''),
+                    download.file = TRUE, dir = save.dir, depLevels=depLevels, ...) 
           tryCatch({
-            err <- try(RNetCDF::open.nc(paste(save.dir, filename, '_', time, '.nc', sep = '')), silent = T)
+            err <- try(RNetCDF::open.nc(paste(save.dir,'/', filename, '_', time, '.nc', sep = '')), silent = T)
           }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})
           if(class(err) != 'try-error') break
         }
+
       }
       
     }
@@ -324,6 +328,8 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
     print(paste('WOA data downloaded to ', filename,'...', sep=''))
     
   }
+  
+  setwd(original_dir)
   
   
 }

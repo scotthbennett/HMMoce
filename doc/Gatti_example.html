@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Paul Gatti and Camrin Braun" />
+
+<meta name="date" content="2020-10-28" />
+
+<title>Example HMMoce run with several minor bug fixes and some new functionality</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Example HMMoce run with several minor bug fixes and some new functionality</h1>
+<h4 class="author">Paul Gatti and Camrin Braun</h4>
+<h4 class="date">2020-10-28</h4>
+
+
+
+<div id="summary" class="section level1">
+<h1>Summary</h1>
+<p>Since the release of the original <code>HMMoce</code> package, we have identified many improvements to the code that would dramatically improve its functionality. Many thanks to all those who have contributed suggestions and code, keep it coming!</p>
+<p>Here we’re preparing for a new release of HMMoce with a slow rollout of features that will be stuck here in testing for a while as we vet the many new features that have been added over the last 2 years. Below you’ll find less of a working vignette and more of a dump of functional code we used to originally develop and test many of the new features Paul has written for the package. Hopefully this will be useful to some people who want to do their own testing and please do submit pull requests if (when) you get ahead of us!</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co">#---------------------------------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="co"># pgatti</span></a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="co"># creation 15/10/19</span></a>
+<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="co"># last update 21/10/19</span></a>
+<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="co">#  R version 3.4.4</span></a>
+<a class="sourceLine" id="cb1-6" data-line-number="6"><span class="co">#=============================================================================================</span></a>
+<a class="sourceLine" id="cb1-7" data-line-number="7"><span class="co"># HMMoce</span></a>
+<a class="sourceLine" id="cb1-8" data-line-number="8"><span class="co"># shark example</span></a>
+<a class="sourceLine" id="cb1-9" data-line-number="9"><span class="co">#=============================================================================================</span></a>
+<a class="sourceLine" id="cb1-10" data-line-number="10"><span class="co"># 1. load tag &amp; env data + compute likelihoods</span></a>
+<a class="sourceLine" id="cb1-11" data-line-number="11"><span class="co"># 2. Bathymetry and bottom temp based likelihoods</span></a>
+<a class="sourceLine" id="cb1-12" data-line-number="12"><span class="co"># 3. model fitting</span></a>
+<a class="sourceLine" id="cb1-13" data-line-number="13"><span class="co">#---------------------------------------------------------------------------------------------</span></a>
+<a class="sourceLine" id="cb1-14" data-line-number="14"></a>
+<a class="sourceLine" id="cb1-15" data-line-number="15"><span class="kw">rm</span>(<span class="dt">list=</span><span class="kw">ls</span>())</a>
+<a class="sourceLine" id="cb1-16" data-line-number="16"><span class="kw">graphics.off</span>()</a>
+<a class="sourceLine" id="cb1-17" data-line-number="17"><span class="co">#</span></a>
+<a class="sourceLine" id="cb1-18" data-line-number="18"></a>
+<a class="sourceLine" id="cb1-19" data-line-number="19"><span class="co"># shortcut functions------</span></a>
+<a class="sourceLine" id="cb1-20" data-line-number="20">ac=<span class="cf">function</span>(x){<span class="kw">return</span>(<span class="kw">as.character</span>(x))}</a>
+<a class="sourceLine" id="cb1-21" data-line-number="21">an=<span class="cf">function</span>(x){<span class="kw">return</span>(<span class="kw">as.numeric</span>(<span class="kw">ac</span>(x)))}</a>
+<a class="sourceLine" id="cb1-22" data-line-number="22">an.=<span class="cf">function</span>(x){<span class="kw">return</span>(<span class="kw">as.numeric</span>(x))}</a>
+<a class="sourceLine" id="cb1-23" data-line-number="23">av=<span class="cf">function</span>(x){<span class="kw">return</span>(<span class="kw">as.vector</span>(x))}</a>
+<a class="sourceLine" id="cb1-24" data-line-number="24">gf=<span class="cf">function</span>(){<span class="kw">graphics.off</span>()}</a>
+<a class="sourceLine" id="cb1-25" data-line-number="25"><span class="co">#-------------------------</span></a>
+<a class="sourceLine" id="cb1-26" data-line-number="26"></a>
+<a class="sourceLine" id="cb1-27" data-line-number="27">dir=<span class="st">'C:/Users/pgatti/Documents/Halibut/R/functions/whoi_hmmoce_pkg/'</span></a>
+<a class="sourceLine" id="cb1-28" data-line-number="28"><span class="kw">source</span>(<span class="kw">paste0</span>(dir,<span class="st">'pgatti_potential_functions.r'</span>))</a>
+<a class="sourceLine" id="cb1-29" data-line-number="29"></a>
+<a class="sourceLine" id="cb1-30" data-line-number="30"><span class="kw">setwd</span>(dir)</a>
+<a class="sourceLine" id="cb1-31" data-line-number="31"><span class="kw">library</span>(HMMoce)</a>
+<a class="sourceLine" id="cb1-32" data-line-number="32"><span class="kw">library</span>(GA)</a>
+<a class="sourceLine" id="cb1-33" data-line-number="33"></a>
+<a class="sourceLine" id="cb1-34" data-line-number="34"><span class="co">#----------------------------------------------</span></a>
+<a class="sourceLine" id="cb1-35" data-line-number="35"><span class="co"># 1. load tag &amp; env data + compute likelihoods</span></a>
+<a class="sourceLine" id="cb1-36" data-line-number="36"><span class="co">#----------------------------------------------</span></a>
+<a class="sourceLine" id="cb1-37" data-line-number="37">preprocessing=F</a>
+<a class="sourceLine" id="cb1-38" data-line-number="38"><span class="cf">if</span>(preprocessing){</a>
+<a class="sourceLine" id="cb1-39" data-line-number="39">  <span class="kw">print</span>(<span class="st">'not runned yet'</span>)</a>
+<a class="sourceLine" id="cb1-40" data-line-number="40">  <span class="kw">stop</span>()</a>
+<a class="sourceLine" id="cb1-41" data-line-number="41">  </a>
+<a class="sourceLine" id="cb1-42" data-line-number="42">  <span class="co"># following copy/pasted from Camrin example</span></a>
+<a class="sourceLine" id="cb1-43" data-line-number="43">  </a>
+<a class="sourceLine" id="cb1-44" data-line-number="44">  <span class="co">#------------</span></a>
+<a class="sourceLine" id="cb1-45" data-line-number="45">  <span class="co"># LOAD THE TAG DATA</span></a>
+<a class="sourceLine" id="cb1-46" data-line-number="46">  <span class="co">#------------</span></a>
+<a class="sourceLine" id="cb1-47" data-line-number="47">  <span class="co"># setwd()</span></a>
+<a class="sourceLine" id="cb1-48" data-line-number="48">  </a>
+<a class="sourceLine" id="cb1-49" data-line-number="49">  <span class="co"># SET INITIAL LOCATIONS (TAG AND POP-UP)</span></a>
+<a class="sourceLine" id="cb1-50" data-line-number="50">  iniloc &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">13</span>, <span class="dv">10</span>, <span class="dv">2015</span>, <span class="fl">41.3</span>, <span class="fl">-69.27</span>, </a>
+<a class="sourceLine" id="cb1-51" data-line-number="51">                                <span class="dv">10</span>, <span class="dv">4</span>, <span class="dv">2016</span>, <span class="fl">40.251</span>, <span class="fl">-36.061</span>), <span class="dt">nrow =</span> <span class="dv">2</span>, <span class="dt">ncol =</span> <span class="dv">5</span>, <span class="dt">byrow =</span> T))</a>
+<a class="sourceLine" id="cb1-52" data-line-number="52">  <span class="kw">names</span>(iniloc) &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="st">'day'</span>,<span class="st">'month'</span>,<span class="st">'year'</span>,<span class="st">'lat'</span>,<span class="st">'lon'</span>)</a>
+<a class="sourceLine" id="cb1-53" data-line-number="53">  tag &lt;-<span class="st"> </span><span class="kw">as.POSIXct</span>(<span class="kw">paste</span>(iniloc[<span class="dv">1</span>,<span class="dv">1</span>], <span class="st">'/'</span>, iniloc[<span class="dv">1</span>,<span class="dv">2</span>], <span class="st">'/'</span>, iniloc[<span class="dv">1</span>,<span class="dv">3</span>], <span class="dt">sep=</span><span class="st">''</span>), <span class="dt">format =</span> <span class="st">'%d/%m/%Y'</span>, <span class="dt">tz=</span><span class="st">'UTC'</span>)</a>
+<a class="sourceLine" id="cb1-54" data-line-number="54">  pop &lt;-<span class="st"> </span><span class="kw">as.POSIXct</span>(<span class="kw">paste</span>(iniloc[<span class="dv">2</span>,<span class="dv">1</span>], <span class="st">'/'</span>, iniloc[<span class="dv">2</span>,<span class="dv">2</span>], <span class="st">'/'</span>, iniloc[<span class="dv">2</span>,<span class="dv">3</span>], <span class="dt">sep=</span><span class="st">''</span>), <span class="dt">format =</span> <span class="st">'%d/%m/%Y'</span>, <span class="dt">tz=</span><span class="st">'UTC'</span>)</a>
+<a class="sourceLine" id="cb1-55" data-line-number="55">  </a>
+<a class="sourceLine" id="cb1-56" data-line-number="56">  <span class="co"># VECTOR OF DATES FROM DATA. THIS WILL BE THE TIME STEPS, T, IN THE LIKELIHOODS</span></a>
+<a class="sourceLine" id="cb1-57" data-line-number="57">  dateVec &lt;-<span class="st"> </span><span class="kw">as.Date</span>(<span class="kw">seq</span>(tag, pop, <span class="dt">by =</span> <span class="st">'day'</span>)) </a>
+<a class="sourceLine" id="cb1-58" data-line-number="58">  </a>
+<a class="sourceLine" id="cb1-59" data-line-number="59">  <span class="co"># READ IN DATA AS OUTPUT FROM WC PORTAL</span></a>
+<a class="sourceLine" id="cb1-60" data-line-number="60">  <span class="co"># SST DATA</span></a>
+<a class="sourceLine" id="cb1-61" data-line-number="61">  sstFile &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;141259-SST.csv&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;HMMoce&quot;</span>)</a>
+<a class="sourceLine" id="cb1-62" data-line-number="62">  tag.sst &lt;-<span class="st"> </span><span class="kw">read.wc</span>(sstFile, <span class="dt">type =</span> <span class="st">'sst'</span>, <span class="dt">tag=</span>tag, <span class="dt">pop=</span>pop, <span class="dt">verbose=</span>T) </a>
+<a class="sourceLine" id="cb1-63" data-line-number="63">  sst.udates &lt;-<span class="st"> </span>tag.sst<span class="op">$</span>udates; tag.sst &lt;-<span class="st"> </span>tag.sst<span class="op">$</span>data</a>
+<a class="sourceLine" id="cb1-64" data-line-number="64">  </a>
+<a class="sourceLine" id="cb1-65" data-line-number="65">  <span class="co"># DEPTH-TEMPERATURE PROFILE DATA</span></a>
+<a class="sourceLine" id="cb1-66" data-line-number="66">  pdtFile &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;141259-PDTs.csv&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;HMMoce&quot;</span>)</a>
+<a class="sourceLine" id="cb1-67" data-line-number="67">  pdt &lt;-<span class="st"> </span><span class="kw">read.wc</span>(pdtFile, <span class="dt">type =</span> <span class="st">'pdt'</span>, <span class="dt">tag=</span>tag, <span class="dt">pop=</span>pop, <span class="dt">verbose=</span>T) </a>
+<a class="sourceLine" id="cb1-68" data-line-number="68">  pdt.udates &lt;-<span class="st"> </span>pdt<span class="op">$</span>udates; pdt &lt;-<span class="st"> </span>pdt<span class="op">$</span>data</a>
+<a class="sourceLine" id="cb1-69" data-line-number="69">  </a>
+<a class="sourceLine" id="cb1-70" data-line-number="70">  <span class="co"># RAW LIGHT DATA</span></a>
+<a class="sourceLine" id="cb1-71" data-line-number="71">  <span class="co">#lightFile &lt;- system.file(&quot;extdata&quot;, &quot;141259-LightLoc.csv&quot;, package = &quot;HMMoce&quot;)</span></a>
+<a class="sourceLine" id="cb1-72" data-line-number="72">  <span class="co">#light &lt;- read.wc(ptt, lightFile, type = 'light', tag=tag, pop=pop); </span></a>
+<a class="sourceLine" id="cb1-73" data-line-number="73">  <span class="co">#light.udates &lt;- light$udates; light &lt;- light$data</span></a>
+<a class="sourceLine" id="cb1-74" data-line-number="74">  </a>
+<a class="sourceLine" id="cb1-75" data-line-number="75">  <span class="co"># LIGHT BASED POSITIONS FROM GPE2 (INSTEAD OF RAW LIGHTLOCS FROM PREVIOUS)</span></a>
+<a class="sourceLine" id="cb1-76" data-line-number="76">  locsFile &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;141259-Locations-GPE2.csv&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;HMMoce&quot;</span>)</a>
+<a class="sourceLine" id="cb1-77" data-line-number="77">  locs &lt;-<span class="st"> </span><span class="kw">read.table</span>(locsFile, <span class="dt">sep =</span> <span class="st">','</span>, <span class="dt">header =</span> T, <span class="dt">blank.lines.skip =</span> F)</a>
+<a class="sourceLine" id="cb1-78" data-line-number="78">  locDates &lt;-<span class="st"> </span><span class="kw">as.Date</span>(<span class="kw">as.POSIXct</span>(locs<span class="op">$</span>Date, <span class="dt">format=</span><span class="kw">findDateFormat</span>(locs<span class="op">$</span>Date)))</a>
+<a class="sourceLine" id="cb1-79" data-line-number="79">  </a>
+<a class="sourceLine" id="cb1-80" data-line-number="80">  <span class="co"># SET SPATIAL LIMITS</span></a>
+<a class="sourceLine" id="cb1-81" data-line-number="81">  <span class="co"># these are the lat/lon bounds of your study area (e.g. where you think the animal went)</span></a>
+<a class="sourceLine" id="cb1-82" data-line-number="82">  sp.lim &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">lonmin =</span> <span class="dv">-82</span>,</a>
+<a class="sourceLine" id="cb1-83" data-line-number="83">                 <span class="dt">lonmax =</span> <span class="dv">-25</span>,</a>
+<a class="sourceLine" id="cb1-84" data-line-number="84">                 <span class="dt">latmin =</span> <span class="dv">15</span>,</a>
+<a class="sourceLine" id="cb1-85" data-line-number="85">                 <span class="dt">latmax =</span> <span class="dv">50</span>)</a>
+<a class="sourceLine" id="cb1-86" data-line-number="86">  </a>
+<a class="sourceLine" id="cb1-87" data-line-number="87">  <span class="co">#------------</span></a>
+<a class="sourceLine" id="cb1-88" data-line-number="88">  <span class="co"># GET ENVIRONMENTAL DATA</span></a>
+<a class="sourceLine" id="cb1-89" data-line-number="89">  <span class="co">#------------ </span></a>
+<a class="sourceLine" id="cb1-90" data-line-number="90">  <span class="co"># env data downloads can be</span></a>
+<a class="sourceLine" id="cb1-91" data-line-number="91">  <span class="co">#large, depending on application for 180 days of data spanning the NW Atlantic</span></a>
+<a class="sourceLine" id="cb1-92" data-line-number="92">  <span class="co">#(the example application), the downloads will take ~10mins on Amazon EC2.</span></a>
+<a class="sourceLine" id="cb1-93" data-line-number="93">  <span class="co">#Personal computers will likely be slower.</span></a>
+<a class="sourceLine" id="cb1-94" data-line-number="94">  </a>
+<a class="sourceLine" id="cb1-95" data-line-number="95">  <span class="co"># DOWNLOAD SST DATA</span></a>
+<a class="sourceLine" id="cb1-96" data-line-number="96">  <span class="co">#sst.dir &lt;- paste(tempdir(), '/sst/', sep='')</span></a>
+<a class="sourceLine" id="cb1-97" data-line-number="97"><span class="co">#  sst.dir &lt;- paste('~/work/EnvData/hmmoce', '/sst/', sep='')</span></a>
+<a class="sourceLine" id="cb1-98" data-line-number="98">  <span class="kw">dir.create</span>(sst.dir, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb1-99" data-line-number="99">  <span class="kw">get.env</span>(sst.udates, <span class="dt">filename=</span><span class="st">'oisst'</span>, <span class="dt">type =</span> <span class="st">'sst'</span>, <span class="dt">sst.type=</span><span class="st">'oi'</span>, <span class="dt">spatLim =</span> sp.lim, <span class="dt">save.dir =</span> sst.dir)</a>
+<a class="sourceLine" id="cb1-100" data-line-number="100">  </a>
+<a class="sourceLine" id="cb1-101" data-line-number="101">  <span class="co"># YOU NEED SOME REPRESENTATION OF ENVIRONMENTAL DEPTH-TEMPERATURE</span></a>
+<a class="sourceLine" id="cb1-102" data-line-number="102">  <span class="co"># HYCOM DATA</span></a>
+<a class="sourceLine" id="cb1-103" data-line-number="103">  <span class="co">#hycom.dir &lt;- paste0(dir,'EnvData/hycom/', sep='')</span></a>
+<a class="sourceLine" id="cb1-104" data-line-number="104">  hycom.dir &lt;-<span class="st"> </span><span class="kw">paste</span>(<span class="st">'~/work/EnvData/hmmoce'</span>, <span class="st">'/hycom/'</span>, <span class="dt">sep=</span><span class="st">''</span>)</a>
+<a class="sourceLine" id="cb1-105" data-line-number="105">  <span class="kw">dir.create</span>(hycom.dir, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb1-106" data-line-number="106">  <span class="kw">get.env</span>(pdt.udates[<span class="dv">90</span><span class="op">:</span><span class="kw">length</span>(pdt.udates)],</a>
+<a class="sourceLine" id="cb1-107" data-line-number="107">          <span class="dt">filename=</span><span class="st">'hycom'</span>, <span class="dt">type =</span> <span class="st">'hycom'</span>, <span class="dt">spatLim =</span> sp.lim, <span class="dt">save.dir =</span> hycom.dir)</a>
+<a class="sourceLine" id="cb1-108" data-line-number="108">  </a>
+<a class="sourceLine" id="cb1-109" data-line-number="109">  <span class="co"># OR WORLD OCEAN ATLAS DATA</span></a>
+<a class="sourceLine" id="cb1-110" data-line-number="110">  <span class="co">#woa.dir &lt;- paste(tempdir(), '/woa/', sep='')</span></a>
+<a class="sourceLine" id="cb1-111" data-line-number="111">  <span class="co">#dir.create(woa.dir, recursive = TRUE)</span></a>
+<a class="sourceLine" id="cb1-112" data-line-number="112">  <span class="co">#get.env(type = 'woa', resol = 'quarter', save.dir = woa.dir)</span></a>
+<a class="sourceLine" id="cb1-113" data-line-number="113">  <span class="co"># THEN LOAD AND CHECK THE DOWNLOADED RDA FILE FOR WOA</span></a>
+<a class="sourceLine" id="cb1-114" data-line-number="114">  <span class="co">#load(paste(woa.dir,'woa.quarter.rda',sep=''))</span></a>
+<a class="sourceLine" id="cb1-115" data-line-number="115">  <span class="co">#str(woa.quarter)</span></a>
+<a class="sourceLine" id="cb1-116" data-line-number="116">  <span class="co">#List of 4</span></a>
+<a class="sourceLine" id="cb1-117" data-line-number="117">  <span class="co">#$ watertemp: num [1:44, 1:46, 1:57, 1:12] 26.5 26.5 26.4 26.3 26.2 ...</span></a>
+<a class="sourceLine" id="cb1-118" data-line-number="118">  <span class="co">#$ lon      : num [1:44(1d)] -95.5 -94.5 -93.5 -92.5 -91.5 -90.5 -89.5 -88.5 -87.5 -86.5 ...</span></a>
+<a class="sourceLine" id="cb1-119" data-line-number="119">  <span class="co">#$ lat      : num [1:46(1d)] 9.5 10.5 11.5 12.5 13.5 14.5 15.5 16.5 17.5 18.5 ...</span></a>
+<a class="sourceLine" id="cb1-120" data-line-number="120">  <span class="co">#$ depth    : num [1:57(1d)] 0 5 10 15 20 25 30 35 40 45 ...</span></a>
+<a class="sourceLine" id="cb1-121" data-line-number="121">  </a>
+<a class="sourceLine" id="cb1-122" data-line-number="122">  <span class="co"># BATHYMETRY</span></a>
+<a class="sourceLine" id="cb1-123" data-line-number="123">  bathy.dir &lt;-<span class="st"> </span><span class="kw">paste</span>(<span class="st">'~/work/EnvData/hmmoce'</span>, <span class="st">'/bathy/'</span>, <span class="dt">sep=</span><span class="st">''</span>)</a>
+<a class="sourceLine" id="cb1-124" data-line-number="124">  <span class="kw">dir.create</span>(bathy.dir, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb1-125" data-line-number="125">  bathy &lt;-<span class="st"> </span><span class="kw">get.bath.data</span>(sp.lim<span class="op">$</span>lonmin, sp.lim<span class="op">$</span>lonmax, sp.lim<span class="op">$</span>latmin, sp.lim<span class="op">$</span>latmax, <span class="dt">folder =</span> bathy.dir)</a>
+<a class="sourceLine" id="cb1-126" data-line-number="126">  <span class="co">#library(raster); plot(bathy)</span></a>
+<a class="sourceLine" id="cb1-127" data-line-number="127">  <span class="co"># OR READ IT FROM NETCDF</span></a>
+<a class="sourceLine" id="cb1-128" data-line-number="128">  <span class="co">#bathy.nc &lt;- RNetCDF::open.nc(paste(bathy.dir, 'bathy.nc', sep=''))</span></a>
+<a class="sourceLine" id="cb1-129" data-line-number="129">  </a>
+<a class="sourceLine" id="cb1-130" data-line-number="130">  <span class="co">#------------</span></a>
+<a class="sourceLine" id="cb1-131" data-line-number="131">  <span class="co"># CALCULATE LIKELIHOODS</span></a>
+<a class="sourceLine" id="cb1-132" data-line-number="132">  <span class="co">#------------</span></a>
+<a class="sourceLine" id="cb1-133" data-line-number="133">  <span class="co"># .par functions are the same calculations as those lacking .par, except they have been parallelized to leverage multiple CPUs</span></a>
+<a class="sourceLine" id="cb1-134" data-line-number="134">  locs.grid &lt;-<span class="st"> </span><span class="kw">setup.locs.grid</span>(sp.lim)</a>
+<a class="sourceLine" id="cb1-135" data-line-number="135">  </a>
+<a class="sourceLine" id="cb1-136" data-line-number="136">  <span class="co"># vector indicating which likelihoods to run (e.g. 1=light, 2=sst, 5=hycom)</span></a>
+<a class="sourceLine" id="cb1-137" data-line-number="137">  <span class="co"># can be combined with if() statements around calc functions: if (any(likVec == 5) &amp; !exists('L.5')){calc.hycom(...)}</span></a>
+<a class="sourceLine" id="cb1-138" data-line-number="138">  likVec &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">5</span>) </a>
+<a class="sourceLine" id="cb1-139" data-line-number="139">  </a>
+<a class="sourceLine" id="cb1-140" data-line-number="140">  <span class="co"># LIGHT-BASED LIKELIHOODS</span></a>
+<a class="sourceLine" id="cb1-141" data-line-number="141">  <span class="co">#L.1 &lt;- calc.srss(light, locs.grid = locs.grid, dateVec = dateVec, res=0.25) # if trying to use raw light levels, not currently recommended (v0.2)</span></a>
+<a class="sourceLine" id="cb1-142" data-line-number="142">  L<span class="fl">.1</span> &lt;-<span class="st"> </span><span class="kw">calc.lightloc</span>(locs, <span class="dt">locs.grid =</span> locs.grid, <span class="dt">dateVec =</span> dateVec, <span class="dt">errEll =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb1-143" data-line-number="143"></a>
+<a class="sourceLine" id="cb1-144" data-line-number="144">  <span class="co">#library(fields);library(raster)</span></a>
+<a class="sourceLine" id="cb1-145" data-line-number="145">  <span class="co">#plot(L.1[[12]]); world(add=T)</span></a>
+<a class="sourceLine" id="cb1-146" data-line-number="146">  </a>
+<a class="sourceLine" id="cb1-147" data-line-number="147">  <span class="co"># SST LIKELIHOODS</span></a>
+<a class="sourceLine" id="cb1-148" data-line-number="148">  <span class="co">#L.2 &lt;- calc.sst(tag.sst, filename='oisst', sst.dir = sst.dir, dateVec = dateVec, sens.err = 1)</span></a>
+<a class="sourceLine" id="cb1-149" data-line-number="149">  L<span class="fl">.2</span> &lt;-<span class="st"> </span><span class="kw">calc.sst</span>(tag.sst, <span class="dt">filename=</span><span class="st">'oisst'</span>, <span class="dt">sst.dir =</span> sst.dir, <span class="dt">dateVec =</span> dateVec, <span class="dt">sens.err =</span> <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb1-150" data-line-number="150">  <span class="co"># save.image() # good idea to save after these larger calculations in case the next one causes problems</span></a>
+<a class="sourceLine" id="cb1-151" data-line-number="151">  <span class="co"># gc(); closeAllConnections() # also good to do garbage collection and kill any straggling processes that are running</span></a>
+<a class="sourceLine" id="cb1-152" data-line-number="152">  </a>
+<a class="sourceLine" id="cb1-153" data-line-number="153">  <span class="co"># PDT LIKELIHOODS</span></a>
+<a class="sourceLine" id="cb1-154" data-line-number="154">  <span class="co"># OCEAN HEAT CONTENT (INTEGRATED PDTS)</span></a>
+<a class="sourceLine" id="cb1-155" data-line-number="155">  L<span class="fl">.3</span> &lt;-<span class="st"> </span><span class="kw">calc.ohc.par</span>(pdt, <span class="dt">filename=</span><span class="st">'hycom'</span>, <span class="dt">ohc.dir =</span> hycom.dir, <span class="dt">dateVec =</span> dateVec, <span class="dt">isotherm =</span> <span class="st">''</span>, <span class="dt">use.se =</span> F)</a>
+<a class="sourceLine" id="cb1-156" data-line-number="156">  <span class="co"># save.image() # good idea to save after these larger calculations in case the next one causes problems</span></a>
+<a class="sourceLine" id="cb1-157" data-line-number="157">  <span class="co"># gc(); closeAllConnections() # also good to do garbage collection and kill any straggling processes that are running</span></a>
+<a class="sourceLine" id="cb1-158" data-line-number="158">  </a>
+<a class="sourceLine" id="cb1-159" data-line-number="159">  <span class="co"># WORLD OCEAN ATLAS-BASED LIKELIHOODS</span></a>
+<a class="sourceLine" id="cb1-160" data-line-number="160">  L<span class="fl">.4</span> &lt;-<span class="st"> </span><span class="kw">calc.woa.par</span>(pdt, <span class="dt">ptt=</span>ptt, <span class="dt">woa.data =</span> woa.quarter, <span class="dt">sp.lim=</span>sp.lim, <span class="dt">focalDim =</span> <span class="dv">9</span>, <span class="dt">dateVec =</span> dateVec, <span class="dt">use.se =</span> T)</a>
+<a class="sourceLine" id="cb1-161" data-line-number="161">  <span class="co"># save.image() # good idea to save after these larger calculations in case the next one causes problems</span></a>
+<a class="sourceLine" id="cb1-162" data-line-number="162">  <span class="co"># gc(); closeAllConnections() # also good to do garbage collection and kill any straggling processes that are running</span></a>
+<a class="sourceLine" id="cb1-163" data-line-number="163">  </a>
+<a class="sourceLine" id="cb1-164" data-line-number="164">  <span class="co"># HYCOM PROFILE BASED LIKELIHOODS</span></a>
+<a class="sourceLine" id="cb1-165" data-line-number="165">  L<span class="fl">.5</span> &lt;-<span class="st"> </span><span class="kw">calc.hycom</span>(pdt, <span class="dt">filename=</span><span class="st">'hycom'</span>, hycom.dir, <span class="dt">focalDim =</span> <span class="dv">9</span>, <span class="dt">dateVec =</span> <span class="kw">as.POSIXct</span>(dateVec), <span class="dt">use.se =</span> T)</a>
+<a class="sourceLine" id="cb1-166" data-line-number="166">  <span class="co"># save.image() # good idea to save after these larger calculations in case the next one causes problems</span></a>
+<a class="sourceLine" id="cb1-167" data-line-number="167">  <span class="co"># gc(); closeAllConnections() # also good to do garbage collection and kill any straggling processes that are running</span></a>
+<a class="sourceLine" id="cb1-168" data-line-number="168">  </a>
+<a class="sourceLine" id="cb1-169" data-line-number="169">}<span class="cf">else</span>{</a>
+<a class="sourceLine" id="cb1-170" data-line-number="170">  <span class="kw">load</span>(<span class="kw">paste0</span>(dir,<span class="st">&quot;likelihoods_example_20191014.rda&quot;</span>))</a>
+<a class="sourceLine" id="cb1-171" data-line-number="171">}</a>
+<a class="sourceLine" id="cb1-172" data-line-number="172"></a>
+<a class="sourceLine" id="cb1-173" data-line-number="173"><span class="co">#----------------------------------------------</span></a>
+<a class="sourceLine" id="cb1-174" data-line-number="174"><span class="co"># 2. Bathymetry and bottom temp based likelihoods</span></a>
+<a class="sourceLine" id="cb1-175" data-line-number="175"><span class="co"># (likely non sense here (for a pelagic) but just to illlustrate the computation &amp; check if this work)</span></a>
+<a class="sourceLine" id="cb1-176" data-line-number="176"><span class="co">#----------------------------------------------</span></a>
+<a class="sourceLine" id="cb1-177" data-line-number="177">calc.lik.bottom=<span class="ot">FALSE</span></a>
+<a class="sourceLine" id="cb1-178" data-line-number="178"><span class="cf">if</span>(calc.lik.bottom){</a>
+<a class="sourceLine" id="cb1-179" data-line-number="179">  <span class="kw">rm</span>(L<span class="fl">.5</span>)</a>
+<a class="sourceLine" id="cb1-180" data-line-number="180">  L.rasters &lt;-<span class="st"> </span><span class="kw">mget</span>(<span class="kw">ls</span>(<span class="dt">pattern =</span> <span class="st">'L</span><span class="ch">\\</span><span class="st">.'</span>)) <span class="co"># use with caution as all workspace items containing 'L.' will be listed. We only want the likelihood outputs calculated above</span></a>
+<a class="sourceLine" id="cb1-181" data-line-number="181">  resamp.idx &lt;-<span class="st"> </span><span class="kw">which.max</span>(<span class="kw">lapply</span>(L.rasters, <span class="dt">FUN=</span><span class="cf">function</span>(x) raster<span class="op">::</span><span class="kw">res</span>(x)[<span class="dv">1</span>]))</a>
+<a class="sourceLine" id="cb1-182" data-line-number="182">  L.res &lt;-<span class="st"> </span><span class="kw">resample.grid</span>(L.rasters, L.rasters[[resamp.idx]])</a>
+<a class="sourceLine" id="cb1-183" data-line-number="183">  </a>
+<a class="sourceLine" id="cb1-184" data-line-number="184">  <span class="kw">dim</span>(bathy);<span class="kw">res</span>(bathy)</a>
+<a class="sourceLine" id="cb1-185" data-line-number="185">  <span class="co"># aggregate etopo bathy grid 0.08--&gt;.25</span></a>
+<a class="sourceLine" id="cb1-186" data-line-number="186">  b2=raster<span class="op">::</span><span class="kw">resample</span>(bathy, L.res[[<span class="dv">1</span>]][[<span class="dv">1</span>]])</a>
+<a class="sourceLine" id="cb1-187" data-line-number="187">  <span class="kw">dim</span>(b2);<span class="kw">res</span> (b2)</a>
+<a class="sourceLine" id="cb1-188" data-line-number="188">  <span class="co"># aggregate etopo bathy grid 0.08--&gt;.25</span></a>
+<a class="sourceLine" id="cb1-189" data-line-number="189">  b3=raster<span class="op">::</span><span class="kw">resample</span>(bathy, L.res<span class="op">$</span>L.mle.res)</a>
+<a class="sourceLine" id="cb1-190" data-line-number="190">  <span class="kw">dim</span>(b3);<span class="kw">res</span>(b3)</a>
+<a class="sourceLine" id="cb1-191" data-line-number="191">  </a>
+<a class="sourceLine" id="cb1-192" data-line-number="192">  <span class="co"># there is probably a way to avoid the loop here</span></a>
+<a class="sourceLine" id="cb1-193" data-line-number="193">  tag.pdt=<span class="ot">NULL</span></a>
+<a class="sourceLine" id="cb1-194" data-line-number="194">  <span class="cf">for</span>(dd <span class="cf">in</span> <span class="kw">unique</span>(<span class="kw">ac</span>(pdt<span class="op">$</span>Date))){</a>
+<a class="sourceLine" id="cb1-195" data-line-number="195">    <span class="co"># dd=unique(ac(pdt$Date))[1]</span></a>
+<a class="sourceLine" id="cb1-196" data-line-number="196">    xx=pdt[<span class="kw">ac</span>(pdt<span class="op">$</span>Date)<span class="op">==</span>dd,]</a>
+<a class="sourceLine" id="cb1-197" data-line-number="197">    tag.pdt=<span class="kw">rbind</span>(tag.pdt,xx[<span class="kw">which.max</span>(xx<span class="op">$</span>Depth),<span class="kw">c</span>(<span class="st">'Date'</span>,<span class="st">'Depth'</span>,<span class="st">'MinTemp'</span>, <span class="st">'MaxTemp'</span>)])</a>
+<a class="sourceLine" id="cb1-198" data-line-number="198">  }</a>
+<a class="sourceLine" id="cb1-199" data-line-number="199">  </a>
+<a class="sourceLine" id="cb1-200" data-line-number="200">  <span class="co"># bathymetry based likelihood</span></a>
+<a class="sourceLine" id="cb1-201" data-line-number="201">  L<span class="fl">.6</span>&lt;-<span class="kw">calc.bathy</span>(tag.pdt,b3,dateVec, <span class="dt">focalDim =</span> <span class="dv">3</span>, <span class="dt">sens.err =</span> <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb1-202" data-line-number="202">  L<span class="fl">.62</span>&lt;-<span class="kw">calc.bathy.par</span>(tag.pdt,b3,dateVec,  <span class="dt">focalDim =</span> <span class="dv">3</span>, <span class="dt">sens.err =</span> <span class="dv">1</span>,<span class="dt">ncores=</span><span class="dv">4</span>)</a>
+<a class="sourceLine" id="cb1-203" data-line-number="203"></a>
+<a class="sourceLine" id="cb1-204" data-line-number="204">  <span class="co"># par(mfrow=c(1,2));plot(L.6[[2]],main='linear loop');plot(L.62[[2]],main='parallel')</span></a>
+<a class="sourceLine" id="cb1-205" data-line-number="205">  </a>
+<a class="sourceLine" id="cb1-206" data-line-number="206">  <span class="co"># bottom temperature based likelihood</span></a>
+<a class="sourceLine" id="cb1-207" data-line-number="207">  L<span class="fl">.7</span>&lt;-<span class="kw">calc.bottomTemp</span>(tag.pdt[<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>,],b3,dateVec[<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>], <span class="dt">focalDim =</span> <span class="dv">3</span>, <span class="dt">sens.err =</span> <span class="dv">1</span>,<span class="dt">hycom.dir=</span><span class="st">'C:/Users/pgatti/Documents/Halibut/R/functions/whoi_hmmoce_pkg/EnvData/hycom/'</span>,<span class="dt">filename=</span><span class="st">'hycom'</span>)</a>
+<a class="sourceLine" id="cb1-208" data-line-number="208">  L<span class="fl">.72</span>&lt;-<span class="kw">calc.bottomTemp.par</span>(tag.pdt[<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>,],b3,dateVec[<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>], <span class="dt">focalDim =</span> <span class="dv">3</span>, <span class="dt">sens.err =</span> <span class="dv">1</span>,<span class="dt">hycom.dir=</span><span class="st">'C:/Users/pgatti/Documents/Halibut/R/functions/whoi_hmmoce_pkg/EnvData/hycom/'</span>,<span class="dt">filename=</span><span class="st">'hycom'</span>)</a>
+<a class="sourceLine" id="cb1-209" data-line-number="209">  </a>
+<a class="sourceLine" id="cb1-210" data-line-number="210">  <span class="co"># par(mfrow=c(1,2));plot(L.7[[2]],main='linear loop');plot(L.72[[2]],main='parallel')</span></a>
+<a class="sourceLine" id="cb1-211" data-line-number="211"></a>
+<a class="sourceLine" id="cb1-212" data-line-number="212">}</a>
+<a class="sourceLine" id="cb1-213" data-line-number="213"><span class="co">#----------------------------------------------</span></a>
+<a class="sourceLine" id="cb1-214" data-line-number="214"></a>
+<a class="sourceLine" id="cb1-215" data-line-number="215"><span class="co">#----------------------------------------------</span></a>
+<a class="sourceLine" id="cb1-216" data-line-number="216"><span class="co"># 3. model fitting</span></a>
+<a class="sourceLine" id="cb1-217" data-line-number="217"><span class="co">#------------</span></a>
+<a class="sourceLine" id="cb1-218" data-line-number="218"><span class="co"># PREPARE TO RUN THE MODEL</span></a>
+<a class="sourceLine" id="cb1-219" data-line-number="219"><span class="co">#------------</span></a>
+<a class="sourceLine" id="cb1-220" data-line-number="220"></a>
+<a class="sourceLine" id="cb1-221" data-line-number="221"><span class="co"># some issue with L.5...</span></a>
+<a class="sourceLine" id="cb1-222" data-line-number="222"><span class="kw">print</span>(<span class="st">&quot;L.5 remove --&gt; no way to display it&quot;</span>)</a>
+<a class="sourceLine" id="cb1-223" data-line-number="223"><span class="kw">rm</span>(L<span class="fl">.5</span>)</a>
+<a class="sourceLine" id="cb1-224" data-line-number="224"></a>
+<a class="sourceLine" id="cb1-225" data-line-number="225">L.rasters &lt;-<span class="st"> </span><span class="kw">mget</span>(<span class="kw">ls</span>(<span class="dt">pattern =</span> <span class="st">'L</span><span class="ch">\\</span><span class="st">.'</span>)) <span class="co"># use with caution as all workspace items containing 'L.' will be listed. We only want the likelihood outputs calculated above</span></a>
+<a class="sourceLine" id="cb1-226" data-line-number="226">resamp.idx &lt;-<span class="st"> </span><span class="kw">which.max</span>(<span class="kw">lapply</span>(L.rasters, <span class="dt">FUN=</span><span class="cf">function</span>(x) raster<span class="op">::</span><span class="kw">res</span>(x)[<span class="dv">1</span>]))</a>
+<a class="sourceLine" id="cb1-227" data-line-number="227">L.res &lt;-<span class="st"> </span><span class="kw">resample.grid</span>(L.rasters, L.rasters[[resamp.idx]])</a>
+<a class="sourceLine" id="cb1-228" data-line-number="228"></a>
+<a class="sourceLine" id="cb1-229" data-line-number="229"><span class="co"># Figure out appropriate L combinations</span></a>
+<a class="sourceLine" id="cb1-230" data-line-number="230"><span class="co"># use this if you have a vector (likVec) indicating which likelihoods you are calculating</span></a>
+<a class="sourceLine" id="cb1-231" data-line-number="231"><span class="co"># for example, likVec &lt;- c(1,2,5) for light, sst, and hycom likelihoods</span></a>
+<a class="sourceLine" id="cb1-232" data-line-number="232"><span class="cf">if</span> (<span class="kw">length</span>(likVec) <span class="op">&gt;</span><span class="st"> </span><span class="dv">2</span>){</a>
+<a class="sourceLine" id="cb1-233" data-line-number="233">  L.idx &lt;-<span class="st"> </span><span class="kw">c</span>(utils<span class="op">::</span><span class="kw">combn</span>(likVec, <span class="dv">2</span>, <span class="dt">simplify=</span>F), utils<span class="op">::</span><span class="kw">combn</span>(likVec, <span class="dv">3</span>, <span class="dt">simplify=</span>F))</a>
+<a class="sourceLine" id="cb1-234" data-line-number="234">} <span class="cf">else</span>{</a>
+<a class="sourceLine" id="cb1-235" data-line-number="235">  L.idx &lt;-<span class="st"> </span>utils<span class="op">::</span><span class="kw">combn</span>(likVec, <span class="dv">2</span>, <span class="dt">simplify=</span>F)</a>
+<a class="sourceLine" id="cb1-236" data-line-number="236">}</a>
+<a class="sourceLine" id="cb1-237" data-line-number="237"></a>
+<a class="sourceLine" id="cb1-238" data-line-number="238">run.idx &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">4</span>)</a>
+<a class="sourceLine" id="cb1-239" data-line-number="239"></a>
+<a class="sourceLine" id="cb1-240" data-line-number="240"><span class="co"># vector of appropriate migr kernel speed. see ?makePar for more info.</span></a>
+<a class="sourceLine" id="cb1-241" data-line-number="241">parVec &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">4</span>)</a>
+<a class="sourceLine" id="cb1-242" data-line-number="242"></a>
+<a class="sourceLine" id="cb1-243" data-line-number="243"><span class="co"># GOOD IDEA TO CLEAN THINGS UP AND SAVE</span></a>
+<a class="sourceLine" id="cb1-244" data-line-number="244"><span class="co">#rm(list=c('L.1','L.2','L.3','L.4','L.5', 'woa.quarter'))</span></a>
+<a class="sourceLine" id="cb1-245" data-line-number="245"><span class="co"># setwd(); base::save.image('.rda')</span></a>
+<a class="sourceLine" id="cb1-246" data-line-number="246"></a>
+<a class="sourceLine" id="cb1-247" data-line-number="247"><span class="co">#------------</span></a>
+<a class="sourceLine" id="cb1-248" data-line-number="248"><span class="co"># RUN THE MODEL</span></a>
+<a class="sourceLine" id="cb1-249" data-line-number="249"><span class="co">#------------</span></a>
+<a class="sourceLine" id="cb1-250" data-line-number="250"><span class="co"># CAN BE PARALLELIZED...</span></a>
+<a class="sourceLine" id="cb1-251" data-line-number="251"><span class="co">#require(foreach)</span></a>
+<a class="sourceLine" id="cb1-252" data-line-number="252"><span class="co">#print('Processing in parallel... ')</span></a>
+<a class="sourceLine" id="cb1-253" data-line-number="253"><span class="co">#ncores &lt;- ceiling(parallel::detectCores() * .25)</span></a>
+<a class="sourceLine" id="cb1-254" data-line-number="254"><span class="co">#cl = parallel::makeCluster(ncores)</span></a>
+<a class="sourceLine" id="cb1-255" data-line-number="255"><span class="co">#doParallel::registerDoParallel(cl, cores = ncores)</span></a>
+<a class="sourceLine" id="cb1-256" data-line-number="256"><span class="co">#ans = foreach::foreach(tt = run.idx) %dopar%{</span></a>
+<a class="sourceLine" id="cb1-257" data-line-number="257"></a>
+<a class="sourceLine" id="cb1-258" data-line-number="258"><span class="co">#for (tt in run.idx){</span></a>
+<a class="sourceLine" id="cb1-259" data-line-number="259"><span class="co">#  for (bnd in bndVec){</span></a>
+<a class="sourceLine" id="cb1-260" data-line-number="260"><span class="co">#    for (i in parVec){</span></a>
+<a class="sourceLine" id="cb1-261" data-line-number="261">      </a>
+<a class="sourceLine" id="cb1-262" data-line-number="262">tt=<span class="dv">1</span></a>
+<a class="sourceLine" id="cb1-263" data-line-number="263">i=parVec[<span class="dv">1</span>]</a>
+<a class="sourceLine" id="cb1-264" data-line-number="264"></a>
+<a class="sourceLine" id="cb1-265" data-line-number="265">ptt &lt;-<span class="st"> </span><span class="dv">141259</span></a>
+<a class="sourceLine" id="cb1-266" data-line-number="266"><span class="co">#runName &lt;- paste(ptt,'_idx',tt,'_bnd',bnd,'_par',i,sep='')</span></a>
+<a class="sourceLine" id="cb1-267" data-line-number="267"></a>
+<a class="sourceLine" id="cb1-268" data-line-number="268"><span class="co"># COMBINE LIKELIHOOD MATRICES</span></a>
+<a class="sourceLine" id="cb1-269" data-line-number="269"><span class="co"># L.idx combination indicates likelihood surfaces to consider</span></a>
+<a class="sourceLine" id="cb1-270" data-line-number="270">L &lt;-<span class="st"> </span><span class="kw">make.L</span>(L.res[[<span class="dv">1</span>]][L.idx[[tt]]],</a>
+<a class="sourceLine" id="cb1-271" data-line-number="271">            <span class="dt">iniloc =</span> iniloc, <span class="dt">dateVec =</span> dateVec)</a>
+<a class="sourceLine" id="cb1-272" data-line-number="272"></a>
+<a class="sourceLine" id="cb1-273" data-line-number="273"></a>
+<a class="sourceLine" id="cb1-274" data-line-number="274">L &lt;-<span class="st"> </span>L<span class="op">$</span>L</a>
+<a class="sourceLine" id="cb1-275" data-line-number="275">g &lt;-<span class="st"> </span>L.res<span class="op">$</span>g</a>
+<a class="sourceLine" id="cb1-276" data-line-number="276">lon &lt;-<span class="st"> </span>g<span class="op">$</span>lon[<span class="dv">1</span>,]</a>
+<a class="sourceLine" id="cb1-277" data-line-number="277">lat &lt;-<span class="st"> </span>g<span class="op">$</span>lat[,<span class="dv">1</span>]</a>
+<a class="sourceLine" id="cb1-278" data-line-number="278"></a>
+<a class="sourceLine" id="cb1-279" data-line-number="279"><span class="kw">rm</span>(L<span class="fl">.1</span>,L<span class="fl">.2</span>,L<span class="fl">.3</span>,L<span class="fl">.4</span>,L<span class="fl">.5</span>,L<span class="fl">.6</span>)</a>
+<a class="sourceLine" id="cb1-280" data-line-number="280"><span class="co">#rm(L.res,L.rasters,locs.grid,bathy)</span></a>
+<a class="sourceLine" id="cb1-281" data-line-number="281"></a>
+<a class="sourceLine" id="cb1-282" data-line-number="282"><span class="co">#-----------------------------------------------</span></a>
+<a class="sourceLine" id="cb1-283" data-line-number="283"><span class="co"># Parameter estimation</span></a>
+<a class="sourceLine" id="cb1-284" data-line-number="284"><span class="co">#-----------------------------------------------</span></a>
+<a class="sourceLine" id="cb1-285" data-line-number="285"><span class="co"># a. nlminb or optim (gradient based)</span></a>
+<a class="sourceLine" id="cb1-286" data-line-number="286"><span class="co"># b. GA genetic algorithm</span></a>
+<a class="sourceLine" id="cb1-287" data-line-number="287"><span class="co">#-----------------------------------------------</span></a>
+<a class="sourceLine" id="cb1-288" data-line-number="288"></a>
+<a class="sourceLine" id="cb1-289" data-line-number="289"><span class="co">#-----------------------------------------------</span></a>
+<a class="sourceLine" id="cb1-290" data-line-number="290"><span class="co"># a. nlminb or optim</span></a>
+<a class="sourceLine" id="cb1-291" data-line-number="291"><span class="co">#-----------------------------------------------</span></a>
+<a class="sourceLine" id="cb1-292" data-line-number="292">maskL=<span class="ot">FALSE</span></a>
+<a class="sourceLine" id="cb1-293" data-line-number="293"></a>
+<a class="sourceLine" id="cb1-294" data-line-number="294"><span class="co"># pars sigma1 (resident), sigma2 (migrant), p11 switch from behavior 1 to 1 (remain resident), p22</span></a>
+<a class="sourceLine" id="cb1-295" data-line-number="295"><span class="co"># c(1,2)/1000 * 3600 * 24/111/g$dla/(.5*pi)</span></a>
+<a class="sourceLine" id="cb1-296" data-line-number="296">pars.init=<span class="kw">c</span>(<span class="dv">2</span>,.<span class="dv">2</span>,.<span class="dv">6</span>,.<span class="dv">8</span>)</a>
+<a class="sourceLine" id="cb1-297" data-line-number="297">lower.bounds=<span class="kw">c</span>(<span class="fl">0.1</span>,<span class="fl">0.001</span>,.<span class="dv">1</span>,.<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb1-298" data-line-number="298">upper.bounds=<span class="kw">c</span>(<span class="dv">5</span>,.<span class="dv">5</span>,.<span class="dv">9</span>,.<span class="dv">9</span>)</a>
+<a class="sourceLine" id="cb1-299" data-line-number="299"></a>
+<a class="sourceLine" id="cb1-300" data-line-number="300">alg.opt=<span class="st">'optim'</span></a>
+<a class="sourceLine" id="cb1-301" data-line-number="301"><span class="cf">if</span>(alg.opt<span class="op">==</span><span class="st">'optim'</span>){</a>
+<a class="sourceLine" id="cb1-302" data-line-number="302">  t0=<span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb1-303" data-line-number="303">  res.optim=<span class="kw">optim</span>(<span class="dt">par=</span>pars.init, <span class="dt">fn=</span>neg.log.lik.fun,<span class="dt">g=</span>g.mle,<span class="dt">L=</span>L.mle,<span class="dt">maskL=</span>maskL, <span class="dt">gr=</span><span class="ot">NULL</span>, </a>
+<a class="sourceLine" id="cb1-304" data-line-number="304">                  <span class="dt">lower=</span>lower.bounds, <span class="dt">upper=</span>upper.bounds, </a>
+<a class="sourceLine" id="cb1-305" data-line-number="305">                  <span class="dt">method=</span><span class="st">'L-BFGS-B'</span>,<span class="dt">hessian=</span><span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb1-306" data-line-number="306">  <span class="co"># hessian=T --&gt; compute hessian matrix for estimate of parameter SD --&gt; usually slow down the computations</span></a>
+<a class="sourceLine" id="cb1-307" data-line-number="307">  t1=<span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb1-308" data-line-number="308">  <span class="kw">print</span>(t1<span class="op">-</span>t0) </a>
+<a class="sourceLine" id="cb1-309" data-line-number="309">  <span class="kw">save</span>(res.optim,<span class="dt">file=</span><span class="kw">paste0</span>(<span class="st">'optim.'</span>,ptt,<span class="st">'_idx'</span>,tt,<span class="st">'_bnd'</span>,bnd,<span class="st">'_maskL'</span>,maskL,<span class="st">'.mle.RData'</span>))</a>
+<a class="sourceLine" id="cb1-310" data-line-number="310">  </a>
+<a class="sourceLine" id="cb1-311" data-line-number="311">  t0=<span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb1-312" data-line-number="312">  res.optim=<span class="kw">optim</span>(<span class="dt">par=</span>pars.init, <span class="dt">fn=</span>neg.log.lik.fun,<span class="dt">g=</span>g,<span class="dt">L=</span>L,<span class="dt">maskL=</span>maskL, <span class="dt">gr=</span><span class="ot">NULL</span>, </a>
+<a class="sourceLine" id="cb1-313" data-line-number="313">                  <span class="dt">lower=</span>lower.bounds, <span class="dt">upper=</span>upper.bounds, </a>
+<a class="sourceLine" id="cb1-314" data-line-number="314">                  <span class="dt">method=</span><span class="st">'L-BFGS-B'</span>,<span class="dt">hessian=</span><span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb1-315" data-line-number="315">  t1=<span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb1-316" data-line-number="316">  <span class="kw">print</span>(t1<span class="op">-</span>t0) </a>
+<a class="sourceLine" id="cb1-317" data-line-number="317">  <span class="kw">save</span>(res.optim,<span class="dt">file=</span><span class="kw">paste0</span>(<span class="st">'optim.'</span>,ptt,<span class="st">'_idx'</span>,tt,<span class="st">'_bnd'</span>,bnd,<span class="st">'_maskL'</span>,maskL,<span class="st">'.RData'</span>))</a>
+<a class="sourceLine" id="cb1-318" data-line-number="318">}</a>
+<a class="sourceLine" id="cb1-319" data-line-number="319"></a>
+<a class="sourceLine" id="cb1-320" data-line-number="320">alg.opt=<span class="st">'nlminb'</span></a>
+<a class="sourceLine" id="cb1-321" data-line-number="321"><span class="cf">if</span>(alg.opt<span class="op">==</span><span class="st">'nlminb'</span>){</a>
+<a class="sourceLine" id="cb1-322" data-line-number="322">  t0=<span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb1-323" data-line-number="323">  <span class="co">#res.nlminb=nlminb(pars.init, objective=neg.log.lik.fun, gradient = NULL, hessian = NULL,g=g,L=L,</span></a>
+<a class="sourceLine" id="cb1-324" data-line-number="324">  <span class="co">#                  scale = 1, lower = 0, upper = max.sigma)</span></a>
+<a class="sourceLine" id="cb1-325" data-line-number="325">  res.nlminb=<span class="kw">tryCatch</span>({<span class="kw">nlminb</span>(pars.init, <span class="dt">objective=</span>neg.log.lik.fun,<span class="dt">maskL=</span>maskL, <span class="dt">gradient =</span> <span class="ot">NULL</span>, <span class="dt">hessian =</span> <span class="ot">NULL</span>,</a>
+<a class="sourceLine" id="cb1-326" data-line-number="326">                              <span class="dt">g=</span>g.mle,<span class="dt">L=</span>L.mle,</a>
+<a class="sourceLine" id="cb1-327" data-line-number="327">                              <span class="dt">scale =</span> <span class="dv">1</span>, <span class="dt">lower=</span>lower.bounds, <span class="dt">upper=</span>upper.bounds,</a>
+<a class="sourceLine" id="cb1-328" data-line-number="328">                              <span class="dt">control=</span><span class="kw">list</span>(<span class="dt">iter.max=</span><span class="dv">100</span>))},<span class="dt">error=</span><span class="cf">function</span>(error_message){<span class="kw">return</span>(error_message)})</a>
+<a class="sourceLine" id="cb1-329" data-line-number="329">  t1=<span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb1-330" data-line-number="330">  <span class="kw">print</span>(t1<span class="op">-</span>t0) </a>
+<a class="sourceLine" id="cb1-331" data-line-number="331">  <span class="kw">save</span>(res.optim,<span class="dt">file=</span><span class="kw">paste0</span>(<span class="st">'nlminb.'</span>,ptt,<span class="st">'_idx'</span>,tt,<span class="st">'_bnd'</span>,bnd,<span class="st">'_maskL'</span>,maskL,<span class="st">'.mle.RData'</span>))</a>
+<a class="sourceLine" id="cb1-332" data-line-number="332">  </a>
+<a class="sourceLine" id="cb1-333" data-line-number="333">  <span class="co"># print('nlmib has failed with the acurate grid ?!')</span></a>
+<a class="sourceLine" id="cb1-334" data-line-number="334">  t0=<span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb1-335" data-line-number="335">  <span class="co">#res.nlminb=nlminb(pars.init, objective=neg.log.lik.fun, gradient = NULL, hessian = NULL,g=g,L=L,</span></a>
+<a class="sourceLine" id="cb1-336" data-line-number="336">  <span class="co">#                  scale = 1, lower = 0, upper = max.sigma)</span></a>
+<a class="sourceLine" id="cb1-337" data-line-number="337">  res.nlminb=<span class="kw">tryCatch</span>({<span class="kw">nlminb</span>(pars.init, <span class="dt">objective=</span>neg.log.lik.fun,<span class="dt">maskL=</span>maskL, <span class="dt">gradient =</span> <span class="ot">NULL</span>, <span class="dt">hessian =</span> <span class="ot">NULL</span>,</a>
+<a class="sourceLine" id="cb1-338" data-line-number="338">                              <span class="dt">g=</span>g,<span class="dt">L=</span>L,</a>
+<a class="sourceLine" id="cb1-339" data-line-number="339">                              <span class="dt">scale =</span> <span class="dv">1</span>, <span class="dt">lower=</span>lower.bounds, <span class="dt">upper=</span>upper.bounds,</a>
+<a class="sourceLine" id="cb1-340" data-line-number="340">                              <span class="dt">control=</span><span class="kw">list</span>(<span class="dt">iter.max=</span><span class="dv">100</span>))},<span class="dt">error=</span><span class="cf">function</span>(error_message){<span class="kw">return</span>(error_message)})</a>
+<a class="sourceLine" id="cb1-341" data-line-number="341">  t1=<span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb1-342" data-line-number="342">  <span class="kw">print</span>(t1<span class="op">-</span>t0) </a>
+<a class="sourceLine" id="cb1-343" data-line-number="343">  <span class="kw">save</span>(res.optim,<span class="dt">file=</span><span class="kw">paste0</span>(<span class="st">'nlminb.'</span>,ptt,<span class="st">'_idx'</span>,tt,<span class="st">'_bnd'</span>,bnd,<span class="st">'_maskL'</span>,maskL,<span class="st">'.RData'</span>))</a>
+<a class="sourceLine" id="cb1-344" data-line-number="344">}</a>
+<a class="sourceLine" id="cb1-345" data-line-number="345"></a>
+<a class="sourceLine" id="cb1-346" data-line-number="346"><span class="co">#-----------------------------------------------</span></a>
+<a class="sourceLine" id="cb1-347" data-line-number="347"><span class="co"># b. GA genetic algorithm</span></a>
+<a class="sourceLine" id="cb1-348" data-line-number="348"><span class="co">#-----------------------------------------------</span></a>
+<a class="sourceLine" id="cb1-349" data-line-number="349"><span class="co"># alg.opt='GA'</span></a>
+<a class="sourceLine" id="cb1-350" data-line-number="350"><span class="co"># evolutionnary algorithm, completely different approach from gradient based such as optim or nlminb</span></a>
+<a class="sourceLine" id="cb1-351" data-line-number="351"><span class="co"># do not need initialization value,</span></a>
+<a class="sourceLine" id="cb1-352" data-line-number="352"><span class="co"># although you can still provide a parameter set that might work,</span></a>
+<a class="sourceLine" id="cb1-353" data-line-number="353"><span class="co"># and the algorithm will integrate it in its initial population of parameter set</span></a>
+<a class="sourceLine" id="cb1-354" data-line-number="354"><span class="co"># IT IS MUCH MORE time/computing consumming BUT also more resilient to local minima</span></a>
+<a class="sourceLine" id="cb1-355" data-line-number="355"><span class="co"># has a common feature with SEM, i.e. random sampling (mutations)</span></a>
+<a class="sourceLine" id="cb1-356" data-line-number="356"></a>
+<a class="sourceLine" id="cb1-357" data-line-number="357">alg.opt=<span class="st">'GA'</span></a>
+<a class="sourceLine" id="cb1-358" data-line-number="358"><span class="cf">if</span>(<span class="dt">alg.opt=</span><span class="st">'GA'</span>){</a>
+<a class="sourceLine" id="cb1-359" data-line-number="359">  </a>
+<a class="sourceLine" id="cb1-360" data-line-number="360">  pm=.<span class="dv">1</span> <span class="co"># probability of mutation # default value of GA</span></a>
+<a class="sourceLine" id="cb1-361" data-line-number="361">  mit=<span class="dv">100</span> <span class="co"># maximum number of generations (i.e. iterations)</span></a>
+<a class="sourceLine" id="cb1-362" data-line-number="362">  Run=<span class="dv">100</span> <span class="co"># number of iteration without improvement befor ethe algorithm is stopped</span></a>
+<a class="sourceLine" id="cb1-363" data-line-number="363">  pSz=<span class="dv">100</span> <span class="co"># population size (each individual is a parameter set)</span></a>
+<a class="sourceLine" id="cb1-364" data-line-number="364">  Ncores=<span class="dv">4</span> <span class="co"># number of core to use for the parallelization, usually its good to use half of the cores (and let some for the background processes)</span></a>
+<a class="sourceLine" id="cb1-365" data-line-number="365">  </a>
+<a class="sourceLine" id="cb1-366" data-line-number="366"> <span class="co"># pm=.1 # probability of mutation # default value of GA</span></a>
+<a class="sourceLine" id="cb1-367" data-line-number="367"><span class="co">#  mit=1 # maximum number of generations (i.e. iterations)</span></a>
+<a class="sourceLine" id="cb1-368" data-line-number="368"><span class="co">#  Run=20 # number of iteration without improvement befor ethe algorithm is stopped</span></a>
+<a class="sourceLine" id="cb1-369" data-line-number="369"><span class="co">#  pSz=50 # population size (each individual is a parameter set)</span></a>
+<a class="sourceLine" id="cb1-370" data-line-number="370"><span class="co">#  Ncores=4 # number of core to use for the parallelization, usually its good to use half of the cores (and let some for the background processes)</span></a>
+<a class="sourceLine" id="cb1-371" data-line-number="371">  </a>
+<a class="sourceLine" id="cb1-372" data-line-number="372">  <span class="kw">print</span>(<span class="st">'GA with the heavy grid might be long to run (~7 hours here)'</span>)</a>
+<a class="sourceLine" id="cb1-373" data-line-number="373">  t0=<span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb1-374" data-line-number="374">  res.ga=<span class="kw">ga</span>(<span class="dt">type=</span><span class="st">'real-valued'</span>,<span class="dt">fitness=</span>pos.log.lik.fun,</a>
+<a class="sourceLine" id="cb1-375" data-line-number="375">            <span class="dt">g=</span>g.mle,<span class="dt">L=</span>L.mle,<span class="dt">maskL=</span>maskL,</a>
+<a class="sourceLine" id="cb1-376" data-line-number="376">            <span class="dt">lower=</span>lower.bounds,</a>
+<a class="sourceLine" id="cb1-377" data-line-number="377">            <span class="dt">upper=</span>upper.bounds,</a>
+<a class="sourceLine" id="cb1-378" data-line-number="378">            <span class="dt">popSize=</span>pSz,<span class="co">#crossover=gareal_blxCrossover,</span></a>
+<a class="sourceLine" id="cb1-379" data-line-number="379">            <span class="dt">maxiter=</span>mit,<span class="dt">run=</span>Run,<span class="co">#pmutation=pm,</span></a>
+<a class="sourceLine" id="cb1-380" data-line-number="380">            <span class="dt">names=</span><span class="kw">c</span>(<span class="st">'sigma1.ncell'</span>,<span class="st">'sigma2.ncell'</span>,<span class="st">'pswitch11'</span>,<span class="st">'pswitch22'</span>),<span class="co">#suggestions=2,</span></a>
+<a class="sourceLine" id="cb1-381" data-line-number="381">            <span class="dt">keepBest=</span>T,</a>
+<a class="sourceLine" id="cb1-382" data-line-number="382">            <span class="dt">parallel=</span>Ncores<span class="co">#'snow'</span></a>
+<a class="sourceLine" id="cb1-383" data-line-number="383">  )</a>
+<a class="sourceLine" id="cb1-384" data-line-number="384">  t1=<span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb1-385" data-line-number="385">  <span class="kw">print</span>(t1<span class="op">-</span>t0)</a>
+<a class="sourceLine" id="cb1-386" data-line-number="386">  <span class="kw">save</span>(res.ga,<span class="dt">file=</span><span class="kw">paste0</span>(<span class="st">'GA.'</span>,ptt,<span class="st">'_idx'</span>,tt,<span class="st">'_bnd'</span>,bnd,<span class="st">'_maskL'</span>,maskL,<span class="st">'.mle.RData'</span>))</a>
+<a class="sourceLine" id="cb1-387" data-line-number="387">  </a>
+<a class="sourceLine" id="cb1-388" data-line-number="388">  </a>
+<a class="sourceLine" id="cb1-389" data-line-number="389">  pm=.<span class="dv">1</span> <span class="co"># probability of mutation # default value of GA</span></a>
+<a class="sourceLine" id="cb1-390" data-line-number="390">  mit=<span class="dv">100</span> <span class="co"># maximum number of generations (i.e. iterations)</span></a>
+<a class="sourceLine" id="cb1-391" data-line-number="391">  Run=<span class="dv">30</span> <span class="co"># number of iteration without improvement befor ethe algorithm is stopped</span></a>
+<a class="sourceLine" id="cb1-392" data-line-number="392">  pSz=<span class="dv">100</span> <span class="co"># population size (each individual is a parameter set)</span></a>
+<a class="sourceLine" id="cb1-393" data-line-number="393">  Ncores=<span class="dv">4</span></a>
+<a class="sourceLine" id="cb1-394" data-line-number="394">  </a>
+<a class="sourceLine" id="cb1-395" data-line-number="395">  t0=<span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb1-396" data-line-number="396">  res.ga=<span class="kw">ga</span>(<span class="dt">type=</span><span class="st">'real-valued'</span>,<span class="dt">fitness=</span>pos.log.lik.fun,</a>
+<a class="sourceLine" id="cb1-397" data-line-number="397">            <span class="dt">g=</span>g,<span class="dt">L=</span>L,<span class="dt">maskL=</span>maskL,</a>
+<a class="sourceLine" id="cb1-398" data-line-number="398">            <span class="dt">lower=</span>lower.bounds,</a>
+<a class="sourceLine" id="cb1-399" data-line-number="399">            <span class="dt">upper=</span>upper.bounds,</a>
+<a class="sourceLine" id="cb1-400" data-line-number="400">            <span class="dt">popSize=</span>pSz,<span class="co">#crossover=gareal_blxCrossover,</span></a>
+<a class="sourceLine" id="cb1-401" data-line-number="401">            <span class="dt">maxiter=</span>mit,<span class="dt">run=</span>Run,<span class="co">#pmutation=pm,</span></a>
+<a class="sourceLine" id="cb1-402" data-line-number="402">            <span class="dt">names=</span><span class="kw">c</span>(<span class="st">'sigma1.ncell'</span>,<span class="st">'sigma2.ncell'</span>,<span class="st">'pswitch11'</span>,<span class="st">'pswitch22'</span>),<span class="co">#suggestions=2,</span></a>
+<a class="sourceLine" id="cb1-403" data-line-number="403">            <span class="dt">keepBest=</span>T,</a>
+<a class="sourceLine" id="cb1-404" data-line-number="404">            <span class="dt">parallel=</span>Ncores<span class="co">#'snow'</span></a>
+<a class="sourceLine" id="cb1-405" data-line-number="405">  )</a>
+<a class="sourceLine" id="cb1-406" data-line-number="406">  t1=<span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb1-407" data-line-number="407">  <span class="kw">print</span>(t1<span class="op">-</span>t0)</a>
+<a class="sourceLine" id="cb1-408" data-line-number="408">  <span class="kw">save</span>(res.ga,<span class="dt">file=</span><span class="kw">paste0</span>(<span class="st">'GA.'</span>,ptt,<span class="st">'_idx'</span>,tt,<span class="st">'_bnd'</span>,bnd,<span class="st">'_maskL'</span>,maskL,<span class="st">'.RData'</span>))</a>
+<a class="sourceLine" id="cb1-409" data-line-number="409">}</a>
+<a class="sourceLine" id="cb1-410" data-line-number="410"></a>
+<a class="sourceLine" id="cb1-411" data-line-number="411">optim.post.ga=<span class="ot">FALSE</span></a>
+<a class="sourceLine" id="cb1-412" data-line-number="412"><span class="cf">if</span>(optim.post.ga){</a>
+<a class="sourceLine" id="cb1-413" data-line-number="413">  pars.init=<span class="kw">an</span>(res.ga<span class="op">@</span>solution)</a>
+<a class="sourceLine" id="cb1-414" data-line-number="414">  t0=<span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb1-415" data-line-number="415">  res.optim=<span class="kw">optim</span>(<span class="dt">par=</span>pars.init, <span class="dt">fn=</span>neg.log.lik.fun,<span class="dt">g=</span>g,<span class="dt">L=</span>L,<span class="dt">maskL=</span>maskL, <span class="dt">gr=</span><span class="ot">NULL</span>, </a>
+<a class="sourceLine" id="cb1-416" data-line-number="416">                  <span class="dt">lower=</span>lower.bounds, <span class="dt">upper=</span>upper.bounds, </a>
+<a class="sourceLine" id="cb1-417" data-line-number="417">                  <span class="dt">method=</span><span class="st">'L-BFGS-B'</span>,<span class="dt">hessian=</span><span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb1-418" data-line-number="418">  t1=<span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb1-419" data-line-number="419">  <span class="kw">print</span>(t1<span class="op">-</span>t0) </a>
+<a class="sourceLine" id="cb1-420" data-line-number="420">  <span class="kw">save</span>(res.optim,<span class="dt">file=</span><span class="kw">paste0</span>(<span class="st">'postGA.'</span>,ptt,<span class="st">'_idx'</span>,tt,<span class="st">'_bnd'</span>,bnd,<span class="st">'_maskL'</span>,maskL,<span class="st">'.RData'</span>))</a>
+<a class="sourceLine" id="cb1-421" data-line-number="421">  </a>
+<a class="sourceLine" id="cb1-422" data-line-number="422">}</a>
+<a class="sourceLine" id="cb1-423" data-line-number="423"></a>
+<a class="sourceLine" id="cb1-424" data-line-number="424"><span class="co"># duration filter with and without maskL</span></a>
+<a class="sourceLine" id="cb1-425" data-line-number="425">test=<span class="ot">FALSE</span></a>
+<a class="sourceLine" id="cb1-426" data-line-number="426"><span class="cf">if</span>(test){</a>
+<a class="sourceLine" id="cb1-427" data-line-number="427">  t0=<span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb1-428" data-line-number="428">  <span class="co">#ll=pos.log.lik.fun(pars,g.mle,L.mle)</span></a>
+<a class="sourceLine" id="cb1-429" data-line-number="429">  f. &lt;-<span class="st"> </span><span class="kw">hmm.filter</span>(g.mle, L.mle, K1,K2, P)</a>
+<a class="sourceLine" id="cb1-430" data-line-number="430">  t1=<span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb1-431" data-line-number="431">  <span class="kw">print</span>(t1<span class="op">-</span>t0)</a>
+<a class="sourceLine" id="cb1-432" data-line-number="432">  </a>
+<a class="sourceLine" id="cb1-433" data-line-number="433">  t0=<span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb1-434" data-line-number="434">  <span class="co">#ll=pos.log.lik.fun(pars,g.mle,L.mle)</span></a>
+<a class="sourceLine" id="cb1-435" data-line-number="435">  f<span class="fl">.2</span> &lt;-<span class="st"> </span><span class="kw">hmm.filter</span>(g.mle, L.mle, K1,K2, P,<span class="dt">maskL=</span>F)</a>
+<a class="sourceLine" id="cb1-436" data-line-number="436">  t1=<span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb1-437" data-line-number="437">  <span class="kw">print</span>(t1<span class="op">-</span>t0) </a>
+<a class="sourceLine" id="cb1-438" data-line-number="438">}</a>
+<a class="sourceLine" id="cb1-439" data-line-number="439"></a>
+<a class="sourceLine" id="cb1-440" data-line-number="440"><span class="co">#----------------------------------</span></a>
+<a class="sourceLine" id="cb1-441" data-line-number="441"><span class="co"># filter / smooth</span></a>
+<a class="sourceLine" id="cb1-442" data-line-number="442"><span class="co">#----------------------------------</span></a>
+<a class="sourceLine" id="cb1-443" data-line-number="443">alg.opt=<span class="st">'optim'</span></a>
+<a class="sourceLine" id="cb1-444" data-line-number="444"></a>
+<a class="sourceLine" id="cb1-445" data-line-number="445"><span class="co"># parameter set</span></a>
+<a class="sourceLine" id="cb1-446" data-line-number="446"><span class="cf">if</span>(<span class="dt">alg.opt=</span><span class="st">'GA'</span>){</a>
+<a class="sourceLine" id="cb1-447" data-line-number="447">  <span class="kw">load</span>(<span class="kw">paste0</span>(<span class="st">'GA.'</span>,ptt,<span class="st">'_idx'</span>,tt,<span class="st">'_bnd'</span>,bnd,<span class="st">'_maskL'</span>,maskL,<span class="st">'.RData'</span>))</a>
+<a class="sourceLine" id="cb1-448" data-line-number="448">  <span class="kw">plot</span>(res.ga)</a>
+<a class="sourceLine" id="cb1-449" data-line-number="449">  pars=<span class="kw">an</span>(res.ga<span class="op">@</span>solution)</a>
+<a class="sourceLine" id="cb1-450" data-line-number="450">  pars</a>
+<a class="sourceLine" id="cb1-451" data-line-number="451">}</a>
+<a class="sourceLine" id="cb1-452" data-line-number="452"></a>
+<a class="sourceLine" id="cb1-453" data-line-number="453"><span class="cf">if</span>(alg.opt<span class="op">==</span><span class="st">'nlminb'</span>){</a>
+<a class="sourceLine" id="cb1-454" data-line-number="454">  <span class="kw">load</span>(<span class="kw">paste0</span>(<span class="st">'nlminb.'</span>,ptt,<span class="st">'_idx'</span>,tt,<span class="st">'_bnd'</span>,bnd,<span class="st">'_mask'</span>,maskL,<span class="st">'.RData'</span>))</a>
+<a class="sourceLine" id="cb1-455" data-line-number="455">  pars=res.nlminb<span class="op">$</span>par</a>
+<a class="sourceLine" id="cb1-456" data-line-number="456">  pars</a>
+<a class="sourceLine" id="cb1-457" data-line-number="457">}</a>
+<a class="sourceLine" id="cb1-458" data-line-number="458"></a>
+<a class="sourceLine" id="cb1-459" data-line-number="459"><span class="cf">if</span>(alg.opt<span class="op">==</span><span class="st">'optim'</span>){</a>
+<a class="sourceLine" id="cb1-460" data-line-number="460">  <span class="kw">load</span>(<span class="kw">paste0</span>(<span class="st">'optim.'</span>,ptt,<span class="st">'_idx'</span>,tt,<span class="st">'_bnd'</span>,bnd,<span class="st">'_maskL'</span>,maskL,<span class="st">'.RData'</span>))</a>
+<a class="sourceLine" id="cb1-461" data-line-number="461">  pars=res.optim<span class="op">$</span>par</a>
+<a class="sourceLine" id="cb1-462" data-line-number="462">  pars</a>
+<a class="sourceLine" id="cb1-463" data-line-number="463">}</a>
+<a class="sourceLine" id="cb1-464" data-line-number="464"><span class="co"># pars=pars.init</span></a>
+<a class="sourceLine" id="cb1-465" data-line-number="465"></a>
+<a class="sourceLine" id="cb1-466" data-line-number="466">sigmas=pars[<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>]</a>
+<a class="sourceLine" id="cb1-467" data-line-number="467">sizes=<span class="kw">ceiling</span>(sigmas<span class="op">*</span><span class="dv">4</span>)</a>
+<a class="sourceLine" id="cb1-468" data-line-number="468">pb=pars[<span class="dv">3</span><span class="op">:</span><span class="dv">4</span>]</a>
+<a class="sourceLine" id="cb1-469" data-line-number="469">muadvs=<span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)</a>
+<a class="sourceLine" id="cb1-470" data-line-number="470"></a>
+<a class="sourceLine" id="cb1-471" data-line-number="471"><span class="co"># if(!is.na(pars[5])) muadvs[1]&lt;-pars[5]</span></a>
+<a class="sourceLine" id="cb1-472" data-line-number="472"><span class="co">#  if(!is.na(pars[6])) muadvs[2]&lt;-pars[6]</span></a>
+<a class="sourceLine" id="cb1-473" data-line-number="473"></a>
+<a class="sourceLine" id="cb1-474" data-line-number="474">gausskern.PG=F</a>
+<a class="sourceLine" id="cb1-475" data-line-number="475"><span class="cf">if</span>(gausskern.PG){</a>
+<a class="sourceLine" id="cb1-476" data-line-number="476">  <span class="co"># behav 1</span></a>
+<a class="sourceLine" id="cb1-477" data-line-number="477">  <span class="cf">if</span>(sizes[<span class="dv">1</span>]<span class="op">%%</span><span class="dv">2</span><span class="op">==</span><span class="dv">0</span>){sizes[<span class="dv">1</span>]=sizes[<span class="dv">1</span>]<span class="op">+</span><span class="dv">1</span>}</a>
+<a class="sourceLine" id="cb1-478" data-line-number="478">  ss=<span class="kw">sum</span>(<span class="kw">gausskern.nostd</span>(sizes[<span class="dv">1</span>],sigmas[<span class="dv">1</span>],<span class="dt">muadv=</span>muadvs[<span class="dv">1</span>]))</a>
+<a class="sourceLine" id="cb1-479" data-line-number="479">  <span class="cf">while</span>(ss<span class="op">&lt;</span>.<span class="dv">999</span>){</a>
+<a class="sourceLine" id="cb1-480" data-line-number="480">    sizes[<span class="dv">1</span>]=sizes[<span class="dv">1</span>]<span class="op">+</span><span class="dv">2</span></a>
+<a class="sourceLine" id="cb1-481" data-line-number="481">    ss=<span class="kw">sum</span>(<span class="kw">gausskern.nostd</span>(sizes[<span class="dv">1</span>],sigmas[<span class="dv">1</span>],<span class="dt">muadv=</span>muadvs[<span class="dv">1</span>]))</a>
+<a class="sourceLine" id="cb1-482" data-line-number="482">  }</a>
+<a class="sourceLine" id="cb1-483" data-line-number="483">  K1 =<span class="st"> </span><span class="kw">gausskern.pg</span>(sizes[<span class="dv">1</span>],sigmas[<span class="dv">1</span>],<span class="dt">muadv=</span>muadvs[<span class="dv">1</span>])</a>
+<a class="sourceLine" id="cb1-484" data-line-number="484">  <span class="kw">rm</span>(ss)</a>
+<a class="sourceLine" id="cb1-485" data-line-number="485">  K1=<span class="kw">mask.K</span>(K1)</a>
+<a class="sourceLine" id="cb1-486" data-line-number="486">  </a>
+<a class="sourceLine" id="cb1-487" data-line-number="487">  <span class="co"># behav 2</span></a>
+<a class="sourceLine" id="cb1-488" data-line-number="488">  <span class="cf">if</span>(sizes[<span class="dv">2</span>]<span class="op">%%</span><span class="dv">2</span><span class="op">==</span><span class="dv">0</span>){sizes[<span class="dv">2</span>]=sizes[<span class="dv">2</span>]<span class="op">+</span><span class="dv">1</span>}</a>
+<a class="sourceLine" id="cb1-489" data-line-number="489">  ss=<span class="kw">sum</span>(<span class="kw">gausskern.nostd</span>(sizes[<span class="dv">2</span>],sigmas[<span class="dv">2</span>],<span class="dt">muadv=</span>muadvs[<span class="dv">2</span>]))</a>
+<a class="sourceLine" id="cb1-490" data-line-number="490">  <span class="cf">while</span>(ss<span class="op">&lt;</span>.<span class="dv">999</span>){</a>
+<a class="sourceLine" id="cb1-491" data-line-number="491">    sizes[<span class="dv">2</span>]=sizes[<span class="dv">2</span>]<span class="op">+</span><span class="dv">2</span></a>
+<a class="sourceLine" id="cb1-492" data-line-number="492">    ss=<span class="kw">sum</span>(<span class="kw">gausskern.nostd</span>(sizes[<span class="dv">2</span>],sigmas[<span class="dv">2</span>],<span class="dt">muadv=</span>muadvs[<span class="dv">2</span>]))</a>
+<a class="sourceLine" id="cb1-493" data-line-number="493">  }</a>
+<a class="sourceLine" id="cb1-494" data-line-number="494">  K2 =<span class="st"> </span><span class="kw">gausskern.pg</span>(sizes[<span class="dv">2</span>],sigmas[<span class="dv">2</span>],<span class="dt">muadv=</span>muadvs[<span class="dv">2</span>])</a>
+<a class="sourceLine" id="cb1-495" data-line-number="495">  <span class="kw">rm</span>(ss)</a>
+<a class="sourceLine" id="cb1-496" data-line-number="496">  K2=<span class="kw">mask.K</span>(K2)</a>
+<a class="sourceLine" id="cb1-497" data-line-number="497">  </a>
+<a class="sourceLine" id="cb1-498" data-line-number="498">}<span class="cf">else</span>{</a>
+<a class="sourceLine" id="cb1-499" data-line-number="499">  sizes=<span class="kw">rep</span>(<span class="kw">ceiling</span>(sigmas[<span class="dv">1</span>]<span class="op">*</span><span class="dv">4</span>),<span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb1-500" data-line-number="500">  K1 =<span class="st"> </span><span class="kw">gausskern.pg</span>(sizes[<span class="dv">1</span>],sigmas[<span class="dv">1</span>],<span class="dt">muadv=</span>muadvs[<span class="dv">1</span>])</a>
+<a class="sourceLine" id="cb1-501" data-line-number="501">  K2 =<span class="st"> </span><span class="kw">gausskern.pg</span>(sizes[<span class="dv">2</span>],sigmas[<span class="dv">2</span>],<span class="dt">muadv=</span>muadvs[<span class="dv">2</span>])</a>
+<a class="sourceLine" id="cb1-502" data-line-number="502">}</a>
+<a class="sourceLine" id="cb1-503" data-line-number="503"></a>
+<a class="sourceLine" id="cb1-504" data-line-number="504">P &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(pb[<span class="dv">1</span>],<span class="dv">1</span><span class="op">-</span>pb[<span class="dv">1</span>],<span class="dv">1</span><span class="op">-</span>pb[<span class="dv">2</span>],pb[<span class="dv">2</span>]),<span class="dv">2</span>,<span class="dv">2</span>,<span class="dt">byrow=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb1-505" data-line-number="505"></a>
+<a class="sourceLine" id="cb1-506" data-line-number="506"><span class="co"># RUN THE FILTER STEP</span></a>
+<a class="sourceLine" id="cb1-507" data-line-number="507">t0=<span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb1-508" data-line-number="508">f &lt;-<span class="st"> </span><span class="kw">hmm.filter</span>(g, L, <span class="dt">K=</span><span class="kw">list</span>(K1, K2), <span class="dt">P =</span> P, <span class="dt">m =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb1-509" data-line-number="509"></a>
+<a class="sourceLine" id="cb1-510" data-line-number="510"><span class="co">#if(!is.na(bnd)){</span></a>
+<a class="sourceLine" id="cb1-511" data-line-number="511"><span class="co">#  f &lt;- hmm.filter(g, L, K1, K2, maskL=T, P, minBounds = bnd)</span></a>
+<a class="sourceLine" id="cb1-512" data-line-number="512"><span class="co">#  maskL.logical &lt;- TRUE</span></a>
+<a class="sourceLine" id="cb1-513" data-line-number="513"><span class="co">#} else{</span></a>
+<a class="sourceLine" id="cb1-514" data-line-number="514"><span class="co"># f &lt;- hmm.filter(g, L, K1, K2, P, maskL=F)</span></a>
+<a class="sourceLine" id="cb1-515" data-line-number="515"><span class="co"># # f2 &lt;- hmm.filter(g.mle, L.mle, K1, K2, P, maskL=F)</span></a>
+<a class="sourceLine" id="cb1-516" data-line-number="516"><span class="co">#  maskL.logical &lt;- FALSE</span></a>
+<a class="sourceLine" id="cb1-517" data-line-number="517"><span class="co">#}</span></a>
+<a class="sourceLine" id="cb1-518" data-line-number="518">t1=<span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb1-519" data-line-number="519">t1<span class="op">-</span>t0</a>
+<a class="sourceLine" id="cb1-520" data-line-number="520"></a>
+<a class="sourceLine" id="cb1-521" data-line-number="521"><span class="co"># RUN THE SMOOTHING STEP</span></a>
+<a class="sourceLine" id="cb1-522" data-line-number="522">t0=<span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb1-523" data-line-number="523">s &lt;-<span class="st"> </span><span class="kw">hmm.smoother</span>(f, <span class="dt">K =</span> <span class="kw">list</span>(K1, K2), L, P)</a>
+<a class="sourceLine" id="cb1-524" data-line-number="524">t1=<span class="kw">Sys.time</span>()</a>
+<a class="sourceLine" id="cb1-525" data-line-number="525">t1<span class="op">-</span>t0</a>
+<a class="sourceLine" id="cb1-526" data-line-number="526"></a>
+<a class="sourceLine" id="cb1-527" data-line-number="527"><span class="co"># GET THE MOST PROBABLE TRACK</span></a>
+<a class="sourceLine" id="cb1-528" data-line-number="528">tr &lt;-<span class="st"> </span><span class="kw">calc.track</span>(s, g, dateVec, iniloc)</a>
+<a class="sourceLine" id="cb1-529" data-line-number="529"><span class="co">#setwd(myDir); </span></a>
+<a class="sourceLine" id="cb1-530" data-line-number="530"><span class="kw">plotHMM</span>(s, tr, dateVec, <span class="dt">ptt=</span>runName, <span class="dt">save.plot =</span> F)</a>
+<a class="sourceLine" id="cb1-531" data-line-number="531"></a>
+<a class="sourceLine" id="cb1-532" data-line-number="532"><span class="co"># WRITE OUT RESULTS</span></a>
+<a class="sourceLine" id="cb1-533" data-line-number="533"><span class="co">#outVec &lt;- matrix(c(ptt=ptt, minBounds = bnd, migr.spd = i,</span></a>
+<a class="sourceLine" id="cb1-534" data-line-number="534"><span class="co">#                   Lidx = paste(L.idx[[tt]],collapse=''), P1 = P[1,1], P2 = P[2,2],</span></a>
+<a class="sourceLine" id="cb1-535" data-line-number="535"><span class="co">#                   spLims = sp.lim[1:4], resol = raster::res(L.rasters[[resamp.idx]]),</span></a>
+<a class="sourceLine" id="cb1-536" data-line-number="536"><span class="co">#                   maskL = maskL, NLL = nllf, name = runName), ncol=15)</span></a>
+<a class="sourceLine" id="cb1-537" data-line-number="537"><span class="co">#write.table(outVec,paste(dataDir, 'outVec_results.csv', sep=''), sep=',', col.names=F, append=T)</span></a>
+<a class="sourceLine" id="cb1-538" data-line-number="538"><span class="co">#names(outVec) &lt;- c('ptt','bnd','migr.spd','Lidx','P1','P2','spLims','resol','maskL','nll','name')</span></a>
+<a class="sourceLine" id="cb1-539" data-line-number="539"><span class="co">#res &lt;- list(outVec = outVec, s = s, g = g, tr = tr, dateVec = dateVec, iniloc = iniloc, grid = raster::res(L.res[[1]]$L.5)[1])</span></a>
+<a class="sourceLine" id="cb1-540" data-line-number="540"><span class="co">#setwd(myDir); save(res, file=dir,paste(runName, '-HMMoce_res.rda', sep=''))</span></a>
+<a class="sourceLine" id="cb1-541" data-line-number="541"><span class="co">#save.image(file=paste(ptt, '-HMMoce.RData', sep=''))</span></a>
+<a class="sourceLine" id="cb1-542" data-line-number="542"><span class="co">#source('~/HMMoce/R/hmm.diagnose.r') # not yet functional</span></a>
+<a class="sourceLine" id="cb1-543" data-line-number="543"><span class="co">#hmm.diagnose(res, L.idx, L.res, dateVec, locs.grid, iniloc, bathy, pdt, plot=T)</span></a>
+<a class="sourceLine" id="cb1-544" data-line-number="544"></a>
+<a class="sourceLine" id="cb1-545" data-line-number="545"><span class="co">#write.table(outVec, file='HMMoce_results_outVec.csv', sep=',', append=T)</span></a>
+<a class="sourceLine" id="cb1-546" data-line-number="546"></a>
+<a class="sourceLine" id="cb1-547" data-line-number="547"><span class="co">#    } # parVec loop</span></a>
+<a class="sourceLine" id="cb1-548" data-line-number="548"><span class="co">#  } # bndVec loop</span></a>
+<a class="sourceLine" id="cb1-549" data-line-number="549"><span class="co">#} # L.idx loop</span></a>
+<a class="sourceLine" id="cb1-550" data-line-number="550"></a>
+<a class="sourceLine" id="cb1-551" data-line-number="551"></a>
+<a class="sourceLine" id="cb1-552" data-line-number="552"><span class="co">#parallel::stopCluster(cl)</span></a>
+<a class="sourceLine" id="cb1-553" data-line-number="553"><span class="co">#closeAllConnections()</span></a></code></pre></div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

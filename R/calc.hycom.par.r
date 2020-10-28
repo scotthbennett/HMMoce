@@ -89,7 +89,7 @@ calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.
   }
   
   # get and check the vars
-  depth <- RNetCDF::var.get.nc(nc1, dep.idx)
+  #depth <- RNetCDF::var.get.nc(nc1, dep.idx)
   lon <- RNetCDF::var.get.nc(nc1, lon.idx)
   if(length(dim(lon)) == 2) lon <- lon[,1]
   if(!any(lon < 180)) lon <- lon - 360

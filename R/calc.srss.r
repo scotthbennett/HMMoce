@@ -9,8 +9,7 @@
 #' georeferenced SRSS times that the tag-measured times are compared to in order
 #' to generate a likelihood.
 #' 
-#' @param light is data frame from -LightLoc file output from DAP/Tag Portal for WC tags and 
-#'   contains tag-measured dawn/dusk times.
+#' @param light is data frame of Date (POSIXct) and Type where type is either "Dawn" or "Dusk". This is a standard product from -LightLoc file output from DAP/Tag Portal for WC tags.
 #' @param locs.grid is list output from \code{setup.locs.grid}
 #' @param dateVec is vector of POSIXct dates for each time step of the likelihood
 #' @param res is resolution of light grid in degrees. default is 1 deg. higher

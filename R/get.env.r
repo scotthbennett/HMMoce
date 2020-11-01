@@ -299,7 +299,7 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
         
         #print(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))
         r1r <- raster::shift(raster::rotate(raster::shift(r1, 180)), 180)
-        cr1 <- try(compareRaster(r1r,r2), TRUE)
+        cr1 <- try(compareRaster(r1,r2), TRUE)
         cr2 <- try(compareRaster(r1r,r2), TRUE)
         if (class(cr1) != 'try-error'){
           r3 <- raster::merge(r1, r2)
@@ -307,16 +307,23 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
           r3 <- raster::merge(r1r, r2)
         } else{
           e <- raster::extent(spatLim$lonmin, spatLim$lonmax, spatLim$latmin, spatLim$latmax)
-          template <- raster::raster(e)
+          template <- raster::raster(e, ncols = ceiling((e@xmax - e@xmin) / raster::res(r1)[1]),
+                                     nrows = ceiling((e@ymax - e@ymin) / raster::res(r1)[1]))
           projection(template) <- '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
-          tfile <- paste0(tdir, '/trynastyrasty.tif')
-          raster::writeRaster(template, file=tfile, format="GTiff", overwrite=TRUE)
-          f1 <- paste(tdir, '/', filename, '_', time, '_1.nc', sep = '')
-          f2 <- paste(tdir, '/', filename, '_', time, '_2.nc', sep = '')
-          gdalUtils::mosaic_rasters(gdalfile=c(f1,f2), dst_dataset=tfile, of="GTiff")
+          crs(r1) <- crs(template)
+          crs(r2) <- crs(template)
+          r1p <- resample(r1, template)
+          r2p <- resample(r2, template)
+          r3 <- merge(r1p, r2p)
           
-          r3 <- raster::brick(tfile)
-          r3 <- raster::shift(raster::rotate(raster::shift(r3, 180)), 180)
+          #tfile <- paste0(tdir, '/trynastyrasty.tif')
+          #raster::writeRaster(template, file=tfile, format="GTiff", overwrite=TRUE)
+          #f1 <- paste(tdir, '/', filename, '_', time, '_1.nc', sep = '')
+          #f2 <- paste(tdir, '/', filename, '_', time, '_2.nc', sep = '')
+          #gdalUtils::mosaic_rasters(gdalfile=c(f1,f2), dst_dataset=tfile, of="GTiff")
+          
+          #r3 <- raster::brick(tfile)
+          #r3 <- raster::shift(raster::rotate(raster::shift(r3, 180)), 180)
           
         }
         

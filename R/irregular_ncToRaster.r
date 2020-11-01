@@ -8,7 +8,7 @@
 #' \dontrun{
 #' bathy <- irregular_ncToRaster(paste0(bathy.dir, 'bathy.nc'), varid = 'topo')
 #' }
-
+#' @export
 #' @return a raster version of the input .nc file coerced to regular grid
 
 irregular_ncToRaster <- function(fname, varid){

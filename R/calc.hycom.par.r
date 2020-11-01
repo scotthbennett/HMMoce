@@ -37,7 +37,9 @@ calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.
   if (is.na(ncores) | ncores < 0) ncores <- ceiling(as.numeric(system('nproc', intern=T)) * .9)
     
   # calculate midpoint of tag-based min/max temps
-  if(length(grep('mean', names(pdt))) > 0){
+  if(length(grep('mean', names(pdt))) > 1){
+    pdt$useTemp <- pdt[,grep('mean', names(pdt))[1]]
+  } else if(length(grep('mean', names(pdt))) == 1){
     pdt$useTemp <- pdt[,grep('mean', names(pdt))]
   } else{
     pdt$useTemp <- (pdt$maxtemp + pdt$mintemp) / 2

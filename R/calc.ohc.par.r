@@ -49,7 +49,9 @@ calc.ohc.par <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy =
   rho <- 1025 # kg/m3 <- assumed density of seawater
   
   # calculate midpoint of tag-based min/max temps
-  if(length(grep('mean', names(pdt))) > 0){
+  if(length(grep('mean', names(pdt))) > 1){
+    pdt$useTemp <- pdt[,grep('mean', names(pdt))[1]]
+  } else if(length(grep('mean', names(pdt))) == 1){
     pdt$useTemp <- pdt[,grep('mean', names(pdt))]
   } else{
     pdt$useTemp <- (pdt$maxtemp + pdt$mintemp) / 2

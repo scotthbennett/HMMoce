@@ -298,8 +298,28 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
         setwd(original_dir)
         
         #print(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))
-        #r1r <- raster::shift(raster::rotate(raster::shift(r1, 180)), 180)
-        r3 <- raster::merge(r1, r2)
+        r1r <- raster::shift(raster::rotate(raster::shift(r1, 180)), 180)
+        cr1 <- try(compareRaster(r1r,r2), TRUE)
+        cr2 <- try(compareRaster(r1r,r2), TRUE)
+        if (class(cr1) != 'try-error'){
+          r3 <- raster::merge(r1, r2)
+        } else if (class(cr2) != 'try-error'){
+          r3 <- raster::merge(r1r, r2)
+        } else{
+          e <- raster::extent(spatLim$lonmin, spatLim$lonmax, spatLim$latmin, spatLim$latmax)
+          template <- raster::raster(e)
+          projection(template) <- '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
+          tfile <- paste0(tdir, '/trynastyrasty.tif')
+          raster::writeRaster(template, file=tfile, format="GTiff", overwrite=TRUE)
+          f1 <- paste(tdir, '/', filename, '_', time, '_1.nc', sep = '')
+          f2 <- paste(tdir, '/', filename, '_', time, '_2.nc', sep = '')
+          gdalUtils::mosaic_rasters(gdalfile=c(f1,f2), dst_dataset=tfile, of="GTiff")
+          
+          r3 <- raster::brick(tfile)
+          r3 <- raster::shift(raster::rotate(raster::shift(r3, 180)), 180)
+          
+        }
+        
         raster::writeRaster(r3, paste(save.dir, '/', filename, '_', time, '.nc', sep = ''), format='CDF', overwrite=TRUE, varname = ncnames[grep('temp', ncnames, ignore.case=TRUE)])
         if (file.exists(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))) cat(paste0('File output to ', paste(save.dir, '/', filename, '_', time, '.nc', sep = '')),'\n')
         

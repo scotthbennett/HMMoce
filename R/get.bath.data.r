@@ -94,18 +94,34 @@ get.bath.data <- function(spatLim, save.dir = tempdir(), seaonly = TRUE, res = c
     print('merging those files to a single output file')
     r1 <- irregular_ncToRaster(fname1, varid)
     r2 <- irregular_ncToRaster(fname2, varid)
+    r1r <- raster::shift(raster::rotate(raster::shift(r1, 180)), 180)
     
     ## reset original directory after messing w temp files
     setwd(original_dir)
     
+    e <- raster::extent(spatLim$lonmin, spatLim$lonmax, spatLim$latmin, spatLim$latmax)
+    template <- raster::raster(e, ncols = ceiling((e@xmax - e@xmin) / raster::res(r1)[1]),
+                               nrows = ceiling((e@ymax - e@ymin) / raster::res(r1)[1]))
+    projection(template) <- '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
+    crs(r1) <- crs(template)
+    crs(r2) <- crs(template)
+    r1p <- try(raster::resample(r1, template), TRUE)
+    if (class(r1p) == 'try-error') r1p <- raster::resample(r1r, template)
+    r2p <- raster::resample(r2, template)
+    r3 <- raster::merge(r1p, r2p)
+    
     #print(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))
-    r1r <- raster::shift(raster::rotate(raster::shift(r1, 180)), 180)
-    r3 <- raster::merge(r1r, r2)
-    raster::writeRaster(r3, paste0(save.dir, '/bathy.nc'), format='CDF', overwrite=TRUE)
+    #r1r <- raster::shift(raster::rotate(raster::shift(r1, 180)), 180)
+    #r3 <- raster::merge(r1r, r2)
+    raster::writeRaster(r3, paste0(save.dir, '/bathy.nc'), format='CDF', overwrite=TRUE, varname = 'topo')
     if (file.exists(paste0(save.dir, '/bathy.nc'))) print(paste0('File output to ', paste0(save.dir, '/bathy.nc')))
     bathy <- r3
     
   } else {
+    
+    original_dir <- getwd()
+    tdir <- tempdir()
+    fname <- paste(tdir, "bathy.nc", sep = "/")
     
     opt <- sub("LATLOW", spatLim$latmin, opt)
     opt <- sub("LATHIGH", spatLim$latmax, opt)
@@ -118,7 +134,9 @@ get.bath.data <- function(spatLim, save.dir = tempdir(), seaonly = TRUE, res = c
     
     ## bathy is on irregular grid so needs to be coerced
     bathy <- irregular_ncToRaster(fname, varid)
-    raster::writeRaster(bathy, paste0(save.dir, '/bathy.nc'), format='CDF', overwrite=TRUE)
+    
+    setwd(original_dir)
+    raster::writeRaster(bathy, paste0(save.dir, '/bathy.nc'), format='CDF', overwrite=TRUE, varname = 'topo')
     if (file.exists(paste0(save.dir, '/bathy.nc'))) print(paste0('File output to ', paste0(save.dir, '/bathy.nc')))
     
   }

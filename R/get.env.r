@@ -312,9 +312,10 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
           projection(template) <- '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
           crs(r1) <- crs(template)
           crs(r2) <- crs(template)
-          r1p <- resample(r1, template)
-          r2p <- resample(r2, template)
-          r3 <- merge(r1p, r2p)
+          r1p <- try(raster::resample(r1, template), TRUE)
+          if (class(r1p) == 'try-error') r1p <- raster::resample(r1r, template)
+          r2p <- raster::resample(r2, template)
+          r3 <- raster::merge(r1p, r2p)
           
           #tfile <- paste0(tdir, '/trynastyrasty.tif')
           #raster::writeRaster(template, file=tfile, format="GTiff", overwrite=TRUE)

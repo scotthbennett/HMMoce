@@ -1,3 +1,5 @@
+#' @export
+
 gausskern.pg <- function (siz, sigma, muadv = 0) {
   if (round(siz) < 1) siz = 1
   x = 1:round(siz)

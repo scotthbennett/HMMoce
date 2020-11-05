@@ -27,6 +27,7 @@
 #' upper.bounds=c(5,.5,.9,.9)
 #' 
 #' }
+#' @export
 
 opt.params <- function(pars.init, lower.bounds, upper.bounds, g, L, alg.opt = 'optim', reformat = TRUE, ...){
   

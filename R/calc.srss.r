@@ -9,8 +9,7 @@
 #' georeferenced SRSS times that the tag-measured times are compared to in order
 #' to generate a likelihood.
 #' 
-#' @param light is data frame from -LightLoc file output from DAP/Tag Portal for WC tags and 
-#'   contains tag-measured dawn/dusk times.
+#' @param light is data frame of Date (POSIXct) and Type where type is either "Dawn" or "Dusk". This is a standard product from -LightLoc file output from DAP/Tag Portal for WC tags.
 #' @param locs.grid is list output from \code{setup.locs.grid}
 #' @param dateVec is vector of POSIXct dates for each time step of the likelihood
 #' @param res is resolution of light grid in degrees. default is 1 deg. higher
@@ -37,6 +36,7 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){
   
   # need lat/lon vectors from locs.grid
   lon <- locs.grid$lon[1,]
+  if (any(lon > 180)) stop('calc.srss cannot handle longitude values > 180 at this time')
   lat <- locs.grid$lat[,1]
   # then rebuild these vectors based on input resolution to this particular function, default is 1 deg
   lon <- seq(min(lon), max(lon), res)
@@ -67,6 +67,7 @@ calc.srss <- function(light = NULL, locs.grid, dateVec, res = 1, focalDim = 3){
   fyear = seq(ISOdate(lubridate::year(dateVec[1]), 1, 1, tz = 'UTC'), ISOdate(lubridate::year(dateVec[1]), 12, 31, tz = 'UTC'), 'day')
   sr.grid[,,1:365] = sapply(1:365, function(i) matrix(maptools::sunriset(xy, fyear[i], direction = "sunrise", POSIXct.out = TRUE)$day,length(lon),length(lat)))
   ss.grid[,,1:365] = sapply(1:365, function(i) matrix(maptools::sunriset(xy, fyear[i], direction = "sunset", POSIXct.out = TRUE)$day,length(lon),length(lat)))
+  
   
   list.ras <- list(x = lon, y = lat, z = sr.grid*24*60)
   ex <- raster::extent(list.ras)

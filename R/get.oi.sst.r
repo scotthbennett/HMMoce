@@ -39,12 +39,20 @@ get.oi.sst <- function(limits, time, filename='', download.file=TRUE, dir = getw
   ## Set the base URL based on the start date. If the ending date exceeds the
   ## period for this experiment, then print a warning and truncate the output
   ## early.
-  
-  expts = data.frame(
-    start=c(as.Date('1981-09-01')),
-    end=c(Sys.Date() + 1),
-    url=c('https://upwell.pfeg.noaa.gov/erddap/griddap/ncdcOisst2Agg_LonPM180.nc?sst')
+  if (limits$lonmax <= 180){
+    expts = data.frame(
+      start=c(as.Date('1981-09-01')),
+      end=c(Sys.Date() + 1),
+      url=c('https://upwell.pfeg.noaa.gov/erddap/griddap/ncdcOisst2Agg_LonPM180.nc?sst')
     )
+  } else{
+    expts = data.frame(
+      start=c(as.Date('1981-09-01')),
+      end=c(Sys.Date() + 1),
+      url=c('https://upwell.pfeg.noaa.gov/erddap/griddap/ncdcOisst2Agg.nc?sst')
+    )
+  }
+  
   
   if(time[1] < expts$start[1])
     stop('Data begins at %s and is not available at %s.',

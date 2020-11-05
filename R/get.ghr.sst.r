@@ -42,7 +42,7 @@ get.ghr.sst <- function(limits, time, filename='', download.file=TRUE, dir = get
   
   expts = data.frame(
     start=c(as.Date('2010-06-09')),
-    end=c('2017-09-13'),
+    end=c(as.Date('2017-09-13')),
     url=c('https://upwell.pfeg.noaa.gov/erddap/griddap/jplG1SST.nc?SST')
     )
   
@@ -50,13 +50,13 @@ get.ghr.sst <- function(limits, time, filename='', download.file=TRUE, dir = get
   ## https://data.nodc.noaa.gov/thredds/catalog/ghrsst/L4/GLOB/JPL_OUROCEAN/G1SST/2019/342/catalog.html?dataset=ghrsst/L4/GLOB/JPL_OUROCEAN/G1SST/2019/342/20191208-JPL_OUROCEAN-L4UHfnd-GLOB-v01-fv01_0-G1SST.nc.bz2
   
   if(time[1] < expts$start[1])
-    stop('Data begins at %s and is not available at %s.',
-         strftime(expts$start[1], '%d %b %Y'),
-         strftime(time[1], '%d %b %Y'))
+    stop(sprintf('Data begins at %s and is not available at %s.',
+                 strftime(expts$start[1], '%d %b %Y'),
+                 strftime(time[1], '%d %b %Y')))
   if(time[1] > expts$end[nrow(expts)])
-    stop('Data ends at %s and is not available at %s.',
-         strftime(expts$end[nrow(expts)], '%d %b %Y'),
-         strftime(time[1], '%d %b %Y'))
+    stop(sprintf('Data ends at %s and is not available at %s.',
+                 strftime(expts$end[nrow(expts)], '%d %b %Y'),
+                 strftime(time[1], '%d %b %Y')))
   for(i in seq(nrow(expts))) {
     if((time[1] >= expts$start[i]) & (time[1] <= expts$end[i]))
       url = expts$url[i]

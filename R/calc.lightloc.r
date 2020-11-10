@@ -6,14 +6,11 @@
 #' Light errors are parameterized using elliptical error values output in 
 #' '-Locations.csv' (WC tags).
 #' 
-#' @param lightloc is data frame of light-based location estimates. If errEll is FALSE, only Date (POSIXct), Longitude, Latitude, and Error.Semi.minor.axis are required. If errEll is TRUE, additional required columns are Offset, Offset.orientation, and Error.Semi.major.axis.
+#' @param lightloc is data frame of light-based location estimates. If errEll is FALSE, only Date (POSIXct), Longitude, Latitude, and Error.Semi.minor.axis are required. The function currently sets a hard minimum on Error.semi.minor.axis at 100 km. If errEll is TRUE, additional required columns are Offset, Offset.orientation, and Error.Semi.major.axis.
 #' @param locs.grid is list output from \code{setup.locs.grid}
 #' @param dateVec is vector of POSIXct dates for each time step of the likelihood
 #' @param errEll is logical indicating whether error ellipses should be 
-#'   generated for light-based likelihoods as given from output of WC-GPE. False
-#'   if only longitude should be used. If False, standard deviation on light 
-#'   measurements is currently fixed at 0.7 deg longitude following Musyl et al 
-#'   2011. Default is FALSE and will use longitude only.
+#'   generated for light-based likelihoods. If FALSE (default), only longitude is used to generate likelihoods. If TRUE, both latitude and longitude are used resulting in an ellipse-shaped likelihood. 
 #' @references Musyl MK, Domeier ML, Nasby-Lucas N, Brill RW, McNaughton LM, 
 #'   Swimmer JY, Lutcavage MS, Wilson SG, Galuardi B, Liddle JB (2011) 
 #'   Performance of pop-up satellite archival tags. Mar Ecol Prog Ser

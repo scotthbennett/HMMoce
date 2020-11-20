@@ -73,6 +73,17 @@ get.bath.data <- function(spatLim, save.dir = tempdir(), seaonly = TRUE, res = c
     
     ## get part 2 - whatever is below 180, if any
     ex2 <- raster::intersect(raster::extent(unlist(spatLim)), ex180)
+    if (is.null(ex2)){
+      ## the first download got the full extent 
+      
+      bathy <- irregular_ncToRaster(fname1, varid)
+      
+      setwd(original_dir)
+      raster::writeRaster(bathy, paste0(save.dir, '/bathy.nc'), format='CDF', overwrite=TRUE, varname = 'topo')
+      if (seaonly == T) bathy[bathy >= 0] <- NA
+      return(bathy)
+      
+    }
     #if (ex2@xmax == 180) ex2@xmax <- 179.995
     
     lonlow <- ex2@xmin

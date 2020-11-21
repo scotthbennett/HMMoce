@@ -254,6 +254,7 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
               err <- try(RNetCDF::open.nc(paste(tdir, '/', filename, '_', time, '_2.nc', sep = '')), silent = T)
             }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})
             if(class(err) != 'try-error') break
+          }
         }
         
         cat('merging those files to a single output file','\n')

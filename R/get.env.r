@@ -246,6 +246,14 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
           file.copy(paste0(tdir, '/', filename, '_', time, '_1.nc'),
                     paste0(save.dir,'/', filename, '_', time, '.nc'))
           next
+        } else{
+          repeat{
+            get.hycom(c(ex2@xmin, ex2@xmax, ex2@ymin, ex2@ymax), time, filename = paste(filename, '_', time, '_2.nc', sep = ''),
+                      download.file = TRUE, dir = tdir, depLevels=depLevels)#, ...) 
+            tryCatch({
+              err <- try(RNetCDF::open.nc(paste(tdir, '/', filename, '_', time, '_2.nc', sep = '')), silent = T)
+            }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})
+            if(class(err) != 'try-error') break
         }
         
         cat('merging those files to a single output file','\n')

@@ -113,7 +113,7 @@ get.bath.data <- function(spatLim, save.dir = tempdir(), seaonly = TRUE, res = c
     e <- raster::extent(spatLim$lonmin, spatLim$lonmax, spatLim$latmin, spatLim$latmax)
     template <- raster::raster(e, ncols = ceiling((e@xmax - e@xmin) / raster::res(r1)[1]),
                                nrows = ceiling((e@ymax - e@ymin) / raster::res(r1)[1]))
-    projection(template) <- '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
+    raster::projection(template) <- '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
     crs(r1) <- crs(template)
     crs(r2) <- crs(template)
     r1p <- try(raster::resample(r1, template), TRUE)

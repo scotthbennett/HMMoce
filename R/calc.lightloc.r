@@ -77,18 +77,17 @@ calc.lightloc <- function(lightloc, locs.grid, dateVec, errEll = TRUE){
         
         if ('Error.Semi.minor.axis' %in% names(locs.ii)){
           if (locs.ii$Error.Semi.minor.axis[1] < 70000) warning('Some values of Error.Semi.minor.axis are < 70km which usually does not represent the actual error in these measurements.')
-          
           # create longitude likelihood based on GPE data
           slon.sd <- locs.ii$Error.Semi.minor.axis[1] / 1000 / 111 #semi minor axis
           
-          # use normally distributed error from position using fixed std dev
-          L.lightloc.try[,,ii] <- stats::dnorm(t(locs.grid$lon), locs.ii$Longitude[1], slon.sd)
-          
         } else if ('longitudeError' %in% names(locs.ii)){
           if (locs.ii$longitudeError[1] < 0.7) warning('Some values of longitudeError are < 0.7deg which usually does not represent the actual error in these measurements.')
-          
           # create longitude likelihood based on GPE data
           slon.sd <- locs.ii$longitudeError #semi minor axis
+          
+        } else{
+          warning('No longitude error specified. Fixed at 0.7deg based on Musyl et al 2011. Although note that this error is likely higher for many species.')
+          slon.sd <- 0.7 ## musyl et al 2011
         }
         
         # use normally distributed error from position using fixed std dev
@@ -97,8 +96,8 @@ calc.lightloc <- function(lightloc, locs.grid, dateVec, errEll = TRUE){
        
       } else if(errEll == TRUE){
         #if (locs.ii$Error.Semi.minor.axis[1] < 100000) warning('Some values of Error.Semi.minor.axis are < 100km which usually does not represent the actual error in these measurements.')
-        
-       if ('latitudeError' %in% names(locs.ii)){
+       
+        if ('latitudeError' %in% names(locs.ii)){
          print('Offset variables are being set to 0 because latitudeError was supplied')
          locs.ii$Offset <- 0
          locs.ii$Offset.orientation <- 0
@@ -134,65 +133,4 @@ calc.lightloc <- function(lightloc, locs.grid, dateVec, errEll = TRUE){
   
   return(L.lightloc)
   
-}
-
-
-
-
-
-
-if (nrow(light.t) > 1){
-  
-  L.lightloc.try <- array(0, dim = c(col, row, nrow(light.t)))
-  
-  ## if multiple matches at this time step
-  for (ii in 1:nrow(light.t)){
-    
-    locs.ii <- light.t[ii,]
-    
-    if(errEll == FALSE){
-      if (locs.ii$Error.Semi.minor.axis[1] < 100000) locs.ii$Error.Semi.minor.axis[1] <- 100000
-      # create longitude likelihood based on GPE data
-      slon.sd <- locs.ii$Error.Semi.minor.axis[1] / 1000 / 111 #semi minor axis
-      # use normally distributed error from position using fixed std dev
-      L.lightloc.try[,,ii] <- stats::dnorm(t(locs.grid$lon), locs.ii$Longitude[1], slon.sd)
-      
-    } else if(errEll == TRUE){
-      if (locs.ii$Error.Semi.minor.axis[1] < 100000) locs.ii$Error.Semi.minor.axis[1] <- 100000
-      L.lightloc.try[,,ii] <- calc.errEll(locs.ii[1,], locs.grid)
-      
-    } 
-    
-  }
-  
-  L.lightloc[,,t] <- apply(L.lightloc.try, 1:2, sum, na.rm = T)
-  
-  ## normalize
-  L.lightloc[,,t] = L.lightloc[,,t] / max(L.lightloc[,,t], na.rm=T)
-  
-} else if (nrow(light.t) == 1){
-  
-  if(errEll == FALSE){
-    if (light.t$Error.Semi.minor.axis[1] < 100000) light.t$Error.Semi.minor.axis[1] <- 100000
-    # create longitude likelihood based on GPE data
-    slon.sd <- light.t$Error.Semi.minor.axis[1] / 1000 / 111 #semi minor axis
-    # use normally distributed error from position using fixed std dev
-    L.light <- stats::dnorm(t(locs.grid$lon), light.t$Longitude[1], slon.sd)
-    
-    L.lightloc[,,t] <- L.light
-    
-  } else if(errEll == TRUE){
-    if (light.t$Error.Semi.minor.axis[1] < 100000){
-      #light.t$Error.Semi.minor.axis[1] <- 100000
-      warning('Some values of Error.Semi.minor.axis are < 100km which usually does not represent the actual error in these measurements.')
-    }
-    L.lightloc[,,t] <- calc.errEll(light.t[1,], locs.grid)
-    
-  }
-  
-  ## normalize
-  L.lightloc[,,t] = L.lightloc[,,t] / max(L.lightloc[,,t], na.rm=T)
-  
-} else{
-  ## do nothing
 }

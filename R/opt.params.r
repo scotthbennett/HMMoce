@@ -18,6 +18,7 @@
 #' @param run optional. see \code{run} input to \code{GA::ga()}. Default is 100.
 #' @param p_size optional. see \code{popSize} input to \code{GA::ga()}. Default is 100.
 #' @param ncores optional. see \code{parallel} input to \code{GA::ga()}. Default is FALSE, therefore not parallelized.
+#' @export
 #' @author Paul Gatti
 #' @author Camrin Braun
 #' @examples 
@@ -27,7 +28,6 @@
 #' upper.bounds=c(5,.5,.9,.9)
 #' 
 #' }
-#' @export
 
 opt.params <- function(pars.init, lower.bounds, upper.bounds, g, L, alg.opt = 'optim', reformat = TRUE, ...){
   

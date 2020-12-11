@@ -228,7 +228,7 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
         ex1 <- raster::intersect(raster::extent(unlist(spatLim)), ex360)
         ex1 <- raster::extent(raster::rotate(raster::raster(ex1)))
         #if (ex1@xmin == -180) ex1@xmin <- -179.99
-        original_dir <- getwd()
+        #original_dir <- getwd()
         tdir <- tempdir()
         repeat{
           get.hycom(c(ex1@xmin, ex1@xmax, ex1@ymin, ex1@ymax), time, filename = paste(filename, '_', time, '_1.nc', sep = ''),

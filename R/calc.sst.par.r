@@ -17,6 +17,7 @@
 #'  approximately incorporate 0.25 degrees.
 #'@param sens.err is numeric indicating the percent sensor error in the tag sst
 #'  sensor. Default is 1.
+#'@param auto.aggr is logical indicating whether to automatically aggregate the calculated likelihood raster if the resolution is higher than 0.1.
 #'@param ncores is integer indicating number of cores used in this parallel
 #'  computation. Defaults to using a detection function that chooses cores for
 #'  you.
@@ -29,7 +30,7 @@
 #'@seealso \code{\link{calc.sst}}
 #'  
 
-calc.sst.par <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.err = 1, ncores = NULL){
+calc.sst.par <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.err = 1, auto.aggr = TRUE, ncores = NULL){
   
   print(paste('Starting SST likelihood calculation...'))
   
@@ -125,7 +126,7 @@ calc.sst.par <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, s
                                     ymn=min(lat), ymx=max(lat)), 2)
     
     # check for coarse enough resolution that our calculations wont take all day
-    if(round(raster::res(r)[1], 2) < 0.1){
+    if(auto.aggr & round(raster::res(r)[1], 2) < 0.1){
       aggFact <- round(0.1 / round(raster::res(r)[1], 2), 0)
       if(aggFact > 1) r <- raster::aggregate(r, fact = aggFact)
     }

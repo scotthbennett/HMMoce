@@ -73,10 +73,12 @@ calc.sst <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.
                                     ymn=min(lat), ymx=max(lat)), 2)
     
     if(auto.aggr & round(raster::res(r)[1], 2) < 0.1){
-      print('Raster is very high resolution. Automatically coarsening using raster::aggregate. If you do not want this behavior, set auto.aggr = FALSE')
       aggFact <- round(0.1 / round(raster::res(r)[1], 2), 0)
       if(aggFact != 1) r <- raster::aggregate(r, fact = aggFact)
-      if (i == 1) L.sst <- array(0, dim = c(dim(r)[2], dim(r)[1], T))
+      if (i == 1 | !exists('lik.sst')){
+        print('Raster is very high resolution. Automatically coarsening using raster::aggregate. If you do not want this behavior, set auto.aggr = FALSE')
+        L.sst <- array(0, dim = c(dim(r)[2], dim(r)[1], T))
+      }
     } 
     
     if (is.null(focalDim)){

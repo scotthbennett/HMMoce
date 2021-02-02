@@ -41,16 +41,22 @@ get.oi.sst <- function(limits, time, filename='', download.file=TRUE, dir = getw
   ## early.
   if (limits$lonmax <= 180){
     expts = data.frame(
-      start=c(as.Date('1981-09-01')),
-      end=c(Sys.Date() + 1),
-      url=c('https://upwell.pfeg.noaa.gov/erddap/griddap/ncdcOisst2Agg_LonPM180.nc?sst')
-    )
+      start=c(as.Date('1981-09-01'),
+              as.Date('2020-04-27')),
+      end=c(as.Date('2020-04-26'), 
+            Sys.Date() + 1),
+      url=c('https://upwell.pfeg.noaa.gov/erddap/griddap/ncdcOisst2Agg_LonPM180.nc?sst',
+            'https://upwell.pfeg.noaa.gov/erddap/griddap/ncdcOisst21Agg_LonPM180.nc?sst'))
+    
   } else{
     expts = data.frame(
-      start=c(as.Date('1981-09-01')),
-      end=c(Sys.Date() + 1),
-      url=c('https://upwell.pfeg.noaa.gov/erddap/griddap/ncdcOisst2Agg.nc?sst')
-    )
+      start=c(as.Date('1981-09-01'),
+              as.Date('2020-04-27')),
+      end=c(as.Date('2020-04-26'), 
+            Sys.Date() + 1),
+      url=c('https://upwell.pfeg.noaa.gov/erddap/griddap/ncdcOisst2Agg.nc?sst',
+            'https://upwell.pfeg.noaa.gov/erddap/griddap/ncdcOisst21Agg.nc?sst'))
+    
   }
   
   

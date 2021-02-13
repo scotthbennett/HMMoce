@@ -11,6 +11,7 @@
 #'   approximately incorporate 0.25 degrees.
 #' @param sens.err is numeric indicating the percent sensor error in the tag-measured max depth. This allows some uncertainty when calculating the integral for the likelihood and doesnt have to necessarily reflect the actual sensor error. Default is 5 percent.
 #' @param lik.type is character indicating which likelihood type to use in the bathymetry calculation. Options are dnorm (a traditional likelihood bounded by tag measurement +/- sens.err; experimental) or max ("one-sided" likelihood >= tag-measured max depth; DEFAULT). The latter choice acts more like a mask in that it doesnt allow likelihoods in water shallower than the max depth for each time point.
+#' @param dist2shore is character indicating whether distance to shore (contour at bathy = 0) should be formulated as biasing the likelihood 'toward' or 'away' from shore. Default is NULL, resulting in typical bathymetry likelihood with no distance from shore calculation.
 #' 
 #' @return likelihood is raster brick of likelihood surfaces representing
 #' matches between tag-based sst and remotely sensed sst maps
@@ -19,12 +20,22 @@
 #' 
 #' @author Originally written by Paul Gatti
 
-calc.bathy <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err = 5, lik.type = 'max'){
+calc.bathy <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err = 5, lik.type = 'max', auto.aggr = TRUE, dist2shore = NULL){
   
   if (lik.type == 'dnorm') warning('Bathymetry likelihood calculation with lik.type = normal is experimental. If you use it, please send feedback on your experience as we work to improve it.')
   
+  ## if auto aggregation is set to TRUE, downsample the input bathymetry layer
+  if(auto.aggr & round(raster::res(bathy.grid)[1], 2) < 0.1){
+    warning('auto.aggr = TRUE and input raster is very high resolution. The input raster is being downsampled to approx 0.1 deg resolution. If you do not want this behavior, switch to auto.aggr = FALSE.')
+    aggFact <- round(0.1 / round(raster::res(bathy.grid)[1], 2), 0)
+    if(aggFact != 1) bathy.grid <- raster::aggregate(bathy.grid, fact = aggFact)
+  } 
+  
   ## convert a negative bathy grid to positive to match expectations and mask land
   if (raster::cellStats(bathy.grid, 'min', na.rm=T) < 0){
+    if (!is.null(dist2shore)){
+      bathy.temp <- bathy.grid
+    }
     bathy.grid <- bathy.grid * -1
     bathy.grid[bathy.grid < 0] <- NA
   }
@@ -32,7 +43,7 @@ calc.bathy <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err = 5, 
   mmd <- mmd[which(mmd$Date <= max(dateVec)),]
   mmd$dateVec <- findInterval(mmd$Date, dateVec)
   mmd <- data.frame(mmd %>% group_by(dateVec) %>% 
-                          dplyr::summarise(maxDepth = max(MaxDepth, na.rm=TRUE), .groups = 'drop_last'))
+                      dplyr::summarise(maxDepth = max(MaxDepth, na.rm=TRUE), .groups = 'drop_last'))
   
   print(paste("Starting bathymetry likelihood calculation..."))
   t0 <- Sys.time()
@@ -55,7 +66,7 @@ calc.bathy <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err = 5, 
                  length.out = dim(bathy.grid)[1])
   
   for (i in 1:T) {
-
+    
     print(dateVec[i])
     
     mmd.i <- mmd[which(mmd$dateVec == i),]
@@ -75,8 +86,9 @@ calc.bathy <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err = 5, 
       ## the actual likelihood calculation
       lik.bathy <- likint3(dat, sdx, bathy.i[1], bathy.i[2])
       lik.bathy = as.matrix(lik.bathy) / max(as.matrix(lik.bathy), na.rm = TRUE)
+      
     } else{
-      stop('Argument lik.type can only be one of max or dnorm.')
+      stop('Argument lik.type can only be one of max, dist2shore, or dnorm.')
     }
     
     lik.bathy[is.na(lik.bathy) | is.infinite(lik.bathy)] <- 0
@@ -89,12 +101,27 @@ calc.bathy <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err = 5, 
   print(paste("Making final likelihood raster..."))
   crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
   list.bathy <- list(x = lon.agg, y = lat.agg, z = L.bathy)
-
+  
   ex <- raster::extent(list.bathy)
   L.bathy <- raster::brick(list.bathy$z, xmn = ex[1], xmx = ex[2], 
                            ymn = ex[3], ymx = ex[4], transpose = F, crs)
   L.bathy <- raster::flip(raster::flip(L.bathy, direction = "y"), direction = 'x')
   L.bathy[L.bathy < 0] <- 0
+  
+  ## should distance from shore be used as a linear "filter" in conjunction with the regular bathymetry likelihood
+  if (!is.null(dist2shore)){
+    if (exists('bathy.temp')){
+      shore_dist <- calc.dist2shore(bathy.temp)
+    } else{
+      shore_dist <- calc.dist2shore(bathy.grid)
+    }
+    shore_dist <- shore_dist / raster::cellStats(shore_dist, 'max')
+    shore_dist <- raster::resample(shore_dist, L.bathy)
+    
+    if (dist2shore == 'toward') shore_dist <- (shore_dist * -1) + 1
+    
+    L.bathy <- L.bathy * shore_dist
+  }
   
   t1 <- Sys.time()
   print(paste("Bathymetric calculations took ", round(as.numeric(difftime(t1, t0, units = "mins")), 2), "minutes..."))

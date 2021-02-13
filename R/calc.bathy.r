@@ -111,8 +111,12 @@ calc.bathy <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err = 5, 
   ## should distance from shore be used as a linear "filter" in conjunction with the regular bathymetry likelihood
   if (!is.null(dist2shore)){
     if (exists('bathy.temp')){
+      na_frac <- length(which(is.na(bathy.temp[]))) / length(bathy.temp[]) * 100
+      if (na_frac > 10) warning('Input bathy grid contains more than 10% NAs. The dist2shore calculation requires that grid cells on land (bathy > 0) retain their values. Land cells should NOT be masked as NA values or this calculation will not be correct.')
       shore_dist <- calc.dist2shore(bathy.temp)
     } else{
+      na_frac <- length(which(is.na(bathy.grid[]))) / length(bathy.grid[]) * 100
+      if (na_frac > 10) warning('Input bathy grid contains more than 10% NAs. The dist2shore calculation requires that grid cells on land (bathy > 0) retain their values. Land cells should NOT be masked as NA values or this calculation will not be correct.')
       shore_dist <- calc.dist2shore(bathy.grid)
     }
     shore_dist <- shore_dist / raster::cellStats(shore_dist, 'max')

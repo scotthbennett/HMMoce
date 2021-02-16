@@ -12,6 +12,7 @@
 #' @param sens.err is numeric indicating the percent sensor error in the tag-measured max depth. This allows some uncertainty when calculating the integral for the likelihood and doesnt have to necessarily reflect the actual sensor error. Default is 5 percent.
 #' @param lik.type is character indicating which likelihood type to use in the bathymetry calculation. Options are dnorm (a traditional likelihood bounded by tag measurement +/- sens.err; experimental) or max ("one-sided" likelihood >= tag-measured max depth; DEFAULT). The latter choice acts more like a mask in that it doesnt allow likelihoods in water shallower than the max depth for each time point.
 #' @param dist2shore is character indicating whether distance to shore (contour at bathy = 0) should be formulated as biasing the likelihood 'toward' or 'away' from shore. Default is NULL, resulting in typical bathymetry likelihood with no distance from shore calculation.
+#' @param dist.multiply is integer indicating a multiplicative factor to weight the underlying dist2shore calculation. Default is NA.
 #' 
 #' @return likelihood is raster brick of likelihood surfaces representing
 #' matches between tag-based sst and remotely sensed sst maps
@@ -20,7 +21,7 @@
 #' 
 #' @author Originally written by Paul Gatti
 
-calc.bathy <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err = 5, lik.type = 'max', auto.aggr = TRUE, dist2shore = NULL){
+calc.bathy <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err = 5, lik.type = 'max', auto.aggr = TRUE, dist2shore = NULL, dist.multiply = NA){
   
   if (lik.type == 'dnorm') warning('Bathymetry likelihood calculation with lik.type = normal is experimental. If you use it, please send feedback on your experience as we work to improve it.')
   
@@ -124,7 +125,10 @@ calc.bathy <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err = 5, 
     
     if (dist2shore == 'toward') shore_dist <- (shore_dist * -1) + 1
     
-    L.bathy <- L.bathy * shore_dist
+    ## a multiplicative factor
+    dist.multiply <- ifelse(is.na(dist.multiply), 1, dist.multiply)
+    
+    L.bathy <- L.bathy * shore_dist * dist.multiply
   }
   
   t1 <- Sys.time()

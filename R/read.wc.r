@@ -126,7 +126,13 @@ read.wc <- function(filename, tag, pop, type = 'sst', dateFormat=NULL, verbose=F
   } else if(type == 'light'){
     # READ IN LIGHT DATA FROM WC FILES
     #data <- utils::read.table(paste(wd,'/', ptt, '-LightLoc.csv', sep=''), sep=',',header=T, blank.lines.skip=F,skip=2)
-    data <- utils::read.table(filename, sep=',',header=T, blank.lines.skip=F, skip=2)
+    data <- try(utils::read.table(filename, sep=',',header=T, blank.lines.skip=F, skip=2), TRUE)
+    
+    if (class(data) == 'try-error'){
+      data <- try(utils::read.table(filename, sep=',',header=T, blank.lines.skip=F, skip=0), TRUE)
+      if (class(data) == 'try-error') stop('Tried reading light data with skip=2 (old WC format) and skip=0 (new WC format) but both failed. Check source light data file and try again.')
+    }
+    
     if(!any(grep('depth', names(data), ignore.case=T))) data <- utils::read.table(filename, sep=',',header=T, blank.lines.skip = F, skip = 1)
     if(!any(grep('depth', names(data), ignore.case=T))) data <- utils::read.table(filename, sep=',',header=T, blank.lines.skip = F, skip = 0)
     data <- data[which(!is.na(data[,1])),]

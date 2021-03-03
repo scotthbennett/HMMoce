@@ -89,7 +89,7 @@ calc.bathy <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err = 5, 
       lik.bathy = as.matrix(lik.bathy) / max(as.matrix(lik.bathy), na.rm = TRUE)
       
     } else{
-      stop('Argument lik.type can only be one of max, dist2shore, or dnorm.')
+      stop('Argument lik.type can only be one of max or dnorm.')
     }
     
     lik.bathy[is.na(lik.bathy) | is.infinite(lik.bathy)] <- 0

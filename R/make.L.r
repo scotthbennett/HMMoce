@@ -23,37 +23,6 @@ make.L <- function(ras.list, iniloc, dateVec, known.locs = NULL){
   L <- ras.list[[1]] * 0
   L[is.na(L)] <- 0
   
-  if(!is.null(known.locs)){
-    print('Input known locations are being added to the likelihoods...')
-    # convert input date, lat, lon to likelihood surfaces with dim(L1)
-    L.locs <- L
-
-    if (class(known.locs$date)[1] != class(dateVec)[1]) stop('dateVec and known.locs$date both need to be of class POSIXct.')
-    
-    known.locs <- known.locs[which(known.locs$date <= max(dateVec)),]
-    known.locs$dateVec <- findInterval(known.locs$date, dateVec)
-    
-    for(i in unique(known.locs$dateVec)){
-      known.locs.i <- known.locs[which(known.locs$dateVec == i),]
-      
-      if(length(known.locs.i[,1]) > 1){
-        # if multiple known locations are provided for a given day, only the first is used
-        warning(paste0('Multiple locations supplied at time step ', dateVec[i], '. Only the first one is being used.'))
-        known.locs.i <- known.locs.i[1,]
-      }
-      
-      ## erase other likelihood results for this day
-      L[[i]] <- L[[i]] * 0
-      
-      ## assign the known location for this day, i, as 1 (known) in likelihood raster
-      L.locs[[i]][raster::cellFromXY(L.locs[[i]], known.locs.i[,c('lon','lat')])] <- 1
-      
-    }
-    
-    ## add the locs layer to the raster list
-    ras.list[[length(ras.list) + 1]] <- L.locs
-  }
-  
   ## COMBINE THE LIKELIHOOD LAYERS
   ## for each day:
   for (i in 1:length(dateVec)){
@@ -129,6 +98,34 @@ make.L <- function(ras.list, iniloc, dateVec, known.locs = NULL){
       
     }
   
+  }
+  
+  ## ADD KNOWN LOCATIONS
+  if(!is.null(known.locs)){
+    print('Known locations are being added to the likelihoods...')
+    
+    if (class(known.locs$date)[1] != class(dateVec)[1]) stop('dateVec and known.locs$date both need to be of class POSIXct.')
+    
+    known.locs <- known.locs[which(known.locs$date <= max(dateVec)),]
+    known.locs$dateVec <- findInterval(known.locs$date, dateVec)
+    
+    for(i in unique(known.locs$dateVec)){
+      known.locs.i <- known.locs[which(known.locs$dateVec == i),]
+      
+      if(length(known.locs.i[,1]) > 1){
+        # if multiple known locations are provided for a given day, only the first is used
+        warning(paste0('Multiple locations supplied at time step ', dateVec[i], '. Only the first one is being used.'))
+        known.locs.i <- known.locs.i[1,]
+      }
+      
+      ## erase other likelihood results for this day
+      L[[i]] <- L[[i]] * 0
+      
+      ## assign the known location for this day, i, as 1 (known) in likelihood raster
+      L[[i]][raster::cellFromXY(L[[i]], known.locs.i[,c('lon','lat')])] <- 1
+      
+    }
+    
   }
   
   #----------------------------------------------------------------------------------#

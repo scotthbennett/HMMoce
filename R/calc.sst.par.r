@@ -96,7 +96,7 @@ calc.sst.par <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, s
   cl = parallel::makeCluster(ncores)
   doParallel::registerDoParallel(cl, cores = ncores)
   
-  ans = foreach::foreach(i = 1:T, .packages = c('raster')) %dopar%{
+  ans = foreach::foreach(i = 1:T, .export = 'likint3', .packages = c('raster')) %dopar%{
       
     tag.sst.i <- tag.sst[which(tag.sst$dateVec == i),]
     if (nrow(tag.sst.i) == 0) return(NA)
@@ -125,7 +125,7 @@ calc.sst.par <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, s
     dat <- base::t(raster::as.matrix(raster::flip(r, 2)))
     
     # compare sst to that day's tag-based ohc
-    lik.sst <- HMMoce:::likint3(dat, sdx, sst.i[1], sst.i[2])
+    lik.sst <- likint3(dat, sdx, sst.i[1], sst.i[2])
     
     lik.sst 
     

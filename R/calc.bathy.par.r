@@ -66,7 +66,7 @@ calc.bathy.par <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err =
   cl = parallel::makeCluster(ncores)
   doParallel::registerDoParallel(cl, cores = ncores)
   
-  ans = foreach::foreach(i = 1:T, .packages = c('raster')) %dopar%{
+  ans = foreach::foreach(i = 1:T, .export = 'likint3', .packages = c('raster')) %dopar%{
     
     #print(dateVec[i])
     

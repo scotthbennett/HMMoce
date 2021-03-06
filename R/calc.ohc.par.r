@@ -121,7 +121,7 @@ calc.ohc.par <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy =
   cl = parallel::makeCluster(ncores)
   doParallel::registerDoParallel(cl, cores = ncores)
   
-  ans = foreach::foreach(i = 1:T) %dopar%{
+  ans = foreach::foreach(i = 1:T, .export = 'likint3') %dopar%{
     
     pdt.i <- pdt[which(pdt$dateVec == i),]
     if (nrow(pdt.i) == 0) return(NA)

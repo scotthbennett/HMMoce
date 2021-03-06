@@ -70,17 +70,22 @@ calc.sst.par <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, s
   r <- raster::flip(raster::raster(t(dat), xmn=min(lon), xmx=max(lon),
                                    ymn=min(lat), ymx=max(lat)), 2)
   
+  ## deal with focalDim if NULL
   if (is.null(focalDim)){
     focalDim <- round(0.25 / raster::res(r)[1], 0)
     if (focalDim %% 2 == 0) focalDim <- focalDim - 1
     if (focalDim == 1) focalDim <- 3 ## if this equals 1, weird things happen
   }
   
-  sdx = raster::focal(r, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = T), pad = TRUE)
-  sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
-  dat <- base::t(raster::as.matrix(raster::flip(r, 2)))
+  ## aggregate hi-res rasters 
+  if(auto.aggr & round(raster::res(r)[1], 2) < 0.1){
+    print('Raster is very high resolution. Automatically coarsening using raster::aggregate. If you do not want this behavior, set auto.aggr = FALSE')
+    aggFact <- round(0.1 / round(raster::res(r)[1], 2), 0)
+    if(aggFact > 1) r <- raster::aggregate(r, fact = aggFact)
+    L.sst <- array(0, dim = c(dim(r)[2], dim(r)[1], T))
+  }
   
-  # get aggregated version of lat/lon for raster creation later
+  # get lat/lon for raster creation later
   lon.agg <- seq(raster::extent(r)[1], raster::extent(r)[2], length.out=dim(r)[2])
   lat.agg <- seq(raster::extent(r)[3], raster::extent(r)[4], length.out=dim(r)[1])
   
@@ -93,25 +98,6 @@ calc.sst.par <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, s
   
   ans = foreach::foreach(i = 1:T, .packages = c('raster')) %dopar%{
       
-    likint3 <- function(w, wsd, minT, maxT){
-      #lwr <- minT - .75 * (maxT - minT)
-      #upr <- maxT + .75 * (maxT - minT)
-      #widx = w >= minT-1 & w <= maxT+1 & !is.na(w)
-      #widx = w >= minT-1 & w <= maxT+1 & 
-      widx <- !is.na(w)
-      wdf = data.frame(w = as.vector(w[widx]), wsd = as.vector(wsd[widx]))
-      wdf$wsd[is.na(wdf$wsd)] = 1e-3
-      # wint = apply(wdf, 1, function(x) pracma::integral(dnorm, minT, maxT, mean = x[1], sd = x[2]))
-      wint = apply(wdf, 1, function(x) stats::integrate(stats::dnorm, 
-                                                        # !!!!!! *2 ????
-                                                        # minT, maxT, mean = x[1], sd = x[2]*2 )$value)
-                                                        minT, maxT, mean = x[1], sd = x[2])$value)
-      w = w * 0
-      w[widx] = wint
-      w
-    }
-  #for(i in 1:T){
-    
     tag.sst.i <- tag.sst[which(tag.sst$dateVec == i),]
     if (nrow(tag.sst.i) == 0) return(NA)
     sst.i <- c(tag.sst.i$minT * (1 - sens.err / 100), tag.sst.i$maxT * (1 + sens.err / 100)) # sensor error
@@ -139,7 +125,7 @@ calc.sst.par <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, s
     dat <- base::t(raster::as.matrix(raster::flip(r, 2)))
     
     # compare sst to that day's tag-based ohc
-    lik.sst <- likint3(dat, sdx, sst.i[1], sst.i[2])
+    lik.sst <- HMMoce:::likint3(dat, sdx, sst.i[1], sst.i[2])
     
     lik.sst 
     

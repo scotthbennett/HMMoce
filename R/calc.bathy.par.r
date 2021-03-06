@@ -30,6 +30,7 @@ calc.bathy.par <- function(mmd, bathy.grid, dateVec, focalDim = NULL, sens.err =
     bathy.grid[bathy.grid < 0] <- NA
   }
   
+  if (class(mmd$Date)[1] != class(dateVec)[1]) stop('dateVec and mmd$Date both need to be of class POSIXct.')
   mmd <- mmd[which(mmd$Date <= max(dateVec)),]
   mmd$dateVec <- findInterval(mmd$Date, dateVec)
   mmd <- data.frame(mmd %>% group_by(dateVec) %>% 

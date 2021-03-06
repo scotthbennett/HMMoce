@@ -110,26 +110,8 @@ calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.
   
   print(paste0('Processing in parallel using ', ncores, ' cores... '))
   
-  ans = foreach::foreach(i = 1:T) %dopar%{
+  ans = foreach::foreach(i = 1:T, .export = 'likint3', .packages = c('raster')) %dopar%{
     
-    #print(dateVec[i])
-    likint3 <- function(w, wsd, minT, maxT){
-      #lwr <- minT - .75 * (maxT - minT)
-      #upr <- maxT + .75 * (maxT - minT)
-      #widx = w >= minT-1 & w <= maxT+1 & !is.na(w)
-      #widx = w >= minT-1 & w <= maxT+1 & 
-      widx <- !is.na(w)
-      wdf = data.frame(w = as.vector(w[widx]), wsd = as.vector(wsd[widx]))
-      wdf$wsd[is.na(wdf$wsd)] = 1e-3
-      # wint = apply(wdf, 1, function(x) pracma::integral(dnorm, minT, maxT, mean = x[1], sd = x[2]))
-      wint = apply(wdf, 1, function(x) stats::integrate(stats::dnorm, 
-                                                        # !!!!!! *2 ????
-                                                        # minT, maxT, mean = x[1], sd = x[2]*2 )$value)
-                                                        minT, maxT, mean = x[1], sd = x[2])$value)
-      w = w * 0
-      w[widx] = wint
-      w
-    }
     pdt.i <- pdt[which(pdt$dateVec == i),]
     if (nrow(pdt.i) == 0) return(NA)
     

@@ -3,22 +3,18 @@
 #' Download ETOPO bathymetry. Resolution is either 30 second or one minute 
 #' resolution
 #' 
-#' @param spatLim is a list of spatial limits as \code{list(xmin, xmax, ymin, 
-#'   ymax)}
+#' @param spatLim is a list of spatial limits as \code{list(lonmin, lonmax, latmin, latmax)}
 #' @param save.dir is destination folder. Default is a temporary directory.
 #' @param seaonly is logical indicating whether you want to download only
 #'   bathymetry below sea level.
 #' @param res is numeric indicating resolution in minutes. Choices currently are 0.5 or 1minute.
-#' @return Downloads a NetCDF file containing ETopo bathymetry. If raster=TRUE, 
-#'   a raster is generated from the downloaded NetCDF. Otherwise, the file is 
-#'   just downloaded.
+#' @return Downloads a NetCDF file containing ETopo bathymetry and also returns the output as a \code{raster} object.
 #' @author Function originally written by Ben Galuardi.
 #' @examples
 #' \dontrun{
 #' # Not run to prevent actual data download
 #' sp.lim <- list(lonmin = -82, lonmax = -25, latmin = 15, latmax = 50)
-#' bathy <- get.bath.data(sp.lim$lonmin, sp.lim$lonmax, sp.lim$latmin, 
-#' sp.lim$latmax, save.dir = tempdir())
+#' bathy <- get.bath.data(sp.lim, save.dir = tempdir())
 #' }
 #' @export
 #' @importFrom curl curl_download
@@ -32,9 +28,9 @@ get.bath.data <- function(spatLim, save.dir = tempdir(), seaonly = TRUE, res = c
     varid = 'topo'
   } else if(res == 0.5){
     cat('ERDDAP downloading: Topography, SRTM30+ Version 1.0, 30 arc second, Global \n 	Scripps   (Dataset ID: usgsCeSrtm30v1)')
-    opt ="https://coastwatch.pfeg.noaa.gov/erddap/griddap/usgsCeSrtm30v6.nc?topo[(LATHIGH):(LATLOW)][(LONLOW):(LONHIGH)]"
-    #opt = 'http://coastwatch.pfeg.noaa.gov/erddap/griddap/etopo180.nc?altitude[(LATLOW):1:(LATHIGH)][(LONLOW):1:(LONHIGH)]'
-    varid = 'topo'
+    #opt ="https://coastwatch.pfeg.noaa.gov/erddap/griddap/usgsCeSrtm30v6.nc?topo[(LATHIGH):(LATLOW)][(LONLOW):(LONHIGH)]"
+    opt = 'http://coastwatch.pfeg.noaa.gov/erddap/griddap/etopo180.nc?altitude[(LATLOW):1:(LATHIGH)][(LONLOW):1:(LONHIGH)]'
+    varid = 'altitude'
   }
   
   if (spatLim$lonmax > 180){ ## 0 to 360

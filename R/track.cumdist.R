@@ -11,9 +11,9 @@
 
 track.cumdist <- function(track){
   # Builds trackline in WGS84 coordinate system
-  line = st_sfc(st_linestring(as.matrix(track[,c("lon","lat")])), crs = 4326)
+  line = sf::st_sfc(sf::st_linestring(as.matrix(track[,c("lon","lat")])), crs = 4326)
   
   # Cumulative distance over track (km)
-  cumdist <- round(as.vector(st_length(line)/1000), digits = 2)
+  cumdist <- round(as.vector(sf::st_length(line)/1000), digits = 2)
   return(cumdist)
 }

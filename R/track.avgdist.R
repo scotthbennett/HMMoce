@@ -12,9 +12,9 @@
 
 track.avgdist <- function(track){
   # Builds trackline in WGS84 coordinate system
-  line = st_sfc(st_linestring(as.matrix(track[,c("lon","lat")])), crs = 4326)
+  line = sf::st_sfc(sf::st_linestring(as.matrix(track[,c("lon","lat")])), crs = 4326)
   
   # Avg distance travelled per model time step (km/d or km/X hrs, depending on model formulation)
-  avgdist <- round(as.vector(st_length(line) / (length(dateVec)-1) / 1000), digits = 2)
+  avgdist <- round(as.vector(sf::st_length(line) / (length(dateVec)-1) / 1000), digits = 2)
   return(avgdist)
 }

@@ -47,8 +47,8 @@ km.per.gridunit <- function(limits, res){
   rangedist <- vector(length=2)
   
   # Vector of grid resolution longitude differences
-   rangedist[1] <- st_length(st_sfc(st_linestring(londist[1:2,]), crs = 4326))/1000
-   rangedist[2] <- st_length(st_sfc(st_linestring(londist[3:4,]), crs = 4326))/1000
+   rangedist[1] <- sf::st_length(sf::st_sfc(sf::st_linestring(londist[1:2,]), crs = 4326))/1000
+   rangedist[2] <- sf::st_length(sf::st_sfc(sf::st_linestring(londist[3:4,]), crs = 4326))/1000
    
   return(sort(round(rangedist,digits=2)))
 }

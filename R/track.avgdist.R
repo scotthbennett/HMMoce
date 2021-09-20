@@ -1,4 +1,4 @@
-#' Track Metrics Series by Martin C. Arostegui aka Dr. Mola
+#' @author Track Metrics Series by Martin C. Arostegui aka Dr. Mola
 #' track.avgdist() calculates the average distance travelled per model time step of a track, 
 #' using the coordinates at each time step from the model output of HMMoce
 

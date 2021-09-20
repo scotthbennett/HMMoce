@@ -67,6 +67,7 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
   temp.idx <- grep('temp', ncnames, ignore.case=TRUE) - 1
   lat.idx <- grep('lat', ncnames, ignore.case=TRUE) - 1
   lon.idx <- grep('lon', ncnames, ignore.case=TRUE) - 1
+  if (any(ncnames == 'z')) ncnames[which(ncnames %in% 'z')] <- 'depth'
   dep.idx <- grep('dep', ncnames, ignore.case=TRUE) - 1
   
   ## better handling of depth

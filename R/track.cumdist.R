@@ -1,4 +1,4 @@
-#' Track Metrics Series by Martin C. Arostegui aka Dr. Mola
+#' @author Track Metrics Series by Martin C. Arostegui aka Dr. Mola
 #' track.cumdist() calculates the cumulative distance travelled over a tag deployment track, 
 #' using the coordinates at each time step from the model output of HMMoce
 

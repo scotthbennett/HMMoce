@@ -1,4 +1,4 @@
-#' Track Metrics Series by Martin C. Arostegui aka Dr. Mola
+#' @author Track Metrics Series by Martin C. Arostegui aka Dr. Mola
 #' track.stepdist() calculates a vector of the distance travelled per time step of a tag deployment track, 
 #' using the coordinates at each time step from the model output of HMMoce
 

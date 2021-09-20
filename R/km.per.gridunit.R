@@ -1,4 +1,4 @@
-#' Input Speed Parameter Guidance by Martin C. Arostegui aka Dr. Mola
+#' @author Input Speed Guidance by Martin C. Arostegui aka Dr. Mola
 #' km.per.gridunit() calculates the min and max longitudinal width (in km) of a single grid unit
 #' from the spatial limits of the grid used to model the track ('limits') and grid resolution ('res')
 

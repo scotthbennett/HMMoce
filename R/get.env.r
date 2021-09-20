@@ -315,8 +315,8 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
           template <- raster::raster(e, ncols = ceiling((e@xmax - e@xmin) / raster::res(r1)[1]),
                                      nrows = ceiling((e@ymax - e@ymin) / raster::res(r1)[1]))
           raster::projection(template) <- '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
-          crs(r1) <- crs(template)
-          crs(r2) <- crs(template)
+          raster::crs(r1) <- raster::crs(template)
+          raster::crs(r2) <- raster::crs(template)
           r1p <- try(raster::resample(r1, template), TRUE)
           if (class(r1p) == 'try-error') r1p <- raster::resample(r1r, template)
           r2p <- raster::resample(r2, template)
@@ -432,8 +432,8 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
           template <- raster::raster(e, ncols = ceiling((e@xmax - e@xmin) / raster::res(r1)[1]),
                                      nrows = ceiling((e@ymax - e@ymin) / raster::res(r1)[1]))
           raster::projection(template) <- '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
-          crs(r1) <- crs(template)
-          crs(r2) <- crs(template)
+          raster::crs(r1) <- raster::crs(template)
+          raster::crs(r2) <- raster::crs(template)
           r1p <- try(raster::resample(r1, template), TRUE)
           if (class(r1p) == 'try-error') r1p <- raster::resample(r1r, template)
           r2p <- raster::resample(r2, template)

@@ -440,7 +440,7 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
           r3 <- raster::merge(r1p, r2p)
           
         }
-        #r3 <- raster::flip(r3, 'y')
+        r3 <- raster::flip(r3, 'y')
         raster::writeRaster(r3, paste(save.dir, '/', filename, '_', time, '.nc', sep = ''), format='CDF', overwrite=TRUE, varname = ncnames[grep('temp', ncnames, ignore.case=TRUE)])
         if (file.exists(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))) cat(paste0('File output to ', paste(save.dir, '/', filename, '_', time, '.nc', sep = '')),'\n')
         

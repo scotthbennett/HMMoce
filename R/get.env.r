@@ -221,7 +221,7 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
       
       if (spatLim$lonmin >= -180 & spatLim$lonmax <= 180 & time < as.Date('2013-01-01')){
         # 180 coords, before 2013 -> normal
-        
+        print(paste('case 1'))
         repeat{
           get.hycom(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''),
                     download.file = TRUE, dir = save.dir, depLevels=depLevels, ...) 
@@ -234,6 +234,7 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
       } else if (spatLim$lonmin >= 0 & spatLim$lonmax <= 180 & time >= as.Date('2013-01-01')){
         # 180 coords after 2013 -> hycom native is 360 so:
         #  - if you have 0 to 180 coords, you're good
+        print(paste('case 2'))
         
         repeat{
           get.hycom(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''),
@@ -244,10 +245,11 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
           if(class(err) != 'try-error') break
         }
         
-      } else if(spatLim$lonmin < 0 & time >= as.Date('2013-01-01')){
+      } else if(spatLim$lonmin < 0 & spatLim$lonmax <= 0 & time >= as.Date('2013-01-01')){
         # 180 coords after 2013 -> hycom native is 360 so:
         #  - if you have -180 to 0, convert to get hycom then convert back
-
+        print(paste('case 3'))
+        
         spatLim.temp <- spatLim
         spatLim.temp$lonmin <- make360(spatLim$lonmin)
         spatLim.temp$lonmax <- make360(spatLim$lonmax)
@@ -260,7 +262,40 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
           if(class(err) != 'try-error') break
         }
         
-        r1 <- raster::brick(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))
+        ## get var names
+        nc1 <- RNetCDF::open.nc(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))
+        ncnames = NULL
+        nmax <- RNetCDF::file.inq.nc(nc1)$nvars - 1
+        for(ii in 0:nmax) ncnames[ii + 1] <- RNetCDF::var.inq.nc(nc1, ii)$name
+        temp.idx <- grep('temp', ncnames, ignore.case=TRUE) - 1
+        lat.idx <- grep('lat', ncnames, ignore.case=TRUE) - 1
+        lon.idx <- grep('lon', ncnames, ignore.case=TRUE) - 1
+        #dep.idx <- grep('dep', ncnames, ignore.case=TRUE) - 1
+        
+        # get attributes, if they exist
+        ncatts <- NULL
+        nmax <- RNetCDF::var.inq.nc(nc1, temp.idx)$natts - 1
+        for(ii in 0:nmax) ncatts[ii + 1] <- RNetCDF::att.inq.nc(nc1, temp.idx, ii)$name
+        scale.idx <- grep('scale', ncatts, ignore.case=TRUE) - 1
+        if(length(scale.idx) != 0){
+          scale <- RNetCDF::att.get.nc(nc1, temp.idx, attribute=scale.idx)
+        } else{
+          scale <- 1
+        }
+        off.idx <- grep('off', ncatts, ignore.case=TRUE) - 1
+        if(length(off.idx) != 0){
+          offset <- RNetCDF::att.get.nc(nc1, temp.idx, attribute=off.idx)
+        } else{
+          offset <- 0
+        }
+        
+        lon1 <- RNetCDF::var.get.nc(nc1, lon.idx)
+        lat1 <- RNetCDF::var.get.nc(nc1, lat.idx)
+        dat1 <- RNetCDF::var.get.nc(nc1, temp.idx) * scale + offset
+        r1 <- raster::flip(raster::brick(aperm(dat1, c(2,1,3)), xmn=min(lon1), xmx=max(lon1),
+                                         ymn=min(lat1), ymx=max(lat1)), 2)
+        
+        #r1 <- raster::brick(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))
         r1r <- raster::rotate(r1)
         
         raster::writeRaster(r1r, paste(save.dir, '/', filename, '_', time, '.nc', sep = ''), format='CDF', overwrite=TRUE, varname = ncnames[grep('temp', ncnames, ignore.case=TRUE)])
@@ -269,6 +304,7 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
       } else if(spatLim$lonmin < 0 & spatLim$lonmax > 0 & spatLim$lonmax <= 180 & time >= as.Date('2013-01-01')){
         # 180 coords after 2013 -> hycom native is 360 so:
         #  - if you span 0, get both "normal" 0 to 180 and converted < 0 coords and combine
+        print(paste('case 4'))
         
         cat('Detected input coordinates in 180 range but HYCOM is 360 starting in 2013, downloading multiple files to fix this.','\n')
         ex180 <- raster::extent(-180,-0.0001,-90,90)
@@ -377,9 +413,10 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
         raster::writeRaster(r3, paste(save.dir, '/', filename, '_', time, '.nc', sep = ''), format='CDF', overwrite=TRUE, varname = ncnames[grep('temp', ncnames, ignore.case=TRUE)])
         if (file.exists(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))) cat(paste0('File output to ', paste(save.dir, '/', filename, '_', time, '.nc', sep = '')),'\n')
         
-      } else if(spatLim$lonmax > 180 & time < as.Date('2013-01-01')){
+      } else if(spatLim$lonmin > 180 & spatLim$lonmax > 180 & time < as.Date('2013-01-01')){
         # you have 360 coords, before 2013 -> hycom native is 180 so:
         #  - if > 180, convert your coords 
+        print(paste('case 5'))
         
         spatLim.temp <- spatLim
         spatLim.temp$lonmin <- make180(spatLim$lonmin)
@@ -396,8 +433,9 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
       } else if(spatLim$lonmin < 180 & spatLim$lonmax > 180 & time < as.Date('2013-01-01')){
         # you have 360 coords, before 2013 -> hycom native is 180 so:
         #  - if span 180, do both and combine
+        print(paste('case 6'))
         
-        cat('Detected input coordinates > 180, downloading multiple files.','\n')
+        cat('Detected input coordinates > 180 that also span the 180 line, downloading multiple files.','\n')
         ex180 <- raster::extent(-180,180,-90,90)
         ex360 <- raster::extent(180,360,-90,90)
         
@@ -500,26 +538,61 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
           r3 <- raster::merge(r1p, r2p)
           
         }
-        r3 <- raster::flip(r3, 'y')
+        #r3 <- raster::flip(r3, 'y')
         raster::writeRaster(r3, paste(save.dir, '/', filename, '_', time, '.nc', sep = ''), format='CDF', overwrite=TRUE, varname = ncnames[grep('temp', ncnames, ignore.case=TRUE)])
         if (file.exists(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))) cat(paste0('File output to ', paste(save.dir, '/', filename, '_', time, '.nc', sep = '')),'\n')
         
-      } else if(spatLim$lonmax > 180 & time >= as.Date('2013-01-01')){
+      } else if(spatLim$lonmin > 180 & spatLim$lonmax > 180 & time >= as.Date('2013-01-01')){
         # you have 360 coords, after 2013 -> hycom native is 360 so:
         #  - if you have > 180, your request is good but need to convert output
         cat('HYCOM outputs are 0-360 starting in 2013. Converting your output HYCOM data to the 180 coordinate system.','\n')
         
+        print(paste('case 7'))
+        
         tdir <- tempdir()
         repeat{
-          get.hycom(spatLim, time, filename = paste(filename, '_', time, '_1.nc', sep = ''),
+          get.hycom(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''),
                     download.file = TRUE, dir = tdir, depLevels=depLevels)#, ...) 
           tryCatch({
-            err <- try(RNetCDF::open.nc(paste(tdir, '/', filename, '_', time, '_1.nc', sep = '')), silent = T)
+            err <- try(RNetCDF::open.nc(paste(tdir, '/', filename, '_', time, '.nc', sep = '')), silent = T)
           }, error=function(e){print(paste('ERROR: Download of data at ', time, ' failed. Trying call to server again.', sep = ''))})
           if(class(err) != 'try-error') break
         }
         
-        r1 <- raster::brick(paste(tdir, '/', filename, '_', time, '_1.nc', sep = ''))
+        ## get var names
+        nc1 <- RNetCDF::open.nc(paste(tdir, '/', filename, '_', time, '.nc', sep = ''))
+        ncnames = NULL
+        nmax <- RNetCDF::file.inq.nc(nc1)$nvars - 1
+        for(ii in 0:nmax) ncnames[ii + 1] <- RNetCDF::var.inq.nc(nc1, ii)$name
+        temp.idx <- grep('temp', ncnames, ignore.case=TRUE) - 1
+        lat.idx <- grep('lat', ncnames, ignore.case=TRUE) - 1
+        lon.idx <- grep('lon', ncnames, ignore.case=TRUE) - 1
+        #dep.idx <- grep('dep', ncnames, ignore.case=TRUE) - 1
+        
+        # get attributes, if they exist
+        ncatts <- NULL
+        nmax <- RNetCDF::var.inq.nc(nc1, temp.idx)$natts - 1
+        for(ii in 0:nmax) ncatts[ii + 1] <- RNetCDF::att.inq.nc(nc1, temp.idx, ii)$name
+        scale.idx <- grep('scale', ncatts, ignore.case=TRUE) - 1
+        if(length(scale.idx) != 0){
+          scale <- RNetCDF::att.get.nc(nc1, temp.idx, attribute=scale.idx)
+        } else{
+          scale <- 1
+        }
+        off.idx <- grep('off', ncatts, ignore.case=TRUE) - 1
+        if(length(off.idx) != 0){
+          offset <- RNetCDF::att.get.nc(nc1, temp.idx, attribute=off.idx)
+        } else{
+          offset <- 0
+        }
+        
+        lon1 <- RNetCDF::var.get.nc(nc1, lon.idx)
+        lat1 <- RNetCDF::var.get.nc(nc1, lat.idx)
+        dat1 <- RNetCDF::var.get.nc(nc1, temp.idx) * scale + offset
+        r1 <- raster::flip(raster::brick(aperm(dat1, c(2,1,3)), xmn=min(lon1), xmx=max(lon1),
+                                         ymn=min(lat1), ymx=max(lat1)), 2)
+        
+        #r1 <- raster::brick(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))
         r1r <- raster::rotate(r1)
         
         raster::writeRaster(r1r, paste(save.dir, '/', filename, '_', time, '.nc', sep = ''), format='CDF', overwrite=TRUE, varname = ncnames[grep('temp', ncnames, ignore.case=TRUE)])
@@ -528,11 +601,11 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
       } else if(spatLim$lonmin < 180 & spatLim$lonmax > 180 & time >= as.Date('2013-01-01')){
         # you have 360 coords, after 2013 -> hycom native is 360 so:
         #  - if you span 180, get hycom as normal
-        
+        print(paste('case 8'))
         warning('Getting HYCOM data for longitudes > 180 that spans the 180 line, therefore this data cannot be reasonably converted to 180 coordinate system (i.e. you need to run HMMoce using 360 coords). This requires an advanced HMMoce skillset and extreme caution!')
         
         repeat{
-          get.hycom(spatLim.temp, time, filename = paste(filename, '_', time, '.nc', sep = ''),
+          get.hycom(spatLim, time, filename = paste(filename, '_', time, '.nc', sep = ''),
                     download.file = TRUE, dir = save.dir, depLevels=depLevels, ...) 
           tryCatch({
             err <- try(RNetCDF::open.nc(paste(save.dir,'/', filename, '_', time, '.nc', sep = '')), silent = T)

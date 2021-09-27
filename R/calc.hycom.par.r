@@ -224,7 +224,7 @@ calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.
   
   crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
   L.hycom <- raster::brick(L.hycom, xmn=min(lon), xmx=max(lon), ymn=min(lat), ymx=max(lat), transpose=TRUE, crs)
-  L.hycom <- raster::flip(L.hycom, direction = 'y')
+  #L.hycom <- raster::flip(L.hycom, direction = 'y')
   
   #L.hycom[L.hycom < 0] <- 0
   

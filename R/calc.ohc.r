@@ -102,7 +102,7 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
   # get and check the vars
   lon <- RNetCDF::var.get.nc(nc1, lon.idx)
   if(length(dim(lon)) == 2) lon <- lon[,1]
-  if(!any(lon < 180)) lon <- lon - 360
+  if(any(lon > 180)) lon <- make360(lon)
   lat <- RNetCDF::var.get.nc(nc1, lat.idx)
   if(length(dim(lat)) == 2) lat <- lat[1,]
   
@@ -228,7 +228,7 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
   list.ohc <- list(x = lon, y = lat, z = L.ohc)
   ex <- raster::extent(list.ohc)
   L.ohc <- raster::brick(list.ohc$z, xmn=ex[1], xmx=ex[2], ymn=ex[3], ymx=ex[4], transpose=TRUE, crs)
-  L.ohc <- raster::flip(L.ohc, direction = 'y')
+  #L.ohc <- raster::flip(L.ohc, direction = 'y')
 
   L.ohc[L.ohc < 0] <- 0
   

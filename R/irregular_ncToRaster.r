@@ -18,7 +18,12 @@ irregular_ncToRaster <- function(fname, varid){
   lat <- as.numeric(RNetCDF::var.get.nc(nc, variable = "latitude"))
   bdata <- RNetCDF::var.get.nc(nc, variable = varid)
   
-  lat = lat[order(lat)]
+  if (lat[2] - lat[1] > 0){
+    flip = TRUE
+  } else{
+    lat = lat[order(lat)]
+    flip = FALSE
+  }
   
   bathy = list(x = lon, y = lat, data = bdata)
   
@@ -26,6 +31,8 @@ irregular_ncToRaster <- function(fname, varid){
     crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
     ex <- raster::extent(bathy)
     bathy <- raster::raster(t(bathy$data), xmn = ex[1], xmx = ex[2], ymn = ex[3], ymx = ex[4], crs)
+    
+    if (flip) bathy <- raster::flip(bathy, 'y')
   #}
   
   bathy

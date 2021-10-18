@@ -20,7 +20,8 @@
 #' @param use.se is logical indicating whether or not to use SE when using 
 #'   regression to predict temperature at specific depth levels.
 #' @param ncores specify number of cores, or leave blank and use whatever you 
-#'   have!
+#'   have
+#' @param flip_y is logical indicating whether or not to flip the resulting likelihood in the y. Set this to true if output likelihoods are upside down.
 #'   
 #' @return a raster brick of OHC likelihood
 #' @seealso \code{\link{calc.ohc}}
@@ -31,7 +32,7 @@
 #' @importFrom foreach "%dopar%"
 #'
 
-calc.ohc.par <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRUE, use.se = TRUE, ncores = NULL){
+calc.ohc.par <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRUE, use.se = TRUE, ncores = NULL, flip_y = FALSE){
   
   #options(warn=1)
   names(pdt) <- tolower(names(pdt))
@@ -244,7 +245,10 @@ calc.ohc.par <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy =
   list.ohc <- list(x = lon, y = lat, z = L.ohc)
   ex <- raster::extent(list.ohc)
   L.ohc <- raster::brick(list.ohc$z, xmn=ex[1], xmx=ex[2], ymn=ex[3], ymx=ex[4], transpose=TRUE, crs)
-  L.ohc <- raster::flip(L.ohc, direction = 'y')
+  if (flip_y){
+    L.ohc <- raster::flip(L.ohc, direction = 'y')
+    warning('Output raster is being flipped in the y. If this is not desired, use need_flip=FALSE.')
+  }
   
   L.ohc[L.ohc < 0] <- 0
   

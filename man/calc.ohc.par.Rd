@@ -4,11 +4,20 @@
 \alias{calc.ohc.par}
 \title{OHC Likelihood in Parallel}
 \usage{
-calc.ohc.par(pdt, filename, isotherm = "", ohc.dir, dateVec,
-  bathy = TRUE, use.se = TRUE, ncores = NULL)
+calc.ohc.par(
+  pdt,
+  filename,
+  isotherm = "",
+  ohc.dir,
+  dateVec,
+  bathy = TRUE,
+  use.se = TRUE,
+  ncores = NULL,
+  flip_y = FALSE
+)
 }
 \arguments{
-\item{pdt}{input PDT data see \code{\link{extract.pdt}}}
+\item{pdt}{input depth-temperature profile data. Need at least cols: Date (POSIXct), Depth, MinTemp, MaxTemp}
 
 \item{filename}{is the first part of the filename specified to the download 
 function \code{\link{get.env}}. For example, if downloaded files were 
@@ -33,7 +42,9 @@ be applied}
 regression to predict temperature at specific depth levels.}
 
 \item{ncores}{specify number of cores, or leave blank and use whatever you 
-have!}
+have}
+
+\item{flip_y}{is logical indicating whether or not to flip the resulting likelihood in the y. Set this to true if output likelihoods are upside down.}
 }
 \value{
 a raster brick of OHC likelihood

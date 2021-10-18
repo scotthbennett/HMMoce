@@ -4,11 +4,18 @@
 \alias{calc.hycom}
 \title{Hycom Profile LIkelihood}
 \usage{
-calc.hycom(pdt, filename, hycom.dir, focalDim = 9, dateVec,
-  use.se = TRUE)
+calc.hycom(
+  pdt,
+  filename,
+  hycom.dir,
+  focalDim = 9,
+  dateVec,
+  use.se = TRUE,
+  flip_y = FALSE
+)
 }
 \arguments{
-\item{pdt}{input depth-temperature profile data. Need at least cols: Date (POSIXct), Depth, MinTemp, MaxTemp,}
+\item{pdt}{input depth-temperature profile data. Need at least cols: Date (POSIXct), Depth, MinTemp, MaxTemp}
 
 \item{filename}{is the first part of the filename specified to the download 
 function \code{\link{get.env}}. For example, if downloaded files were 
@@ -27,6 +34,8 @@ sd() of temperature grid cell. Recommend focalDim = 9 for Hycom data at
 
 \item{use.se}{is logical indicating whether or not to use SE when using 
 regression to predict temperature at specific depth levels.}
+
+\item{flip_y}{is logical indicating whether or not to flip the resulting likelihood in the y. Set this to true if output likelihoods are upside down.}
 }
 \value{
 a raster brick of Hycom profile likelihood

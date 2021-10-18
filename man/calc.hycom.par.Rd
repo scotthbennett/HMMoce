@@ -4,11 +4,19 @@
 \alias{calc.hycom.par}
 \title{Hycom Profile LIkelihood in Parallel}
 \usage{
-calc.hycom.par(pdt, filename, hycom.dir, focalDim = 9, dateVec,
-  use.se = TRUE, ncores = NULL)
+calc.hycom.par(
+  pdt,
+  filename,
+  hycom.dir,
+  focalDim = 9,
+  dateVec,
+  use.se = TRUE,
+  ncores = NULL,
+  flip_y = FALSE
+)
 }
 \arguments{
-\item{pdt}{input depth-temperature profile data. Need at least cols: Date (POSIXct), Depth, MinTemp, MaxTemp,}
+\item{pdt}{input depth-temperature profile data. Need at least cols: Date (POSIXct), Depth, MinTemp, MaxTemp}
 
 \item{filename}{is the first part of the filename specified to the download 
 function \code{\link{get.env}}. For example, if downloaded files were 
@@ -30,6 +38,8 @@ regression to predict temperature at specific depth levels.}
 
 \item{ncores}{specify number of cores, or leave blank and use whatever you 
 have!}
+
+\item{flip_y}{is logical indicating whether or not to flip the resulting likelihood in the y. Set this to true if output likelihoods are upside down.}
 }
 \value{
 a raster brick of Hycom profile likelihood

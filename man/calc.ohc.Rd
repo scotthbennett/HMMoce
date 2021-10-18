@@ -4,11 +4,19 @@
 \alias{calc.ohc}
 \title{Calculate Ocean Heat Content (OHC) likelihood surface}
 \usage{
-calc.ohc(pdt, filename, isotherm = "", ohc.dir, dateVec, bathy = TRUE,
-  use.se = TRUE)
+calc.ohc(
+  pdt,
+  filename,
+  isotherm = "",
+  ohc.dir,
+  dateVec,
+  bathy = TRUE,
+  use.se = TRUE,
+  flip_y = FALSE
+)
 }
 \arguments{
-\item{pdt}{input depth-temperature profile data. Need at least cols: Date (POSIXct), Depth, MinTemp, MaxTemp,}
+\item{pdt}{input depth-temperature profile data. Need at least cols: Date (POSIXct), Depth, MinTemp, MaxTemp}
 
 \item{filename}{is the first part of the filename specified to the download 
 function \code{\link{get.env}}. For example, if downloaded files were 
@@ -30,6 +38,8 @@ be applied. This does NOT use an input bathymetry dataset but rather masks the d
 
 \item{use.se}{is logical indicating whether or not to use SE when using
 regression to predict temperature at specific depth levels.}
+
+\item{flip_y}{is logical indicating whether or not to flip the resulting likelihood in the y. Set this to true if output likelihoods are upside down.}
 }
 \value{
 likelihood is raster brick of likelihood surfaces representing 

@@ -66,6 +66,11 @@ calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se =
     
   } else{
     depth <- RNetCDF::var.get.nc(nc1, dep.idx)
+    if (max(depth) < 100) depth <- c(0, 2, 4, 6, 8, 10, 12, 15, 20, 25,
+                                     30, 35, 40, 45, 50, 60, 70, 80, 90,
+                                     100, 125, 150, 200, 250, 300, 350, 
+                                     400, 500, 600, 700, 800, 900, 1000,
+                                     1250, 1500, 2000, 2500, 3000, 4000, 5000)
   }
   
   # get attributes, if they exist

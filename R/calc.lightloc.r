@@ -108,8 +108,8 @@ calc.lightloc <- function(lightloc, locs.grid, dateVec, errEll = TRUE){
             slat.sd <- locs.ii$latitudeError #semi minor axis
             
           } else{
-            warning('No longitude error specified. Fixed at 0.7deg based on Musyl et al 2011. Although note that this error is likely higher for many species.')
-            slat.sd <- 0.7 ## musyl et al 2011
+            warning('No longitude error specified. Fixed at 3.5deg based on Doherty et al 2017 and Biais et al 2017.')
+            slat.sd <- 3.5
           }
           
           # use normally distributed error from position using fixed std dev

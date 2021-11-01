@@ -11,6 +11,7 @@
 #' @param dateVec is vector of POSIXct dates for each time step of the likelihood
 #' @param errEll is logical indicating whether error ellipses should be 
 #'   generated for light-based likelihoods. If FALSE (default), only longitude is used to generate likelihoods. If TRUE, both latitude and longitude are used resulting in an ellipse-shaped likelihood. 
+#' @param lon_only is logical indicating whether the likelihood should be generated for longitude only (default is TRUE). If FALSE, latitude only will be used to generate the likelihood. This argument is only valid is errEll = FALSE.
 #' @references Musyl MK, Domeier ML, Nasby-Lucas N, Brill RW, McNaughton LM, 
 #'   Swimmer JY, Lutcavage MS, Wilson SG, Galuardi B, Liddle JB (2011) 
 #'   Performance of pop-up satellite archival tags. Mar Ecol Prog Ser
@@ -75,24 +76,46 @@ calc.lightloc <- function(lightloc, locs.grid, dateVec, errEll = TRUE){
       
       if(errEll == FALSE){ ## then we only care about longitude
         
-        if ('Error.Semi.minor.axis' %in% names(locs.ii)){
-          if (locs.ii$Error.Semi.minor.axis[1] < 70000) warning('Some values of Error.Semi.minor.axis are < 70km which usually does not represent the actual error in these measurements.')
-          # create longitude likelihood based on GPE data
-          slon.sd <- locs.ii$Error.Semi.minor.axis[1] / 1000 / 111 #semi minor axis
+        if (lon_only){
+          if ('Error.Semi.minor.axis' %in% names(locs.ii)){
+            if (locs.ii$Error.Semi.minor.axis[1] < 70000) warning('Some values of Error.Semi.minor.axis are < 70km which usually does not represent the actual error in these measurements.')
+            # create longitude likelihood based on GPE data
+            slon.sd <- locs.ii$Error.Semi.minor.axis[1] / 1000 / 111 #semi minor axis
+            
+          } else if ('longitudeError' %in% names(locs.ii)){
+            if (locs.ii$longitudeError[1] < 0.7) warning('Some values of longitudeError are < 0.7deg which usually does not represent the actual error in these measurements.')
+            # create longitude likelihood based on GPE data
+            slon.sd <- locs.ii$longitudeError #semi minor axis
+            
+          } else{
+            warning('No longitude error specified. Fixed at 0.7deg based on Musyl et al 2011. Although note that this error is likely higher for many species.')
+            slon.sd <- 0.7 ## musyl et al 2011
+          }
           
-        } else if ('longitudeError' %in% names(locs.ii)){
-          if (locs.ii$longitudeError[1] < 0.7) warning('Some values of longitudeError are < 0.7deg which usually does not represent the actual error in these measurements.')
-          # create longitude likelihood based on GPE data
-          slon.sd <- locs.ii$longitudeError #semi minor axis
+          # use normally distributed error from position using fixed std dev
+          L.lightloc.try[,,ii] <- stats::dnorm(t(locs.grid$lon), locs.ii$Longitude[1], slon.sd)
           
         } else{
-          warning('No longitude error specified. Fixed at 0.7deg based on Musyl et al 2011. Although note that this error is likely higher for many species.')
-          slon.sd <- 0.7 ## musyl et al 2011
+          ## lat only
+          if ('Error.Semi.major.axis' %in% names(locs.ii)){
+            if (locs.ii$Error.Semi.major.axis[1] < 70000) warning('Some values of Error.Semi.major.axis are < 70km which usually does not represent the actual error in these measurements.')
+            # create longitude likelihood based on GPE data
+            slat.sd <- locs.ii$Error.Semi.major.axis[1] / 1000 / 111 #semi minor axis
+            
+          } else if ('latitudeError' %in% names(locs.ii)){
+            if (locs.ii$latitudeError[1] < 0.7) warning('Some values of latitudeError are < 0.7deg which usually does not represent the actual error in these measurements.')
+            # create longitude likelihood based on GPE data
+            slat.sd <- locs.ii$latitudeError #semi minor axis
+            
+          } else{
+            warning('No longitude error specified. Fixed at 0.7deg based on Musyl et al 2011. Although note that this error is likely higher for many species.')
+            slat.sd <- 0.7 ## musyl et al 2011
+          }
+          
+          # use normally distributed error from position using fixed std dev
+          L.lightloc.try[,,ii] <- stats::dnorm(t(locs.grid$lat), locs.ii$Latitude[1], slat.sd)
+          
         }
-        
-        # use normally distributed error from position using fixed std dev
-        L.lightloc.try[,,ii] <- stats::dnorm(t(locs.grid$lon), locs.ii$Longitude[1], slon.sd)
-        
        
       } else if(errEll == TRUE){
         #if (locs.ii$Error.Semi.minor.axis[1] < 100000) warning('Some values of Error.Semi.minor.axis are < 100km which usually does not represent the actual error in these measurements.')

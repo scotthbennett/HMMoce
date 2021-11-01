@@ -43,7 +43,7 @@
 #'                      dateVec = dateVec, errEll = TRUE, gpeOnly = TRUE)
 #' }
 
-calc.lightloc <- function(lightloc, locs.grid, dateVec, errEll = TRUE){
+calc.lightloc <- function(lightloc, locs.grid, dateVec, errEll = TRUE, lon_only = TRUE){
   
   print(paste('Starting light likelihood calculation...'))
   t0 <- Sys.time()

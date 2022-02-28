@@ -10,7 +10,8 @@
 #' Nielsen, J. K., F. Mueter, M. Adkison, S. McDermott, T. Loher, and A. C. Seitz. 2019. Effect of study area bathymetric heterogeneity on parameterization and performance of a depth-based geolocation model for demersal fish. Ecological Modelling 402:18-34.
 #' Viterbi, A. 1967. Error bounds for convolutional codes and an asymptotically optimum decoding algorithm. IEEE Transactions on Information Theory, 13: 260-269.
 #' Fariselli, P., P. L. Martelli, and R. Casadio. 2005. The posterior-Viterbi: a new decoding algorithm for hidden Markov models. arXiv: q-bio/0501006
-#' 
+#' Lember, J., and A. A. Koloydenko. 2014. Bridging Viterbi and posterior decoding: a generalized risk approach to hidden path inference based on hidden Markov models. Journal of Machie Learning Research 15: 1-58.
+#'
 #' Parameters
 #' @param pars HMM parameters output from opt.params()
 #' @param s HMM backward smoothed output of hmm.smoother()

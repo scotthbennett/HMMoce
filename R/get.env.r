@@ -42,7 +42,7 @@
 #' }
 #' @export
 
-get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = NULL, resol = NULL, save.dir = getwd(), sst.type=NULL, depLevels=NULL, ...){
+get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = NULL, resol = NULL, save.dir = getwd(), sst.type=NULL, depLevels=NULL, template=NULL, ...){
   
   original_dir <- getwd()
   
@@ -297,6 +297,11 @@ get.env <- function(uniqueDates = NULL, filename = NULL, type = NULL, spatLim = 
         
         #r1 <- raster::brick(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))
         r1r <- raster::rotate(r1)
+        
+        if (!is.null(template)){
+          print('Input raster template is being used to resample the downloaded hycom grid. This is an experimental feature.')
+          r1r <- raster::resample(r1r, template)
+        }
         
         raster::writeRaster(r1r, paste(save.dir, '/', filename, '_', time, '.nc', sep = ''), format='CDF', overwrite=TRUE, varname = ncnames[grep('temp', ncnames, ignore.case=TRUE)])
         if (file.exists(paste(save.dir, '/', filename, '_', time, '.nc', sep = ''))) cat(paste0('File output to ', paste(save.dir, '/', filename, '_', time, '.nc', sep = '')),'\n')

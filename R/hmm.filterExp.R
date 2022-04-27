@@ -1,6 +1,6 @@
 #' HMM filter functions (modified for mini-expansion method)
 #' 
-#' Original expanding kernal code by Dr. Julie Nielsen, integrated by Dr. Martin Arostegui (aka Dr. Mola) into pre-existing hmm.filter function in HMMoce
+#' Original expanding kernel code by Dr. Julie Nielsen, integrated by Dr. Martin Arostegui (aka Dr. Mola) into pre-existing hmm.filter function in HMMoce
 #' 
 #' Cite: Nielsen JK, Bryan DR, Rand KM, Arostegui MC, Braun CD, Galuardi B, McDermott SF. YYYY. Geolocation of a demersal fish (Pacific cod) in a high-latitude island chain (Aleutian Islands, Alaska). Animal Biotelemetry VV: PP-PP.
 #' 

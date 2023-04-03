@@ -18,6 +18,7 @@
 #'   be applied. This does NOT use an input bathymetry dataset but rather masks the depth-temperature likelihood based on the possible locations given the maximum recorded tag-depth (i.e. areas with bottom depth shallower than tag-recorded max depth are masked out).
 #' @param use.se is logical indicating whether or not to use SE when using
 #'   regression to predict temperature at specific depth levels.
+#' @param flip_y is logical indicating whether or not to flip the resulting likelihood in the y. Set this to true if output likelihoods are upside down.
 #'   
 #' @return likelihood is raster brick of likelihood surfaces representing 
 #'   estimated position based on tag-based OHC compared to calculated OHC using 
@@ -30,7 +31,7 @@
 #'   PLoS One 10:e0141101
 #'   
 
-calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRUE, use.se = TRUE){
+calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRUE, use.se = TRUE, flip_y = FALSE){
 
   names(pdt) <- tolower(names(pdt))
   #options(warn=1)
@@ -80,6 +81,11 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
     
   } else{
     depth <- RNetCDF::var.get.nc(nc1, dep.idx)
+    if (max(depth) < 100) depth <- c(0, 2, 4, 6, 8, 10, 12, 15, 20, 25,
+                                     30, 35, 40, 45, 50, 60, 70, 80, 90,
+                                     100, 125, 150, 200, 250, 300, 350, 
+                                     400, 500, 600, 700, 800, 900, 1000,
+                                     1250, 1500, 2000, 2500, 3000, 4000, 5000)
   }
     
   # get attributes, if they exist
@@ -228,7 +234,11 @@ calc.ohc <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy = TRU
   list.ohc <- list(x = lon, y = lat, z = L.ohc)
   ex <- raster::extent(list.ohc)
   L.ohc <- raster::brick(list.ohc$z, xmn=ex[1], xmx=ex[2], ymn=ex[3], ymx=ex[4], transpose=TRUE, crs)
-  #L.ohc <- raster::flip(L.ohc, direction = 'y')
+  
+  if (flip_y){
+    L.ohc <- raster::flip(L.ohc, direction = 'y')
+    warning('Output raster is being flipped in the y. If this is not desired, use need_flip=FALSE.')
+  }
 
   L.ohc[L.ohc < 0] <- 0
   

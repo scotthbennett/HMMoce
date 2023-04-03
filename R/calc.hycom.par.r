@@ -18,13 +18,14 @@
 #'   regression to predict temperature at specific depth levels.
 #' @param ncores specify number of cores, or leave blank and use whatever you 
 #'   have!
+#' @param flip_y is logical indicating whether or not to flip the resulting likelihood in the y. Set this to true if output likelihoods are upside down.
 #'   
 #' @return a raster brick of Hycom profile likelihood
 #' @export
 #' @importFrom foreach %dopar%
 #'
 
-calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se = TRUE, ncores = NULL){
+calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se = TRUE, ncores = NULL, flip_y = FALSE){
   
   names(pdt) <- tolower(names(pdt))
   #options(warn=-1)
@@ -72,6 +73,11 @@ calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.
     
   } else{
     depth <- RNetCDF::var.get.nc(nc1, dep.idx)
+    if (max(depth) < 100) depth <- c(0, 2, 4, 6, 8, 10, 12, 15, 20, 25,
+                                     30, 35, 40, 45, 50, 60, 70, 80, 90,
+                                     100, 125, 150, 200, 250, 300, 350, 
+                                     400, 500, 600, 700, 800, 900, 1000,
+                                     1250, 1500, 2000, 2500, 3000, 4000, 5000)
   }
   
   # get attributes, if they exist
@@ -224,10 +230,14 @@ calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.
   
   crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
   L.hycom <- raster::brick(L.hycom, xmn=min(lon), xmx=max(lon), ymn=min(lat), ymx=max(lat), transpose=TRUE, crs)
-  #L.hycom <- raster::flip(L.hycom, direction = 'y')
+
+  if (flip_y){
+    L.hycom <- raster::flip(L.hycom, direction = 'y')
+    warning('Output raster is being flipped in the y. If this is not desired, use need_flip=FALSE.')
+  }
   
-  #L.hycom[L.hycom < 0] <- 0
-  
+  L.hycom[L.hycom < 0] <- 0
+
   names(L.hycom) = as.character(dateVec)
   
   t1 <- Sys.time()

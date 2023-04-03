@@ -2,14 +2,15 @@ Package: HMMoce
 Type: Package
 Title: Improved Analysis of Marine Animal Movement Data Using Hidden Markov
     Models
-Version: 1.0.0
-Date: 2017-10-26
+Version: 1.1.0
+Date: 2020-05-13
 Authors@R: c(
               person("Camrin", "Braun", email = "camrin.braun@gmail.com", role = c("aut","cre")),
-              person("Benjamin", "Galuardi", email = "drdrumfish@gmail.com", role = c("aut"))
+              person("Benjamin", "Galuardi", email = "drdrumfish@gmail.com", role = c("aut")),
+              person("Paul", "Gatti", email = "Paul.Gatti@mi.mun.ca", role = c("aut")),
+              person("Benjamin", "Jones", role = c("ctb"), comment = 'Contributed to earlier version of some of the download functions.'),
+              person("Martin", "Pedersen", role = c("ctb"), comment = 'Developed an earlier version of some of the HMM framework and helper functions.')
               )
-Author: Camrin Braun [aut, cre],
-    Benjamin Galuardi [aut]
 Maintainer: Camrin Braun <camrin.braun@gmail.com>
 Description: Improved analysis of marine animal movement data by implementing
     a state-space hidden Markov model (HMM) to improve position estimates. Position
@@ -39,8 +40,9 @@ Suggests:
     knitr,
     rmarkdown,
     png,
-    grid
-RoxygenNote: 6.0.1
+    grid,
+    GA
+RoxygenNote: 6.1.1
 URL: http://www.camrinbraun.com/
 BugReports: https://github.com/camrinbraun/HMMoce/issues
 LazyData: true

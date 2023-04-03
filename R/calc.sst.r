@@ -11,12 +11,13 @@
 #'   example, 'tuna_date.nc'. This filename is required here so the calc 
 #'   function knows where to get the env data.
 #' @param sst.dir local directory where remote sensing SST downloads are stored
-#' @param dateVec is vector of dates from tag to pop-up in 1 day increments.
+#' @param dateVec is vector of POSIXct dates for each time step of the likelihood
 #' @param focalDim is integer for dimensions of raster::focal used to calculate 
 #'   sd() of env grid cell. If left to NULL (default), this dimension will
 #'   approximately incorporate 0.25 degrees.
 #' @param sens.err is numeric indicating the percent sensor error in the tag sst
 #'   sensor. Default is 1.
+#' @param auto.aggr is logical indicating whether to automatically aggregate the calculated likelihood raster if the resolution is higher than 0.1.
 #'   
 #' @return likelihood is raster brick of likelihood surfaces representing
 #'   matches between tag-based sst and remotely sensed sst maps
@@ -25,98 +26,83 @@
 #' 
 #' @seealso \code{\link{calc.ohc}}
 #'   
-#' @examples
-#' \dontrun{
-#' 
-#' # sst data
-#' tag.sst <- read.wc(ptt, wd = myDir, type = 'sst', tag=tag, pop=pop); 
-#' sst.udates <- tag.sst$udates; tag.sst <- tag.sst$data
-#' 
-#' # IF YOU NEED TO DOWNLOAD SST DATA
-#' sst.dir <- paste('my_sst_dir')
-#' get.env(sst.udates, type = 'sst', spatLim = sp.lim, save.dir = sst.dir)
-#' 
-#' # GENERATE DAILY SST LIKELIHOODS
-#' L.sst <- calc.sst(tag.sst, sst.dir = sst.dir, dateVec = dateVec)
-#' 
-#' }
 
-calc.sst <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.err = 1){
+calc.sst <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.err = 1, auto.aggr = TRUE){
   
   print(paste('Starting SST likelihood calculation...'))
   t0 <- Sys.time()
   
-  if(class(tag.sst$Date)[1] != 'POSIXct') stop('Error: tag.sst$Date must be as.POSIXct format.')
+  if (class(tag.sst$Date)[1] != class(dateVec)[1]) stop('dateVec and tag.sst$Date both need to be of class POSIXct.')
   
+  tag.sst <- tag.sst[which(tag.sst$Date <= max(dateVec)),]
   tag.sst$dateVec <- findInterval(tag.sst$Date, dateVec)
-  by_dte <- dplyr::group_by(tag.sst, as.factor(tag.sst$dateVec))  # group by unique time points
-  tag.sst <- data.frame(dplyr::summarise_(by_dte, "min(Temperature)", "max(Temperature)"))
-  colnames(tag.sst) <- list('time', 'minT', 'maxT')
-  tag.sst$time <- dateVec[as.numeric(as.character(tag.sst$time))]
-
-  T <- length(tag.sst[,1])
+  tag.sst <- data.frame(tag.sst %>% group_by(dateVec) %>% 
+                          dplyr::summarise(minT = min(Temperature, na.rm=T), maxT = max(Temperature, na.rm=T), .groups = 'drop_last'))
+  T <- length(dateVec)
   
+  ## setup
+  nc1 <- RNetCDF::open.nc(paste(sst.dir, filename, '_', as.Date(dateVec[tag.sst$dateVec[1]]), '.nc', sep=''))
+  ncnames = NULL
+  nmax <- RNetCDF::file.inq.nc(nc1)$nvars - 1
+  for(ii in 0:nmax) ncnames[ii + 1] <- RNetCDF::var.inq.nc(nc1, ii)$name
+  nameidx <- grep('sst', ncnames, ignore.case=TRUE) - 1
+  lon <- RNetCDF::var.get.nc(nc1, 'longitude')
+  lat <- RNetCDF::var.get.nc(nc1, 'latitude')
+  # result will be array of likelihood surfaces
+  L.sst <- array(0, dim = c(length(lon), length(lat), T))
   print(paste('Starting iterations through deployment period ', '...'))
-  
+
   for(i in 1:T){
     
-    time <- tag.sst$time[i]
-    sst.i <- c(tag.sst$minT[i] * (1 - sens.err / 100), tag.sst$maxT[i] * (1 + sens.err / 100)) # sensor error
-
+    print(dateVec[i])
+  
+    # tag data for this time step T
+    tag.sst.i <- tag.sst[which(tag.sst$dateVec == i),]
+    if (nrow(tag.sst.i) == 0) next
+    
+    sst.i <- c(tag.sst.i$minT * (1 - sens.err / 100), tag.sst.i$maxT * (1 + sens.err / 100)) # sensor error
+    
     # open day's sst data
-    nc <- RNetCDF::open.nc(paste(sst.dir, filename, '_', as.Date(time), '.nc', sep='')) #add lat lon in filename '.nc', sep=''))
-    
-    if (i == 1){
-      # get correct name in sst data
-      ncnames = NULL
-      nmax <- RNetCDF::file.inq.nc(nc)$nvars - 1
-      for(ii in 0:nmax) ncnames[ii + 1] <- RNetCDF::var.inq.nc(nc, ii)$name
-      nameidx <- grep('sst', ncnames, ignore.case=TRUE) - 1
-      
-      lon <- RNetCDF::var.get.nc(nc, 'longitude')
-      lat <- RNetCDF::var.get.nc(nc, 'latitude')
-    }
-    
+    nc <- RNetCDF::open.nc(paste(sst.dir, filename, '_', as.Date(dateVec[i]), '.nc', sep=''))
+   
+    ## get grid
     dat <- RNetCDF::var.get.nc(nc, nameidx) # for OI SST
-    
     # calc sd of SST
     # focal calc on mean temp and write to sd var
     r <- raster::flip(raster::raster(t(dat), xmn=min(lon), xmx=max(lon),
                                     ymn=min(lat), ymx=max(lat)), 2)
     
-    if(round(raster::res(r)[1], 2) < 0.1){
+    if(auto.aggr & round(raster::res(r)[1], 2) < 0.1){
       aggFact <- round(0.1 / round(raster::res(r)[1], 2), 0)
       if(aggFact != 1) r <- raster::aggregate(r, fact = aggFact)
+      if (i == 1 | !exists('lik.sst')){
+        print('Raster is very high resolution. Automatically coarsening using raster::aggregate. If you do not want this behavior, set auto.aggr = FALSE')
+        L.sst <- array(0, dim = c(dim(r)[2], dim(r)[1], T))
+      }
     } 
     
-    if(is.null(focalDim)){
+    if (is.null(focalDim)){
       focalDim <- round(0.25 / raster::res(r)[1], 0)
-      if(focalDim %% 2 == 0) focalDim <- focalDim - 1
+      if (focalDim %% 2 == 0) focalDim <- focalDim - 1
+      if (focalDim == 1) focalDim <- 3 ## if this equals 1, weird things happen
     }
 
-    sdx = raster::focal(r, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = T))
+    sdx = raster::focal(r, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = T), pad = TRUE)
     sdx = t(raster::as.matrix(raster::flip(sdx, 2)))
     dat <- base::t(raster::as.matrix(raster::flip(r, 2)))
 
     # compare sst to that day's tag-based ohc
     lik.sst <- likint3(dat, sdx, sst.i[1], sst.i[2])
-
-    if(i == 1){
-      # result will be array of likelihood surfaces
-      L.sst <- array(0, dim = c(dim(lik.sst), length(dateVec)))
-      
-      lon.agg <- seq(raster::extent(r)[1], raster::extent(r)[2], length.out=dim(r)[2])
-      lat.agg <- seq(raster::extent(r)[3], raster::extent(r)[4], length.out=dim(r)[1])
-    }
-    
-    idx <- which(dateVec == time)
-    L.sst[,,idx] = lik.sst / max(lik.sst, na.rm=T)
+    #idx <- which(dateVec == time)
+    L.sst[,,i] = lik.sst / max(lik.sst, na.rm=T)
     
   }
     
   print(paste('Making final likelihood raster...'))
   
   crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
+  lon.agg <- seq(raster::extent(r)[1], raster::extent(r)[2], length.out=dim(r)[2])
+  lat.agg <- seq(raster::extent(r)[3], raster::extent(r)[4], length.out=dim(r)[1])
   list.sst <- list(x = lon.agg, y = lat.agg, z = L.sst)
   ex <- raster::extent(list.sst)
   L.sst <- raster::brick(list.sst$z, xmn=ex[1], xmx=ex[2], ymn=ex[3], ymx=ex[4], transpose=T, crs)

@@ -22,27 +22,17 @@
 #' @return The url used to extract the requested data from the NetCDF subset 
 #'   service.
 #' @importFrom curl curl_download
-#' @examples 
-#' \dontrun{
-#' sp.lim <- list(-90, -60, 0, 30)
-#' time <- as.Date('2013-03-01')
-#' get.oi.sst(sp.lim, time, filename = '')
-#' # only returns url because filename is unspecified
-#' get.oi.sst(sp.lim, time, filename = 'my_data.nc')
-#' nc <- open.nc('my_data.nc')
-#' sst <- var.get.nc(nc, 'sst')
-#' image.plot(sst)
-#' }
 #'   
-#' @author   Function originally written for R by Ben Jones (WHOI) and modified 
+#' @author Function originally written for R by Ben Jones (WHOI) and modified 
 #'   by Camrin Braun and Ben Galuardi.
-#' @references \url{https://www.ncdc.noaa.gov/oisst}
+#' @references \url{https://www.ghrsst.org/}
 #'   
 
 get.ghr.sst <- function(limits, time, filename='', download.file=TRUE, dir = getwd()) {
   
   options(warn = -1)
   
+  original_dir <- getwd()
   dir.create(file.path(dir), recursive = TRUE, showWarnings = FALSE)
   setwd(dir)
   
@@ -52,18 +42,21 @@ get.ghr.sst <- function(limits, time, filename='', download.file=TRUE, dir = get
   
   expts = data.frame(
     start=c(as.Date('2010-06-09')),
-    end=c(Sys.Date() + 1),
-    url=c('http://upwell.pfeg.noaa.gov/erddap/griddap/jplG1SST.nc?SST')
+    end=c(as.Date('2017-09-13')),
+    url=c('https://upwell.pfeg.noaa.gov/erddap/griddap/jplG1SST.nc?SST')
     )
   
+  ## Can get global data post 2017 and trim it down but files are large and need to be unzipped, then trimmed. Maybe add a prompt to make sure the user still wants to proceed.
+  ## https://data.nodc.noaa.gov/thredds/catalog/ghrsst/L4/GLOB/JPL_OUROCEAN/G1SST/2019/342/catalog.html?dataset=ghrsst/L4/GLOB/JPL_OUROCEAN/G1SST/2019/342/20191208-JPL_OUROCEAN-L4UHfnd-GLOB-v01-fv01_0-G1SST.nc.bz2
+  
   if(time[1] < expts$start[1])
-    stop('Data begins at %s and is not available at %s.',
-         strftime(expts$start[1], '%d %b %Y'),
-         strftime(time[1], '%d %b %Y'))
+    stop(sprintf('Data begins at %s and is not available at %s.',
+                 strftime(expts$start[1], '%d %b %Y'),
+                 strftime(time[1], '%d %b %Y')))
   if(time[1] > expts$end[nrow(expts)])
-    stop('Data ends at %s and is not available at %s.',
-         strftime(expts$end[nrow(expts)], '%d %b %Y'),
-         strftime(time[1], '%d %b %Y'))
+    stop(sprintf('Data ends at %s and is not available at %s.',
+                 strftime(expts$end[nrow(expts)], '%d %b %Y'),
+                 strftime(time[1], '%d %b %Y')))
   for(i in seq(nrow(expts))) {
     if((time[1] >= expts$start[i]) & (time[1] <= expts$end[i]))
       url = expts$url[i]
@@ -96,6 +89,9 @@ get.ghr.sst <- function(limits, time, filename='', download.file=TRUE, dir = get
   }
   
   options(warn = 0)
+  
+  ## reset original directory
+  setwd(original_dir)
   
   return(url)
 }

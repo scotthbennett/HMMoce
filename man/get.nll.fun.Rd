@@ -20,15 +20,6 @@ parameter values
 \description{
 Negative Log likelihood of parameters
 }
-\examples{
-\dontrun{
-par0 <- c(log(10), log(10), log(0.5), log(0.5), log(0.95/0.05), log(0.95/0.05))
-fit <- nlm(get.nll.fun, par0, g, L, dt)
-D1 <- exp(fit$estimate[1:2])
-D2 <- exp(fit$estimate[3:4])
-p <- 1/(1+exp(-fit$estimate[5:6]))
-}
-}
 \references{
 Pedersen MW, Patterson TA, Thygesen UH, Madsen H (2011)
   Estimating animal behavior and residency from movement data. Oikos

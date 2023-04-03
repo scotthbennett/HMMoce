@@ -36,13 +36,14 @@
 #'   
 #' @author   Function originally written for R by Ben Jones (WHOI) and modified 
 #'   by Camrin Braun and Ben Galuardi.
-#' @references \url{https://www.ncdc.noaa.gov/oisst}
+#' @references \url{https://coastwatch.pfeg.noaa.gov/erddap/griddap/jplMURSST41.html}
 #'   
 
 get.mur.sst <- function(limits, time, filename='', download.file=TRUE, dir = getwd()) {
   
   options(warn = -1)
   
+  original_dir <- getwd()
   dir.create(file.path(dir), recursive = TRUE, showWarnings = FALSE)
   setwd(dir)
   
@@ -96,6 +97,9 @@ get.mur.sst <- function(limits, time, filename='', download.file=TRUE, dir = get
   }
   
   options(warn = 0)
+  
+  ## reset original directory
+  setwd(original_dir)
   
   return(url)
 }

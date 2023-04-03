@@ -16,7 +16,7 @@ calc.woa(pdt, ptt, woa.data = NULL, dateVec, sp.lim = NULL,
 \item{woa.data}{is (typically) a list of monthly global 1/4deg climatology
 data from WOA13. See \code{\link{get.env}}.}
 
-\item{dateVec}{is vector of dates from tag to pop-up in 1 day increments.}
+\item{dateVec}{is vector of POSIXct dates for each time step of the likelihood}
 
 \item{sp.lim}{is list of limits as \code{list(xmin, xmax, ymin, ymax)}}
 
@@ -43,24 +43,6 @@ likelihoods. This essentially attempts to estimate animal position based on
 the water mass it is in, particularly if extensive diving performs thorough
 sampling of the environment. However, remember the in situ data is being
 compared to climatological means or the results of an oceanographic model.
-}
-\examples{
-\dontrun{
-# READ DATA
-pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop)
-pdt.udates <- pdt$udates
-pdt <- pdt$data
-
-# make dateVec, lat and lon
-
-# define where woa is 
-get.env(type = 'woa', resol = 'one')
-
-# GENERATE DAILY PROFILE LIKELIHOODS
-L.prof.woa <- calc.woa.par(pdt, dat = woa, lat = lat, lon = lon,
-                           dateVec = dateVec, envType = 'woa')
-}
-
 }
 \seealso{
 \code{\link{calc.ohc}}

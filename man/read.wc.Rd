@@ -4,11 +4,10 @@
 \alias{read.wc}
 \title{Read and format tag data}
 \usage{
-read.wc(ptt, filename, tag, pop, type = "sst", verbose = FALSE)
+read.wc(filename, tag, pop, type = "sst", dateFormat = NULL,
+  verbose = FALSE)
 }
 \arguments{
-\item{ptt}{is individual ID number}
-
 \item{filename}{is path to the file where your data lives}
 
 \item{tag}{is POSIXct object of the tagging date}
@@ -19,12 +18,15 @@ read.wc(ptt, filename, tag, pop, type = "sst", verbose = FALSE)
 'sst', 'pdt', 'light' corresponding to those data files output from WC Data
 Portal}
 
-\item{verbose}{is logical indicating whether a verbose output with more
+\item{dateFormat}{is input format argument for \code{as.POSIXct} or NULL.
+Default is NULL and if NULL the code will attempt to detect date format but
+weird things can happen so its best to input your own.}
+
+\item{verbose}{is logical indicating whether a verbose output with more 
 details on the loaded files is desired. Default is FALSE.}
 }
 \value{
-a list containing: the data read as a data.frame and a date vector of
-  unique dates in that data
+a the data read as a data.frame
 }
 \description{
 \code{read.wc} reads and formats tag data output from Wildlife Computers Data
@@ -32,8 +34,20 @@ Portal
 }
 \examples{
 \dontrun{
-# example data loading using example data in the package
+# example data in the package
 sstFile <- system.file("extdata", "141259-SST.csv", package = "HMMoce")
+ptt <- 141259
+
+# set temporal and spatial bounds
+iniloc <- data.frame(matrix(c(13, 10, 2015, 41.3, -69.27, 10, 4, 2016, 40.251, -36.061),
+ nrow = 2, ncol = 5, byrow = TRUE))
+ names(iniloc) <- list('day','month','year','lat','lon')
+ tag <- as.POSIXct(paste(iniloc[1,1], '/', iniloc[1,2], '/', iniloc[1,3], sep=''), 
+ format = '\%d/\%m/\%Y', tz='UTC')
+ pop <- as.POSIXct(paste(iniloc[2,1], '/', iniloc[2,2], '/', iniloc[2,3], sep=''), 
+ format = '\%d/\%m/\%Y', tz='UTC')
+
+# read and format the example data
 tag.sst <- read.wc(ptt, sstFile, type = 'sst', tag=tag, pop=pop)
 }
 }

@@ -12,11 +12,11 @@ contains tag-measured dawn/dusk times.}
 
 \item{locs.grid}{is list output from \code{setup.locs.grid}}
 
-\item{dateVec}{is vector of dates from tag to pop-up in 1 day increments.}
+\item{dateVec}{is vector of POSIXct dates for each time step of the likelihood}
 
 \item{res}{is resolution of light grid in degrees. default is 1 deg. higher
 resolution (e.g. res = .25 for 1/4 deg) takes considerably longer to
-compute}
+compute and may not be appropriate for most scenarios}
 
 \item{focalDim}{is integer for dimensions of raster::focal used to calculate 
 sd() of SRSS grid cell. Recommend focalDim = 3 if res=1 and focalDim = 9 if
@@ -37,18 +37,6 @@ included in locs.grid input. after filtering, each yearday has a grid of
 georeferenced SRSS times that the tag-measured times are compared to in order
 to generate a likelihood.
 }
-\examples{
-\dontrun{
-
-# light data
-light <- read.wc(ptt, wd = myDir, type = 'light', tag=tag, pop=pop); 
-light.udates <- light$udates; light <- light$data
-
-# GENERATE LIGHT LIKELIHOOD
-# SRSS METHOD
-L.light <- calc.srss(light, locs.grid = locs.grid, dateVec = dateVec)
-}
-}
 \seealso{
-\code{\link{calc.gpe2}}
+\code{\link{calc.lightloc}}
 }

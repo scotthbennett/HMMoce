@@ -20,7 +20,7 @@ layers}
 layers}
 
 \item{par0}{is vector of movement parameter values, likely output from
-\code{calc.param}.}
+\code{opt.params}.}
 
 \item{bound.thr}{is numeric indicating the percent threshold that is added 
 and subtracted from the bounding box of the filter output from the 

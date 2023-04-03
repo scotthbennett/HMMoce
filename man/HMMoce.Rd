@@ -4,7 +4,6 @@
 \name{HMMoce}
 \alias{HMMoce}
 \alias{HMMoce-package}
-\alias{HMMoce-package}
 \title{HMMoce: an R package for improved analysis of marine animal movement data 
 using hidden Markov models}
 \description{
@@ -50,6 +49,13 @@ Useful links:
 Authors:
 \itemize{
   \item Benjamin Galuardi \email{drdrumfish@gmail.com}
+  \item Paul Gatti \email{Paul.Gatti@mi.mun.ca}
+}
+
+Other contributors:
+\itemize{
+  \item Benjamin Jones (Contributed to earlier version of some of the download functions.) [contributor]
+  \item Martin Pedersen (Developed an earlier version of some of the HMM framework and helper functions.) [contributor]
 }
 
 }

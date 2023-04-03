@@ -1,18 +1,17 @@
 #' Determine date format of vector
 #' 
-#' \code{findDateFormat} determines the date format of a given vector of dates
+#' \code{findDateFormat} determines the date format of a given vector of character dates. The function essentially guesses its way through a number of common formats used in tag data outputs. It will throw an error if it can't find the appropriate date format.
 #' 
 #' @param dateVec a character vector representing dates
 #' @return dateformat is character string used as input to strptime(format = dateformat)
 #' @export
 #' 
 #' @examples
-#' \dontrun{
 #' dte <- '2015-01-01 05:30:17'
 #' findDateFormat(dte)
 #' dte.POSIX <- as.POSIXct(dte, format = findDateFormat(dte))
 #' dte.POSIX
-#' }
+#'
 
 findDateFormat <- function(dateVec){
 

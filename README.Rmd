@@ -20,12 +20,18 @@ knitr::opts_chunk$set(echo=FALSE, warning=FALSE,
 
 ```
 
-**Camrin D. Braun^1,2^\*, Benjamin Galuardi^3,4^, Simon R. Thorrold^2^**
+**Camrin D. Braun^1,2^\*, Benjamin Galuardi^3,4^, Paul Gatti^5^, Simon R. Thorrold^2^**
 
  1. Massachusetts Institute of Technology-Woods Hole Oceanographic Institution Joint Program in Oceanography/Applied Ocean Science and Engineering, Cambridge, MA 02139
  2. Biology Department, Woods Hole Oceanographic Institution, Woods Hole, MA 02543
  3. School of Marine Science and Technology, University of Massachusetts Dartmouth, Fairhaven, MA 02719
  4. Greater Atlantic Regional Fisheries Office, National Marine Fisheries Service, National Oceanic and Atmospheric Administration, Gloucester, MA 01930
+ 5. Centre for Fisheries Ecosystems Research, Fisheries and Marine Institute of Memorial University of Newfoundland
+
+## Update 2020-05-13
+All the tweaks and improvements made over the last 1-2 years have been folded into v1.2 which is now on the master branch. The next version will likely be v2.0 and will lack backwards compatibility with previous versions. The new version is currently under development in the -dev branch and pull requests are welcome!
+
+Many thanks to Paul Gatti for catching many small bugs and providing several (very!) useful new functions for what will be the next version. Check out the -dev branch to learn more.
 
 ## Package Summary
 Electronic tagging of marine animals is common throughout the world oceans. Many of these studies have deployed archival tags that rely on light levels and sea-surface temperatures to retrospectively track movements of tagged animals. However, methodological issues associated with light-level geolocation have constrained meaningful inference to species where it is possible to accurately estimate time of sunrise and sunset. Most studies have largely disregarded the oceanographic profiles collected by the tag as a potential way of refining light-level geolocation estimates provided by electronic tags.
@@ -33,7 +39,7 @@ Electronic tagging of marine animals is common throughout the world oceans. Many
 Open-source oceanographic measurements and outputs from high-resolution models are increasingly available and accessible. We integrated temperature and depth profiles recorded by electronic tags, with empirical data and model outputs, to construct likelihoods and improve geolocation estimates for marine animals using an existing, but modified, state-space hidden Markov model (HMM). Our model (`HMMoce`) exhibited as much as 6-fold improvement in pointwise error as compared to traditional light-level geolocation approaches and produced the lowest mean error in 3 of 4 cases when compared to the state-of-the-art tag manufacturer's HMM (GPE3). `HMMoce` contained behavior state-switching capability not found in other comparable methods. The use of profile-based likelihood estimates proved useful when we removed data to emulate data returned from species that yield poor quality light data. The results demonstrated the general applicability of the `HMMoce` model to marine animals, particularly those that do not frequent surface waters during crepuscular periods. Our model is available as an open-source `R` package, `HMMoce`, that uses a state-space HMM approach and leverages available tag and oceanographic data to improve position estimates derived from electronic tags.
  
 ## Package Citation
-TBD
+Braun, C. D., Galuardi, B., and Thorrold, S. R. (2018). HMMoce: An R package for improved geolocation of archival-tagged fishes using a hidden Markov method. Methods in Ecology and Evolution, 9(5), 1212-1220.
 
 ## Package Structure
 The package is structured as follows:
@@ -44,7 +50,7 @@ The package is structured as follows:
 * Perform model checking and choose a final model.
  
 ## Installation Instructions
-`HMMoce` can be installed from CRAN from within `R` using `install.packages('HMMoce')`. To get the latest developments, get it from GitHub using `devtools::install_github('camrinbraun/HMMoce', ref='dev')`
+`HMMoce` must be installed from Github as it is no longer available on CRAN. Install it using `devtools::install_github('camrinbraun/HMMoce')` or get the latest development version using `devtools::install_github('camrinbraun/HMMoce', ref='dev')`
 
 ## Examples
 For an example use of the package, please see the vignette using `vignette('HMMoce')`.

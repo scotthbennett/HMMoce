@@ -2,8 +2,7 @@
 #' 
 #' Calculate Hycom profile likelihood surface
 #' 
-#' @param pdt input PDT data output from \code{\link{read.wc}} and
-#'   \code{\link{extract.pdt}}
+#' @param pdt input depth-temperature profile data. Need at least cols: Date (POSIXct), Depth, MinTemp, MaxTemp 
 #' @param filename is the first part of the filename specified to the download 
 #'   function \code{\link{get.env}}. For example, if downloaded files were 
 #'   specific to a particular dataset, you may want to identify that with a name
@@ -14,50 +13,37 @@
 #' @param focalDim is integer for dimensions of raster::focal used to calculate 
 #'   sd() of temperature grid cell. Recommend focalDim = 9 for Hycom data at 
 #'   0.08deg resolution.
-#' @param dateVec vector of complete dates (from tag to pop by day) for data 
-#'   range. This should be in 'Date' format
+#' @param dateVec is vector of POSIXct dates for each time step of the likelihood
 #' @param use.se is logical indicating whether or not to use SE when using 
 #'   regression to predict temperature at specific depth levels.
-#'   
+#' @param flip_y is logical indicating whether or not to flip the resulting likelihood in the y. Set this to true if output likelihoods are upside down.
+#' 
 #' @return a raster brick of Hycom profile likelihood
 #' @export
 #' @seealso \code{\link{calc.hycom.par}}
-#' @importFrom foreach %dopar%
-#'   
-#' @examples
-#' \dontrun{
-#' # pdt data
-#' pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop); 
-#' pdt.udates <- pdt$udates; pdt <- pdt$data
-#' 
-#' # GENERATE DAILY PDT LIKELIHOODS USING HYCOM
-#' L.pdt <- calc.hycom(pdt, hycom.dir = hycom.dir, dateVec = dateVec)
-#' 
-#' }
+#'
 
-calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se = TRUE){
+calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se = TRUE, flip_y = FALSE){
   
   names(pdt) <- tolower(names(pdt))
-  options(warn=1)
+  #options(warn=1)
+  if (class(pdt$date)[1] != class(dateVec)[1]) stop('dateVec and pdt$date both need to be of class POSIXct.')
   
   t0 <- Sys.time()
-  print(paste('Starting OHC likelihood calculation...'))
+  print(paste('Starting 3D likelihood calculation...'))
   
   # calculate midpoint of tag-based min/max temps
-  if(length(grep('mean', names(pdt))) > 0){
+  if(length(grep('mean', names(pdt))) > 1){
+    pdt$useTemp <- pdt[,grep('mean', names(pdt))[1]]
+  } else if(length(grep('mean', names(pdt))) == 1){
     pdt$useTemp <- pdt[,grep('mean', names(pdt))]
   } else{
     pdt$useTemp <- (pdt$maxtemp + pdt$mintemp) / 2
   }
   
-  # get unique time points
-  if(class(pdt$date)[1] != 'POSIXct') stop('Error: pdt$Date must be as.POSIXct format.')
-  
+  pdt <- pdt[which(pdt$date <= max(dateVec)),]
   pdt$dateVec <- findInterval(pdt$date, dateVec)
-  udates <- unique(pdt$dateVec)
-  T <- length(udates)
-  
-  print(paste('Generating profile likelihood...'))
+  T <- length(dateVec)
   
   # open nc and get the indices for the vars
   nc1 =  RNetCDF::open.nc(dir(hycom.dir, full.names = T)[1])
@@ -67,7 +53,25 @@ calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se =
   temp.idx <- grep('temp', ncnames, ignore.case=TRUE) - 1
   lat.idx <- grep('lat', ncnames, ignore.case=TRUE) - 1
   lon.idx <- grep('lon', ncnames, ignore.case=TRUE) - 1
+  if (any(ncnames == 'z')) ncnames[which(ncnames %in% 'z')] <- 'depth'
   dep.idx <- grep('dep', ncnames, ignore.case=TRUE) - 1
+  
+  ## better handling of depth
+  if (length(dep.idx) == 0){
+    depth <- c(0, 2, 4, 6, 8, 10, 12, 15, 20, 25,
+               30, 35, 40, 45, 50, 60, 70, 80, 90,
+               100, 125, 150, 200, 250, 300, 350, 
+               400, 500, 600, 700, 800, 900, 1000,
+               1250, 1500, 2000, 2500, 3000, 4000, 5000)
+    
+  } else{
+    depth <- RNetCDF::var.get.nc(nc1, dep.idx)
+    if (max(depth) < 100) depth <- c(0, 2, 4, 6, 8, 10, 12, 15, 20, 25,
+                                     30, 35, 40, 45, 50, 60, 70, 80, 90,
+                                     100, 125, 150, 200, 250, 300, 350, 
+                                     400, 500, 600, 700, 800, 900, 1000,
+                                     1250, 1500, 2000, 2500, 3000, 4000, 5000)
+  }
   
   # get attributes, if they exist
   ncatts <- NULL
@@ -87,22 +91,27 @@ calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se =
   }
   
   # get and check the vars
-  depth <- RNetCDF::var.get.nc(nc1, dep.idx)
+  #depth <- RNetCDF::var.get.nc(nc1, dep.idx)
   lon <- RNetCDF::var.get.nc(nc1, lon.idx)
   if(length(dim(lon)) == 2) lon <- lon[,1]
   if(!any(lon < 180)) lon <- lon - 360
   lat <- RNetCDF::var.get.nc(nc1, lat.idx)
   if(length(dim(lat)) == 2) lat <- lat[1,]
   
+  # result will be array of likelihood surfaces
+  L.hycom <- array(0, dim = c(length(lon), length(lat), length(dateVec)))
+  
   print(paste('Starting iterations through deployment period ', '...'))
   
-  for(i in udates){ 
-    time <- dateVec[i]
+  for(i in 1:T){ 
+    
+    print(dateVec[i])
+    
     pdt.i <- pdt[which(pdt$dateVec == i),]
-    print(paste('Starting ', time,'...',sep=''))
+    if (nrow(pdt.i) == 0) next
     
     # open day's hycom data
-    nc <- RNetCDF::open.nc(paste(hycom.dir, filename, '_', as.Date(time), '.nc', sep=''))
+    nc <- RNetCDF::open.nc(paste(hycom.dir, filename, '_', as.Date(dateVec[i]), '.nc', sep=''))
     dat <- RNetCDF::var.get.nc(nc, temp.idx) * scale + offset
     
     #extracts depth from tag data for day i
@@ -118,17 +127,17 @@ calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se =
     
     # make predictions based on the regression model earlier for the temperature at standard WOA depth levels for low and high temperature at that depth
     suppressWarnings(
-      fit.low <- locfit::locfit(pdt.i$mintemp ~ pdt.i$depth)
+      fit.low <- locfit::locfit(pdt.i$mintemp ~ pdt.i$depth, maxk=500)
     )
     suppressWarnings(
-      fit.high <- locfit::locfit(pdt.i$maxtemp ~ pdt.i$depth)
+      fit.high <- locfit::locfit(pdt.i$maxtemp ~ pdt.i$depth, maxk=500)
     )
     n = length(hycomDep)
     
     #suppressWarnings(
-    pred.low = stats::predict(fit.low, newdata = hycomDep, se = T, get.data = T)
+    pred.low = stats::predict(fit.low, newdata = hycomDep, se = TRUE, get.data = TRUE)
     #suppressWarnings(
-    pred.high = stats::predict(fit.high, newdata = hycomDep, se = T, get.data = T)
+    pred.high = stats::predict(fit.high, newdata = hycomDep, se = TRUE, get.data = TRUE)
     
     if (use.se){
       # data frame for next step
@@ -147,13 +156,10 @@ calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se =
     
     for(ii in 1:length(depIdx)){
       r = raster::flip(raster::raster(t(dat[,,depIdx[ii]])), 2)
-      f1 = raster::focal(r, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = T))
+      f1 = raster::focal(r, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = TRUE), pad = TRUE)
       f1 = t(raster::as.matrix(raster::flip(f1, 2)))
       sd.i[,,ii] = f1
     }
-    
-    # make index of dates for filling in lik.prof
-    #didx = base::match(udates, dateVec)
     
     # setup the likelihood array for each day. Will have length (dim[3]) = n depths
     lik.pdt = array(NA, dim = c(dim(dat)[1], dim(dat)[2], length(depIdx)))
@@ -176,12 +182,12 @@ calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se =
         
         if (class.try == 'try-error'){
           lik.try <- dat[,,depIdx[b]] * 0
-          warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral for ', time, '...', sep=''))
+          warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral for ', dateVec[i], '...', sep=''))
         }
         
       } else if (class.try == 'try-error' & use.se == TRUE){
         lik.try <- dat[,,depIdx[b]] * 0
-        warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral for ', time, '...', sep=''))
+        warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral for ', dateVec[i], '...', sep=''))
       }
       
       lik.pdt[,,b] <- lik.try
@@ -190,50 +196,32 @@ calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se =
     
     lik.pdt0 <- lik.pdt
     lik.pdt0[is.na(lik.pdt0)] <- 0
-    use.idx <- unique(which(lik.pdt0 != 0, arr.ind=T)[,3])
+    use.idx <- unique(which(lik.pdt0 != 0, arr.ind = TRUE)[,3])
     
     # multiply likelihood across depth levels for each day
-    lik.pdt <- apply(lik.pdt[,,use.idx], 1:2, FUN=function(x) prod(x, na.rm=F))
-    
-    if(!exists('L.hycom')){
-      # result will be array of likelihood surfaces
-      L.hycom <- array(0, dim = c(dim(lik.pdt), length(dateVec)))
-    }
+    lik.pdt <- apply(lik.pdt[,,use.idx], 1:2, FUN=function(x) prod(x, na.rm = FALSE))
     
     #idx <- which(dateVec == as.Date(time))
-    L.hycom[,,i] = lik.pdt / max(lik.pdt, na.rm=T)
+    L.hycom[,,i] = lik.pdt / max(lik.pdt, na.rm=TRUE)
     
   }
-  
-  #parallel::stopCluster(cl)
-  
-  # make index of dates for filling in L.hycom
-  #didx <- base::match(udates, dateVec)
-  
-  # lapply to normalize
-  #lik.pdt <- lapply(ans, function(x) x / max(x, na.rm = T))
-  
-  # fill in L.hycom from the list output
-  #ii = 1
-  #for(i in didx){
-  #  L.hycom[,,i] = lik.pdt[[ii]]
-  #  ii = ii+1  
-  #}
+
   
   print(paste('Making final likelihood raster...'))
   
   crs <- "+proj=longlat +datum=WGS84 +ellps=WGS84"
-  L.hycom <- raster::brick(L.hycom, xmn=min(lon), xmx=max(lon), ymn=min(lat), ymx=max(lat), transpose=T, crs)
-  L.hycom <- raster::flip(L.hycom, direction = 'y')
-  
-  #L.hycom[L.hycom < 0] <- 0
+  L.hycom <- raster::brick(L.hycom, xmn=min(lon), xmx=max(lon), ymn=min(lat), ymx=max(lat), transpose=TRUE, crs)
+  if (flip_y){
+    L.hycom <- raster::flip(L.hycom, direction = 'y')
+    warning('Output raster is being flipped in the y. If this is not desired, use need_flip=FALSE.')
+  }
   
   names(L.hycom) = as.character(dateVec)
   
   t1 <- Sys.time()
   print(paste('Hycom profile calculations took ', round(as.numeric(difftime(t1, t0, units='mins')), 2), 'minutes...'))
   
-  options(warn=2)
+  #options(warn=2)
   
   # return hycom likelihood surfaces
   return(L.hycom)

@@ -10,6 +10,8 @@
 
 get.woa <- function(save.dir = getwd(), resol = 'one'){
 
+  .Defunct('get.env', package = 'HMMoce')
+  
   if (resol == 'one'){
     url <- 'https://s3-us-west-2.amazonaws.com/braun-public/EnvData/woa/woa.one.rda'
     filename <- paste(save.dir, '/woa.one.rda', sep='')

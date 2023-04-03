@@ -4,33 +4,20 @@
 \alias{get.bath.data}
 \title{Download bathymetry data}
 \usage{
-get.bath.data(lonlow, lonhigh, latlow, lathigh, folder = tempdir(),
-  seaonly = T, res = c(0.5), raster = TRUE)
+get.bath.data(spatLim, save.dir = tempdir(), seaonly = TRUE, res = c(0.5))
 }
 \arguments{
-\item{lonlow}{numeric indicating minimum longitude extent of desired download
-(-180 to 180).}
+\item{spatLim}{is a list of spatial limits as \code{list(lonmin, lonmax, latmin, latmax)}}
 
-\item{lonhigh}{see lonlow}
-
-\item{latlow}{see lonlow}
-
-\item{lathigh}{see lonlow}
-
-\item{folder}{is destination folder. Default is a temporary directory.}
+\item{save.dir}{is destination folder. Default is a temporary directory.}
 
 \item{seaonly}{is logical indicating whether you want to download only
 bathymetry below sea level.}
 
 \item{res}{is numeric indicating resolution in minutes. Choices currently are 0.5 or 1minute.}
-
-\item{raster}{is logical indicating whether you want the function to return a
-raster or not (a list will be returned).}
 }
 \value{
-Downloads a NetCDF file containing ETopo bathymetry. If raster=TRUE, 
-  a raster is generated from the downloaded NetCDF. Otherwise, the file is 
-  just downloaded.
+Downloads a NetCDF file containing ETopo bathymetry and also returns the output as a \code{raster} object.
 }
 \description{
 Download ETOPO bathymetry. Resolution is either 30 second or one minute 
@@ -41,8 +28,11 @@ Be patient! The download can take a few minutes!
 }
 \examples{
 \dontrun{
+# Not run to prevent actual data download
 sp.lim <- list(lonmin = -82, lonmax = -25, latmin = 15, latmax = 50)
-bathy <- get.bath.data(sp.lim$lonmin, sp.lim$lonmax, sp.lim$latmin, 
-sp.lim$latmax, folder = tempdir())
+bathy <- get.bath.data(sp.lim, save.dir = tempdir())
 }
+}
+\author{
+Function originally written by Ben Galuardi.
 }

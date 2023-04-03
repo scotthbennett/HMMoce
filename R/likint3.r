@@ -9,6 +9,13 @@
 #' 
 #' @return an array of dim(w) that represents the likelihood of the tag-measured variable as compared to the input grid
 #' @export 
+#' @examples 
+#' # Dummy example environmental grid
+#' env.grid <- matrix(seq(1,100,by=1), ncol=10)
+#'
+#' # Generates likelihood of measurement
+#' # as compared to environmental grid
+#' likint3(env.grid, 2, 55, 70)
 
 likint3 <- function(w, wsd, minT, maxT){
   #lwr <- minT - .75 * (maxT - minT)
@@ -19,7 +26,10 @@ likint3 <- function(w, wsd, minT, maxT){
   wdf = data.frame(w = as.vector(w[widx]), wsd = as.vector(wsd[widx]))
   wdf$wsd[is.na(wdf$wsd)] = 1e-3
   # wint = apply(wdf, 1, function(x) pracma::integral(dnorm, minT, maxT, mean = x[1], sd = x[2]))
-  wint = apply(wdf, 1, function(x) stats::integrate(stats::dnorm, minT, maxT, mean = x[1], sd = x[2] * 2)$value) 
+  wint = apply(wdf, 1, function(x) stats::integrate(stats::dnorm, 
+                                                    # !!!!!! *2 ????
+                                                    # minT, maxT, mean = x[1], sd = x[2]*2 )$value)
+                                                    minT, maxT, mean = x[1], sd = x[2])$value)
   w = w * 0
   w[widx] = wint
   w

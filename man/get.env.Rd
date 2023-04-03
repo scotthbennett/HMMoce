@@ -5,8 +5,8 @@
 \title{Download and Read Oceanographic Data}
 \usage{
 get.env(uniqueDates = NULL, filename = NULL, type = NULL,
-  spatLim = NULL, resol = NULL, save.dir = getwd(), sst.type = NULL,
-  depLevels = NULL)
+  spatLim = NULL, resol = NULL, save.dir = getwd(),
+  sst.type = NULL, depLevels = NULL, ...)
 }
 \arguments{
 \item{uniqueDates}{is a POSIXct vector of desired dates}
@@ -30,7 +30,7 @@ type = 'woa', otherwise NULL. Choices are 'one' or 'quarter'.}
 
 \item{sst.type}{is character indicating type of desired SST product. Choices 
 are currently Optimum Interpolation ('oi')
-\url{https://www.ncdc.noaa.gov/oisst} or a high-resolution composite
+\url{https://www.ncdc.noaa.gov/oisst}, MUR ('mur')\url{https://coastwatch.pfeg.noaa.gov/erddap/griddap/jplMURSST41.html} or a high-resolution composite
 ('ghr') \url{https://www.ghrsst.org/}.}
 
 \item{depLevels}{is an integer describing which depth levels to download from
@@ -46,6 +46,7 @@ further use
 }
 \examples{
 \dontrun{
+# Not run to prevent actual data download
 sp.lim <- list(lonmin = -82, lonmax = -25, latmin = 15, latmax = 50)
 # FOR OI SST DATA
 get.env(as.Date('2015-10-01'), filename='oisst', type = 'sst', 

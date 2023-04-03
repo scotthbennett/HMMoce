@@ -12,14 +12,6 @@
 #'   information on the extent object see \code{raster::extent}
 #'   
 #' @return a list of all resampled likelihood rasters and g, the common grid
-#' @examples 
-#' \dontrun{
-#'  # use with caution as all workspace items containing 'L.' will be listed. 
-#'  # We only want the likelihood outputs calculated above
-#' L.rasters <- mget(ls(pattern = 'L\\.'))
-#' resamp.idx <- which.max(lapply(L.rasters, FUN=function(x) raster::res(x)[1]))
-#' L.res <- resample.grid(L.rasters, L.rasters[[resamp.idx]])
-#' }
 #' @export
 #' 
 
@@ -63,6 +55,6 @@ resample.grid <- function(L.rasters, L.res, mle.res=0.75, bound=NULL){
   
   print(paste('Raster resample took ', Sys.time() - start.t, '.'))
   
-  list(L.rasters, L.mle.res = L.mle.res, g = g, g.mle = g.mle)
+  list(L.rasters = L.rasters, L.mle.res = L.mle.res, g = g, g.mle = g.mle)
   
 }

@@ -4,12 +4,19 @@
 \alias{calc.hycom.par}
 \title{Hycom Profile LIkelihood in Parallel}
 \usage{
-calc.hycom.par(pdt, filename, hycom.dir, focalDim = 9, dateVec,
-  use.se = TRUE, ncores = NULL)
+calc.hycom.par(
+  pdt,
+  filename,
+  hycom.dir,
+  focalDim = 9,
+  dateVec,
+  use.se = TRUE,
+  ncores = NULL,
+  flip_y = FALSE
+)
 }
 \arguments{
-\item{pdt}{input PDT data output from \code{\link{read.wc}} and
-\code{\link{extract.pdt}}}
+\item{pdt}{input depth-temperature profile data. Need at least cols: Date (POSIXct), Depth, MinTemp, MaxTemp}
 
 \item{filename}{is the first part of the filename specified to the download 
 function \code{\link{get.env}}. For example, if downloaded files were 
@@ -24,29 +31,19 @@ function knows where to get the env data.}
 sd() of temperature grid cell. Recommend focalDim = 9 for Hycom data at 
 0.08deg resolution.}
 
-\item{dateVec}{vector of complete dates (from tag to pop by day) for data
-range. This should be in 'Date' format}
+\item{dateVec}{is vector of POSIXct dates for each time step of the likelihood}
 
 \item{use.se}{is logical indicating whether or not to use SE when using 
 regression to predict temperature at specific depth levels.}
 
 \item{ncores}{specify number of cores, or leave blank and use whatever you 
 have!}
+
+\item{flip_y}{is logical indicating whether or not to flip the resulting likelihood in the y. Set this to true if output likelihoods are upside down.}
 }
 \value{
 a raster brick of Hycom profile likelihood
 }
 \description{
 Calculate Hycom profile likelihood surface in parallel
-}
-\examples{
-\dontrun{
-# pdt data
-pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop); 
-pdt.udates <- pdt$udates; pdt <- pdt$data
-
-# GENERATE DAILY PDT LIKELIHOODS USING HYCOM
-L.pdt <- calc.hycom.par(pdt, hycom.dir = hycom.dir, dateVec = dateVec)
-
-}
 }

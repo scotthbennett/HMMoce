@@ -8,7 +8,7 @@
 #' \code{download.file} if the download is failing on your platform.
 #'
 #' @param limits A list of length 4; minlon, maxlon, minlat, maxlat. Longitude values are -180,180
-#' @param time A vector of length 2 with the minimum and maximum times in form
+#' @param time A vector, usually of length 1, in form
 #'   \code{as.Date(date)}.
 #' @param vars A list of variables to download. This can contain
 #'   'water_temp', 'water_u', 'water_v', 'salinity' or 'surf_el' but is not checked
@@ -28,18 +28,6 @@
 #' @return The url used to extract the requested data from the NetCDF subset
 #'   service.
 #' @importFrom curl curl_download
-#' @examples
-#' \dontrun{
-#' lon <- c(-90, -60)
-#' lat <- c(0, 30)
-#' time <- as.Date('2013-03-01')
-#' get.hycom(lon, lat, time, type='a', filename = '', vars = 'water_temp')
-#' # only returns url because filename is unspecified
-#' get.hycom(lon, lat, time, type='a', filename = 'my_data.nc', vars = 'water_temp')
-#' nc <- open.nc('my_data.nc')
-#' hycom <- var.get.nc(nc, 'water_temp')
-#' image.plot(hycom[,,1])
-#' }
 #'
 #' @author   Function originally written for R by Ben Jones (WHOI) and modified
 #'   by Camrin Braun and Ben Galuardi.
@@ -49,6 +37,7 @@
 get.hycom <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
                       filename='', download.file=TRUE, dir = getwd(), depLevels=NULL, ...) {
   
+  original_dir <- getwd()
   dir.create(file.path(dir), recursive = TRUE, showWarnings = FALSE)
   setwd(dir)
   
@@ -57,27 +46,68 @@ get.hycom <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
   ## early.
   
   expts = data.frame(
-    start=c(as.Date('1992-10-02'), as.Date('1995-08-01'),
-            as.Date('2013-01-01'), as.Date('2013-08-20'),
-            as.Date('2014-04-05'), as.Date('2016-04-18')),
-    end=c(as.Date('1995-07-31'), as.Date('2012-12-31'),
-          as.Date('2013-08-19'), as.Date('2014-04-04'),
-          as.Date('2016-04-17'), Sys.Date() + 1),
+    start=c(as.Date('1992-10-02'), 
+            as.Date('1995-08-01'),
+            as.Date('2013-01-01'), 
+            as.Date('2013-08-20'),
+            as.Date('2014-04-05'), 
+            as.Date('2016-04-18'),
+            as.Date('2018-11-21'),
+            as.Date('2018-12-05')),
+    end=c(as.Date('1995-07-31'), 
+          as.Date('2012-12-31'),
+          as.Date('2013-08-19'), 
+          as.Date('2014-04-04'),
+          as.Date('2016-04-17'), 
+          as.Date('2018-11-20'),
+          as.Date('2018-12-04'),
+          Sys.Date() + 1),
     url=c('http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_19.0/',
           'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_19.1/',
           'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_90.9?',
           'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_91.0?',
           'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_91.1?',
-          'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_91.2?'))
+          'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_91.2?',
+          'http://ncss.hycom.org/thredds/ncss/GLBu0.08/expt_93.0?',
+          'http://ncss.hycom.org/thredds/ncss/GLBy0.08/expt_93.0?'))
   
-  if(time[1] < expts$start[1])
-    stop('Data begins at %s and is not available at %s.',
+  missing_dates <- c('20171125',
+                     '20170927',
+                     '20170814',
+                     '20170813',
+                     '20170811',
+                     '20170804',
+                     '20170521',
+                     '20170320',
+                     '20170318',
+                     '20170125',
+                     '20161209',
+                     '20161015',
+                     '20161014',
+                     '20160923',
+                     '20160914',
+                     '20160715',
+                     '20150919',
+                     '20150325',
+                     '20150315',
+                     '20150102',
+                     '20140413')
+  missing_dates <- as.Date(missing_dates, format='%Y%m%d')
+  
+  if(time[1] %in% missing_dates){
+    stop(sprintf('Requested date of %s is missing from the HYCOM dataset. Consider using the day before or after as a substitute.',
+                 strftime(time[1], '%d %b %Y')))
+  }
+  if(time[1] < expts$start[1]){
+    stop(sprintf('Data begins at %s and is not available at %s.',
          strftime(expts$start[1], '%d %b %Y'),
-         strftime(time[1], '%d %b %Y'))
-  if(time[1] > expts$end[nrow(expts)])
-    stop('Data ends at %s and is not available at %s.',
+         strftime(time[1], '%d %b %Y')))
+  }
+  if(time[1] > expts$end[nrow(expts)]){
+    stop(sprintf('Data ends at %s and is not available at %s.',
          strftime(expts$end[nrow(expts)], '%d %b %Y'),
-         strftime(time[1], '%d %b %Y'))
+         strftime(time[1], '%d %b %Y')))
+  }
   for(i in seq(nrow(expts))) {
     if((time[1] >= expts$start[i]) & (time[1] <= expts$end[i]))
       url = expts$url[i]
@@ -86,8 +116,10 @@ get.hycom <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
   if(any(grep('19', url))) url = sprintf('%s%s?', url, as.numeric(format(time, '%Y')))
   
   ## Add the variables.
-  for(var in vars)
+  for(var in vars){
     url = sprintf('%svar=%s&', url, var)
+  }
+  
   ## Add the spatial domain.
   url = sprintf('%snorth=%f&west=%f&east=%f&south=%f&horizStride=1&',
                 url, limits[[4]], limits[[1]], limits[[2]], limits[[3]])
@@ -95,18 +127,27 @@ get.hycom <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
   
   ## Add the time domain.
   if(length(time) == 2){
-    url = sprintf('%stime_start=%s%%3A00%%3A00Z&time_end=%s%%3A00%%3A00Z&timeStride=1&',
+    url = sprintf('%stime_start=%s%%3A00%%3A00Z&time_end=%s%%3A00%%3A00Z&',
                   url, strftime(time[1], '%Y-%m-%dT00'),
                   strftime(time[2], '%Y-%m-%dT00'))
   } else if(length(time) == 1){
-    url = sprintf('%stime_start=%s%%3A00%%3A00Z&time_end=%s%%3A00%%3A00Z&timeStride=1&',
+    url = sprintf('%stime_start=%s%%3A00%%3A00Z&time_end=%s%%3A00%%3A00Z&',
                   url, strftime(time[1], '%Y-%m-%dT00'),
                   strftime(time[1], '%Y-%m-%dT00'))
   }
   
+  ## Check for the newer HYCOM experiments (3hr time resolution) and add stride=8 if needed, otherwise 1 for daily HYCOM data
+  if(any(grep('GLBy', url))){
+    url = sprintf('%stimeStride=%s&', url, 8)
+  } else{
+    url = sprintf('%stimeStride=%s&', url, 1)
+  }
+  
   ## Add the lat-lon points if requested.
-  if(include_latlon)
+  if(include_latlon){
     url = sprintf('%saddLatLon=true&', url)
+  }
+  
   ## Finish the URL.
   if (is.null(depLevels)){
     url = sprintf('%sdisableProjSubset=on&vertCoord=&accept=netcdf', url)
@@ -120,11 +161,14 @@ get.hycom <- function(limits, time, vars=c('water_temp'), include_latlon=TRUE,
   if(filename != ''){
     if(download.file == TRUE){
       #download.file(url, filename, method = 'auto')
-      curl_download(url, filename, quiet=FALSE)
+      curl::curl_download(url, filename, quiet=FALSE)
     } else if(download.file == FALSE){
       system(sprintf('curl -o "%s" "%s"', filename, url))
     }
   }
+  
+  ## reset original directory
+  setwd(original_dir)
   return(url)
 }
 

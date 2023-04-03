@@ -4,11 +4,19 @@
 \alias{calc.ohc}
 \title{Calculate Ocean Heat Content (OHC) likelihood surface}
 \usage{
-calc.ohc(pdt, filename, isotherm = "", ohc.dir, dateVec, bathy = TRUE,
-  use.se = TRUE)
+calc.ohc(
+  pdt,
+  filename,
+  isotherm = "",
+  ohc.dir,
+  dateVec,
+  bathy = TRUE,
+  use.se = TRUE,
+  flip_y = FALSE
+)
 }
 \arguments{
-\item{pdt}{input PDT data see \code{\link{extract.pdt}}}
+\item{pdt}{input depth-temperature profile data. Need at least cols: Date (POSIXct), Depth, MinTemp, MaxTemp}
 
 \item{filename}{is the first part of the filename specified to the download 
 function \code{\link{get.env}}. For example, if downloaded files were 
@@ -23,13 +31,15 @@ on daily tag data. Otherwise, numeric isotherm constraint can be specified
 
 \item{ohc.dir}{directory of downloaded hycom (or other) data}
 
-\item{dateVec}{is vector of dates from tag to pop-up in 1 day increments.}
+\item{dateVec}{is vector of POSIXct dates for each time step of the likelihood}
 
 \item{bathy}{is logical indicating whether or not a bathymetric mask should 
-be applied}
+be applied. This does NOT use an input bathymetry dataset but rather masks the depth-temperature likelihood based on the possible locations given the maximum recorded tag-depth (i.e. areas with bottom depth shallower than tag-recorded max depth are masked out).}
 
 \item{use.se}{is logical indicating whether or not to use SE when using
 regression to predict temperature at specific depth levels.}
+
+\item{flip_y}{is logical indicating whether or not to flip the resulting likelihood in the y. Set this to true if output likelihoods are upside down.}
 }
 \value{
 likelihood is raster brick of likelihood surfaces representing 
@@ -38,16 +48,6 @@ likelihood is raster brick of likelihood surfaces representing
 }
 \description{
 Compare tag data to OHC grid and calculate likelihoods
-}
-\examples{
-\dontrun{
-# depth-temp profile data
-pdt <- read.wc(ptt, wd = myDir, type = 'pdt', tag=tag, pop=pop); 
-pdt.udates <- pdt$udates; pdt <- pdt$data
-# GENERATE DAILY OCEAN HEAT CONTENT (OHC) LIKELIHOODS
-L.ohc <- calc.ohc(pdt, filename='tuna', ohc.dir = hycom.dir, dateVec = dateVec,
-                  isotherm = '')
-}
 }
 \references{
 Luo J, Ault JS, Shay LK, Hoolihan JP, Prince ED, Brown C a.,

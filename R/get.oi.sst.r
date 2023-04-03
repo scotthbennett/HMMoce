@@ -22,17 +22,6 @@
 #' @return The url used to extract the requested data from the NetCDF subset 
 #'   service.
 #' @importFrom curl curl_download
-#' @examples 
-#' \dontrun{
-#' sp.lim <- list(-90, -60, 0, 30)
-#' time <- as.Date('2013-03-01')
-#' get.oi.sst(sp.lim, time, filename = '')
-#' # only returns url because filename is unspecified
-#' get.oi.sst(sp.lim, time, filename = 'my_data.nc')
-#' nc <- open.nc('my_data.nc')
-#' sst <- var.get.nc(nc, 'sst')
-#' image.plot(sst)
-#' }
 #'   
 #' @author   Function originally written for R by Ben Jones (WHOI) and modified 
 #'   by Camrin Braun and Ben Galuardi.
@@ -43,18 +32,33 @@ get.oi.sst <- function(limits, time, filename='', download.file=TRUE, dir = getw
   
   options(warn = -1)
   
+  original_dir <- getwd()
   dir.create(file.path(dir), recursive = TRUE, showWarnings = FALSE)
   setwd(dir)
   
   ## Set the base URL based on the start date. If the ending date exceeds the
   ## period for this experiment, then print a warning and truncate the output
   ## early.
+  if (limits$lonmax <= 180){
+    expts = data.frame(
+      start=c(as.Date('1981-09-01'),
+              as.Date('2020-04-27')),
+      end=c(as.Date('2020-04-26'), 
+            Sys.Date() + 1),
+      url=c('https://upwell.pfeg.noaa.gov/erddap/griddap/ncdcOisst2Agg_LonPM180.nc?sst',
+            'https://upwell.pfeg.noaa.gov/erddap/griddap/ncdcOisst21Agg_LonPM180.nc?sst'))
+    
+  } else{
+    expts = data.frame(
+      start=c(as.Date('1981-09-01'),
+              as.Date('2020-04-27')),
+      end=c(as.Date('2020-04-26'), 
+            Sys.Date() + 1),
+      url=c('https://upwell.pfeg.noaa.gov/erddap/griddap/ncdcOisst2Agg.nc?sst',
+            'https://upwell.pfeg.noaa.gov/erddap/griddap/ncdcOisst21Agg.nc?sst'))
+    
+  }
   
-  expts = data.frame(
-    start=c(as.Date('1981-09-01')),
-    end=c(Sys.Date() + 1),
-    url=c('http://upwell.pfeg.noaa.gov/erddap/griddap/ncdcOisst2Agg_LonPM180.nc?sst')
-    )
   
   if(time[1] < expts$start[1])
     stop('Data begins at %s and is not available at %s.',
@@ -80,8 +84,11 @@ get.oi.sst <- function(limits, time, filename='', download.file=TRUE, dir = getw
                   strftime(time[1], '%Y-%m-%dT00'))
   }
   
+  ## Add useless zlevel
+  url = paste0(url,'[(0.0):1:(0.0)]')
+  
   ## Add the spatial domain.
-  url = sprintf('%s[(0):1:(0)][(%s):1:(%s)][(%s):1:(%s)]',
+  url = sprintf('%s[(%s):1:(%s)][(%s):1:(%s)]',
                 url, limits[[3]], limits[[4]], limits[[1]], limits[[2]])
   print(url)
   
@@ -96,6 +103,9 @@ get.oi.sst <- function(limits, time, filename='', download.file=TRUE, dir = getw
   }
   
   options(warn = 0)
+  
+  ## reset original directory
+  setwd(original_dir)
   
   return(url)
 }

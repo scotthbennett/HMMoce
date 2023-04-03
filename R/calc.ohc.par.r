@@ -208,7 +208,7 @@ calc.ohc.par <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy =
     
     lik.try <- try(likint3(ohc, sdx, minT.ohc, maxT.ohc), TRUE)
     
-    if(class(lik.try) == 'try-error' & use.se == FALSE){
+    if(class(lik.try)[1] == 'try-error' & use.se == FALSE){
       
       # try ohc again with use.se = T
       df = data.frame(low = pred.low$fit - pred.low$se.fit * sqrt(n),
@@ -220,12 +220,12 @@ calc.ohc.par <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, bathy =
       
       lik.try <- try(likint3(ohc, sdx, minT.ohc, maxT.ohc), TRUE)
       
-      if (class(lik.try) == 'try-error'){
+      if (class(lik.try)[1] == 'try-error'){
         lik.try <- ohc * 0
         warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral...', sep=''))
       }
       
-    } else if (class(lik.try) == 'try-error' & use.se == TRUE){
+    } else if (class(lik.try)[1] == 'try-error' & use.se == TRUE){
       lik.try <- ohc * 0
       warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral...', sep=''))
     }

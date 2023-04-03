@@ -36,7 +36,7 @@ calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.
   
   if (is.null(ncores)) ncores <- ceiling(parallel::detectCores() * .9)
   if (is.na(ncores) | ncores < 0) ncores <- ceiling(as.numeric(system('nproc', intern=T)) * .9)
-    
+  
   # calculate midpoint of tag-based min/max temps
   if(length(grep('mean', names(pdt))) > 1){
     pdt$useTemp <- pdt[,grep('mean', names(pdt))[1]]
@@ -172,7 +172,7 @@ calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.
       f1 = t(raster::as.matrix(raster::flip(f1, 2)))
       sd.i[,,ii] = f1
     }
-
+    
     # setup the likelihood array for each day. Will have length (dim[3]) = n depths
     lik.pdt = array(NA, dim = c(dim(dat)[1], dim(dat)[2], length(depIdx)))
     
@@ -183,7 +183,7 @@ calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.
       
       if(!any(which(lik.try > 0))) class.try <- 'try-error'
       
-      if(class.try == 'try-error' & use.se == FALSE){
+      if(class.try[1] == 'try-error' & use.se == FALSE){
         df[b,1] <- pred.low$fit[b] - pred.low$se.fit[b] * sqrt(n)
         df[b,2] <- pred.high$fit[b] - pred.high$se.fit[b] * sqrt(n)
         
@@ -192,12 +192,12 @@ calc.hycom.par <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.
         
         if(!any(which(lik.try > 0))) class.try <- 'try-error'
         
-        if (class.try == 'try-error'){
+        if (class.try[1] == 'try-error'){
           lik.try <- dat[,,depIdx[b]] * 0
           warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral for ', dateVec[i], '...', sep=''))
         }
         
-      } else if (class.try == 'try-error' & use.se == TRUE){
+      } else if (class.try[1] == 'try-error' & use.se == TRUE){
         lik.try <- dat[,,depIdx[b]] * 0
         warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral for ', dateVec[i], '...', sep=''))
       }

@@ -171,7 +171,7 @@ calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se =
       
       if(!any(which(lik.try > 0))) class.try <- 'try-error'
       
-      if(class.try == 'try-error' & use.se == FALSE){
+      if(class.try[1] == 'try-error' & use.se == FALSE){
         df[b,1] <- pred.low$fit[b] - pred.low$se.fit[b] * sqrt(n)
         df[b,2] <- pred.high$fit[b] - pred.high$se.fit[b] * sqrt(n)
         
@@ -180,12 +180,12 @@ calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se =
         
         if(!any(which(lik.try > 0))) class.try <- 'try-error'
         
-        if (class.try == 'try-error'){
+        if (class.try[1] == 'try-error'){
           lik.try <- dat[,,depIdx[b]] * 0
           warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral for ', dateVec[i], '...', sep=''))
         }
         
-      } else if (class.try == 'try-error' & use.se == TRUE){
+      } else if (class.try[1] == 'try-error' & use.se == TRUE){
         lik.try <- dat[,,depIdx[b]] * 0
         warning(paste('Warning: likint3 failed after trying with and without SE prediction of depth-temp profiles. This is most likely a divergent integral for ', dateVec[i], '...', sep=''))
       }

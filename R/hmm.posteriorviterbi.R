@@ -114,7 +114,7 @@ hmm.posteriorviterbi <- function(pars, s, g, iniloc, dateVec, lims.lat, lims.lon
   }
   
   # Ensure diffusion kernel has a central cell (requires odd dimensions)
-  if (is.na(sv)==TRUE) {
+  if (is.na(sv[1])==TRUE) {
     # One-state model
     if (round(pars[1]) == pars[1]) { # if integer
       pars[1] <- pars[1] + 0.000001 # add negligible speed (yields odd dimensions)
@@ -158,7 +158,7 @@ hmm.posteriorviterbi <- function(pars, s, g, iniloc, dateVec, lims.lat, lims.lon
   start.time<- Sys.time()
   for(i in 2:timesteps.vit){ #Start at 2
     # One-state model
-    if (is.na(sv)==TRUE) {
+    if (is.na(sv[1])==TRUE) {
       kern <- K[[1]]
       z <- 1 # behavior state used in testing path admissibility for percentile uncertainty
     } else {

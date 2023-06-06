@@ -116,10 +116,8 @@ hmm.posteriorviterbi <- function(pars, s, g, iniloc, dateVec, lims.lat, lims.lon
   # Ensure diffusion kernel has a central cell (requires odd dimensions)
   if (is.na(sv[1])==TRUE) {
     # One-state model
-    if (round(pars[1]) == pars[1]) { # if integer
-      pars[1] <- pars[1] + 0.000001 # add negligible speed (yields odd dimensions)
-      sigmas = pars[1]
-      sizes = rep(ceiling(sigmas[1]*4),2)
+    if (sizes[1] %% 2 == 0) { # if kernel has even dimensions
+      sizes <- sizes + 1
       pb = NULL
       muadvs = c(0)
       K1 <- gausskern.pg(sizes[1], sigmas[1], muadv=muadvs[1])
@@ -127,11 +125,9 @@ hmm.posteriorviterbi <- function(pars, s, g, iniloc, dateVec, lims.lat, lims.lon
     } else {}
   } else {
     # Two-state model
-    if (round(pars[1]) == pars[1] | round(pars[2]) == pars[2]) { # if integer(s)
-      if (round(pars[1]) == pars[1]) {pars[1] <- pars[1] + 0.000001} # add negligible speed (yields odd dimensions)
-      if (round(pars[2]) == pars[2]) {pars[2] <- pars[2] + 0.000001} # add negligible speed (yields odd dimensions)
-      sigmas = pars[1:2]
-      sizes = rep(ceiling(sigmas[1]*4),2)
+    if (sizes[1] %% 2 == 0 | sizes[2] %% 2 == 0) { # if kernel(s) have even dimensions
+      if (sizes[1] %% 2 == 0) {sizes[1] <- sizes[1] + 1} # yields odd dimensions
+      if (sizes[2] %% 2 == 0) {sizes[2] <- sizes[2] + 1} # yields odd dimensions
       pb = pars[3:4]
       muadvs = c(0,0)
       K1 <- gausskern.pg(sizes[1], sigmas[1], muadv=muadvs[1])
@@ -216,7 +212,12 @@ hmm.posteriorviterbi <- function(pars, s, g, iniloc, dateVec, lims.lat, lims.lon
           if(any(temp.update>0)){
             update.index<- which(row(temp.update)==y & col(temp.update)==x) #index number of grid cell in focus
             update.prob<- log(temp.update) + mpt.calc[y,x,i-1,2]  #cumulative probability of cells in temp.update >0
-            update.cells<- which(temp.update>0,arr.ind=T) #Cells in temp.update with prob>0
+            
+            if(is.matrix(which(temp.update>0,arr.ind=T))){
+              update.cells<- which(temp.update>0,arr.ind=T) #Cells in temp.update with prob>0
+            } else { # if update is vector, ensure matrix format
+              update.cells <- arrayInd(which(temp.update>0,arr.ind=T),dim(temp.update));colnames(update.cells) <- c("row","col")
+            }
             
             #This is the step (below) that could potentially be done with parallel computing
             #As you are trying to find the grid cell in temp.update that has the highest cumulative probability

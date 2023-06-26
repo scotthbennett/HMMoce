@@ -53,7 +53,7 @@ read.wc <- function(filename, tag, pop, type = 'sst', dateFormat=NULL, verbose=F
     #data <- utils::read.table(paste(wd, ptt,'-PDTs.csv', sep=''), sep=',',header=T,blank.lines.skip=F, skip = 0)
     #data <- utils::read.csv(filename)# sep=',', header=T, blank.lines.skip=F, skip = 0)
     data <- utils::read.table(filename, sep=',', header=T, blank.lines.skip=F, skip = 0)
-    if (length(grep('Discont16', names(data))) == 0 & ncol(data) > 89) names(data)[90:94] <- c('Depth16','MinTemp16','MaxTemp16','X.Ox16','Discont16')
+    #if (length(grep('Discont16', names(data))) == 0 & ncol(data) > 89) names(data)[90:94] <- c('Depth16','MinTemp16','MaxTemp16','X.Ox16','Discont16')
     if (verbose) print(paste('If read.wc() fails for type=pdt, check the number of column headers in the PDTs.csv file.'))
     data <- extract.pdt(data)
     if (is.null(dateFormat)){
@@ -65,19 +65,20 @@ read.wc <- function(filename, tag, pop, type = 'sst', dateFormat=NULL, verbose=F
     }
     data$Date <- dts
     d1 <- as.POSIXct('1900-01-02') - as.POSIXct('1900-01-01')
-    didx <- dts >= (tag + d1) & dts <= (pop - d1)
+    #didx <- dts >= (tag + d1) & dts <= (pop - d1)
+    didx <- dts >= tag & dts <= pop
     data <- data[didx,]; dts <- dts[didx]
     
     # check for days with not enough data for locfit
     data1 <- data
     data1$dts <- as.Date(dts)
     dt.cut <- data.frame(group_by(data1, dts) %>% summarise(n=n()))
-    dt.cut <- dt.cut[which(dt.cut[,2] < 3),1]
-    if (length(dt.cut) == 0){
-      
-    } else{
-      data <- data1[-which(data1$dts %in% dt.cut),]
-    }
+    #dt.cut <- dt.cut[which(dt.cut[,2] < 3),1]
+    #if (length(dt.cut) == 0){
+    #  
+    #} else{
+    #  data <- data1[-which(data1$dts %in% dt.cut),]
+    #}
     
     # get unique dates
     udates <- unique(as.Date(data$Date))
@@ -106,7 +107,8 @@ read.wc <- function(filename, tag, pop, type = 'sst', dateFormat=NULL, verbose=F
     }
     data$Date <- dts
     d1 <- as.POSIXct('1900-01-02') - as.POSIXct('1900-01-01')
-    didx <- dts >= (tag + d1) & dts <= (pop - d1)
+    #didx <- dts >= (tag + d1) & dts <= (pop - d1)
+    didx <- dts >= tag & dts <= pop
     data <- data[didx,]
     if (length(data[,1]) < 1){
       stop('Something wrong with reading and formatting of tags SST data. Check date format.')

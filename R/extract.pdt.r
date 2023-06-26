@@ -10,10 +10,14 @@
 #'   
 
 extract.pdt <- function(pdt){
-
   # eliminate any oxygen data
   if(any(grep('X.Ox', colnames(pdt)))){
     dropidx <- c(grep('Ox', names(pdt)), grep('Disc', names(pdt)))
+    pdt <- pdt[,-dropidx]
+  }
+  # eliminate depth error cols
+  if(any(grep('Error', colnames(pdt)))){
+    dropidx <- c(grep('Error', names(pdt)))
     pdt <- pdt[,-dropidx]
   }
   

@@ -259,7 +259,15 @@ hmm.posteriorviterbi <- function(pars, s, g, iniloc, dateVec, lims.lat, lims.lon
     mpt.latlong[i,2]<- longs.vit[mpt[i,2]]
   }
   
-  # Generate dataframe of most probable track by date, lat/lon
-  vit.mpt<- data.frame("date"=dateVec,"lat"=mpt.latlong[,1],"lon"=mpt.latlong[,2])
+  
+  # calculate the estimated behavior state
+  if(dim(s)[1] > 1){
+    p.resid <- apply(s, c(1,2), sum)[2,]
+  } else{
+    p.resid <- rep(NA, length.out = length(dateVec))
+  }
+  
+  # Generate dataframe of most probable track by date, lat/lon, probability of resident state
+  vit.mpt<- data.frame("date"=dateVec,"lat"=mpt.latlong[,1],"lon"=mpt.latlong[,2],"p.resid"=p.resid)
   return(vit.mpt)
 }

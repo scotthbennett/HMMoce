@@ -10,7 +10,7 @@
 #' Output is modified to always yield units of km/*time* where time is the time step duration
 #' If daily, the unit is km/d; if at 12 or 6 hr intervals, the unit is km/X hrs
 
-track.avgdist <- function(track){
+track.avgdist <- function(track,dateVec){
   # Builds trackline in WGS84 coordinate system
   line = sf::st_sfc(sf::st_linestring(as.matrix(track[,c("lon","lat")])), crs = 4326)
   

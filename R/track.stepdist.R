@@ -11,11 +11,11 @@
 
 track.stepdist <- function(track){
   # Empty vector
-  stepdist <- vector(length=(nrow(tr)-1))
+  stepdist <- vector(length=(nrow(track)-1))
   
   # Vector of distances travelled between each model time step (km)
-  for (i in 1:(nrow(tr)-1)){
-    line = sf::st_sfc(sf::st_linestring(as.matrix(tr[i:(i+1),c("lon","lat")])), crs = 4326)
+  for (i in 1:(nrow(track)-1)){
+    line = sf::st_sfc(sf::st_linestring(as.matrix(track[i:(i+1),c("lon","lat")])), crs = 4326)
     stepdist[i] <- sf::st_length(line)/1000
   }
   return(stepdist)

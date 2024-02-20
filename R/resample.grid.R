@@ -33,7 +33,7 @@ resample.grid <- function(L.rasters, L.res, mle.res=0.75, bound=NULL){
     t <- Sys.time()
     r <- raster::resample(r, L.res)
     print(Sys.time() - t)
-    r[r == 0] <- NA
+    #r[r < 0] <- NA
     L.rasters[[i]] <- r
     
   }

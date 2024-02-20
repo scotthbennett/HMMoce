@@ -10,6 +10,7 @@
 #' @param sigmas is vector of length m where each element represents the one-dimensional variance for diffusion of the behavior state(s)
 #' @param n.div is the number of mini-expansion steps the original diffusion kernel is divided into (default = 10, but test carefully for each use case)
 #' @param bathy is the bathymetry raster used in landmasking - must be the same resolution and size as your grid (recommend bathy_resamp)
+#' @param mini.idx is a numeric vector that corresponds to the positions of dateVec for which the mini-expansion should be applied.
 #' @param P a matrix of dimensions m x m representing the probability for transitions between states.
 #' @param m is integer indicating the number of desired behavior states. Currently limited to max 2.
 #' @param maskL is logical indicating whether to mask the input L layer. Default is FALSE. See
@@ -39,14 +40,15 @@
 #' }
 #' 
 
-hmm.filterExp <- function(g, L, K, sigmas, n.div=10, bathy, P, m, maskL = FALSE, bound.thr = 0.1, minBounds = 10){
+hmm.filterExp <- function(g, L, K, sigmas, n.div = 10, bathy, P, m, maskL = FALSE, bound.thr = 0.1, minBounds = 10, mini.idx = NULL){
   
   ## Filter data to estimate locations and behaviour
   
   T <- dim(L)[1] # dimension of time 
   row <- dim(g$lon)[1] # nrows
   col <- dim(g$lon)[2] # ncols
-
+  #m <- 2 # Number of behavioural states
+  
   pred <- array(0, dim = c(m, T, col, row)) # empty array for prediction step. ordering in col before row emulates lon before lat
   phi  <- array(0, dim = c(m, T, col, row)) # posterior (final) step array
   
@@ -54,31 +56,36 @@ hmm.filterExp <- function(g, L, K, sigmas, n.div=10, bathy, P, m, maskL = FALSE,
   phi[1,1,,]  <- L[1,,] # first position is known
   pred[1,1,,] <- L[1,,] # first position is known
   
-  # Miniaturize the kernel(s)
-  if (m==1) {
-    D1exp <- (sigmas^2)/n.div
-    sigmas.exp <- sqrt(D1exp)
-    sizes.exp = rep(ceiling(sigmas.exp[1]*4),2)
-    muadvs.exp = c(0)
-    K1exp <- gausskern.pg(sizes.exp[1], sigmas.exp[1], muadv=muadvs.exp[1])
-    Kexp <- list(K1exp)
-  } else if (m==2) {
-    D1exp <- (sigmas[1]^2)/n.div
-    D2exp <- (sigmas[2]^2)/n.div
-    sigmas.exp <- sqrt(c(D1exp,D2exp))
-    sizes.exp = rep(ceiling(sigmas.exp[1]*4),2)
-    muadvs.exp = c(0,0)
-    K1exp <- gausskern.pg(sizes.exp[1], sigmas.exp[1], muadv=muadvs.exp[1])
-    K2exp <- gausskern.pg(sizes.exp[2], sigmas.exp[2], muadv=muadvs.exp[2])
-    Kexp <- list(K1exp,K2exp)
+  for (ii in 1:m){
+    # convert movement kernels from matrix to cimg for convolution
+    K[[ii]] <- imager::as.cimg(K[[ii]])
   }
   
+  ## set up the kernel(s) for the mini expansion
+  # Miniaturize the kernel(s)
+  if (is.null(n.div)) n.div <- 10
+  print(paste0('Using ', n.div, ' divisions for the mini expansion.'))
+  if (m == 1) {
+    D1exp <- (sigmas ^ 2) / n.div
+    sigmas.exp <- sqrt(D1exp)
+    sizes.exp = rep(ceiling(sigmas.exp[1] * 4),2)
+    muadvs.exp = c(0)
+    K1exp <- gausskern.pg(sizes.exp[1], sigmas.exp[1], muadv = muadvs.exp[1])
+    Kexp <- list(K1exp)
+  } else if (m == 2) {
+    D1exp <- (sigmas[1] ^ 2) / n.div
+    D2exp <- (sigmas[2] ^ 2) / n.div
+    sigmas.exp <- sqrt(c(D1exp, D2exp))
+    sizes.exp = rep(ceiling(sigmas.exp[1] * 4), 2)
+    muadvs.exp = c(0, 0)
+    K1exp <- gausskern.pg(sizes.exp[1], sigmas.exp[1], muadv = muadvs.exp[1])
+    K2exp <- gausskern.pg(sizes.exp[2], sigmas.exp[2], muadv = muadvs.exp[2])
+    Kexp <- list(K1exp, K2exp)
+  }
   
   for (ii in 1:m){
-    
     # convert movement mini-kernels from matrix to cimg for convolution
     Kexp[[ii]] <- imager::as.cimg(Kexp[[ii]])
-    
   }
   
   psi <- rep(0, T - 1) # sum of the probability of states at each step
@@ -96,20 +103,23 @@ hmm.filterExp <- function(g, L, K, sigmas, n.div=10, bathy, P, m, maskL = FALSE,
       
       # convolve previous day's likelihood with movement kernels
       p[[ii]] = imager::as.cimg(t(phi[ii, t-1,,]))
-      #p1 = imager::as.cimg(t(phi[1, t-1,,]))
-      #p2 = imager::as.cimg(t(phi[2, t-1,,]))
       
-      # Mini-expansions within a timestep
-      expansion <- 1
-      while (expansion <= n.div) {
-        q[[ii]] = t(as.matrix(imager::convolve(p[[ii]], Kexp[[ii]])))
-        #q1 = imager::convolve(p1, K1)
-        #q2 = imager::convolve(p2, K2)
-        #q1 = t(as.matrix(q1))
-        #q2 = t(as.matrix(q2))
-        q[[ii]][bathy >= 0] <- 0 # landmask each mini-expansion
-        p[[ii]] <- imager::as.cimg(t(q[[ii]]))
-        expansion = expansion+1
+      if (t %in% mini.idx){
+        # Mini-expansions within a timestep
+        expansion <- 1
+        while (expansion <= n.div) {
+          q[[ii]] = t(as.matrix(imager::convolve(p[[ii]], Kexp[[ii]])))
+          #q1 = imager::convolve(p1, K1)
+          #q2 = imager::convolve(p2, K2)
+          #q1 = t(as.matrix(q1))
+          #q2 = t(as.matrix(q2))
+          q[[ii]][bathy >= 0] <- 0 # landmask each mini-expansion
+          p[[ii]] <- imager::as.cimg(t(q[[ii]]))
+          expansion = expansion+1
+        }
+        
+      } else{
+        q[[ii]] = t(as.matrix(imager::convolve(p[[ii]], K[[ii]])))
       }
       
     }

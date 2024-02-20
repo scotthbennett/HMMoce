@@ -119,9 +119,19 @@ calc.glorys.par <- function(pdt, filename, glorys.dir, focalDim = 9, dateVec, de
     if (nrow(pdt.i) < 3) return(NA)
     
     # open day's glorys data
-    br <- raster::brick(paste(glorys.dir, filename, '_', format(dateVec[i], '%Y%m%d'), '.grd', sep=''))
-    #dat <- RNetCDF::var.get.nc(nc, temp.idx) * scale + offset
-    #dat <- RNetCDF::var.get.nc(nc, 'variable') #* scale + offset
+    # make sure we get the filename right
+    glorys_file <- paste(glorys.dir, filename, '_', format(dateVec[i], '%Y-%m-%d'), '.nc', sep='')
+    if (!file.exists(glorys_file)) glorys_file <- paste(glorys.dir, filename, '_', format(dateVec[i], '%Y%m%d'), '.nc', sep='')
+    if (!file.exists(glorys_file)){
+      glorys_flist <- list.files(glorys.dir)
+      glorys_file <- paste(glorys.dir, glorys_flist[grep(format(dateVec[i], '%Y%m%d'), glorys_flist)], sep='')
+      if (length(glorys_file) > 1){
+        warning('Daily glorys file length is > 1. Choosing the first one which may or may not be the right guess.')
+        glorys_file <- glorys_file[1]
+      }
+    }
+    # open day's glorys data
+    br <- raster::brick(glorys_file)
     dat <- raster::as.array(br)
     
     #extracts depth from tag data for day i

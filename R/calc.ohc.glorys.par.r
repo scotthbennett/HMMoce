@@ -113,8 +113,19 @@ calc.ohc.glorys.par <- function(pdt, filename, isotherm = '', ohc.dir, dateVec, 
     pdt.i <- pdt[which(pdt$dateVec == i),]
     if (nrow(pdt.i) < 3) return(NA)
     
+    # make sure we get the filename right
+    glorys_file <- paste(ohc.dir, filename, '_', format(dateVec[i], '%Y-%m-%d'), '.nc', sep='')
+    if (!file.exists(glorys_file)) glorys_file <- paste(ohc.dir, filename, '_', format(dateVec[i], '%Y%m%d'), '.nc', sep='')
+    if (!file.exists(glorys_file)){
+      glorys_flist <- list.files(ohc.dir)
+      glorys_file <- paste(ohc.dir, glorys_flist[grep(format(dateVec[i], '%Y%m%d'), glorys_flist)], sep='')
+      if (length(glorys_file) > 1){
+        warning('Daily glorys file length is > 1. Choosing the first one which may or may not be the right guess.')
+        glorys_file <- glorys_file[1]
+      }
+    }
     # open day's glorys data
-    br <- raster::brick(paste(ohc.dir, filename, '_', format(dateVec[i], '%Y%m%d'), '.grd', sep=''))
+    br <- raster::brick(glorys_file)
     dat <- raster::as.array(br)
     
     #extracts depth from tag data for day i

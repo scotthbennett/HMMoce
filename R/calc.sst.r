@@ -41,7 +41,7 @@ calc.sst <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, sens.
   T <- length(dateVec)
   
   ## setup
-  nc1 <- RNetCDF::open.nc(paste(sst.dir, filename, '_', as.Date(dateVec[tag.sst$dateVec[1]]), '.nc', sep=''))
+  nc1 <- RNetCDF::open.nc(dir(sst.dir, full.names = T)[1])
   ncnames = NULL
   nmax <- RNetCDF::file.inq.nc(nc1)$nvars - 1
   for(ii in 0:nmax) ncnames[ii + 1] <- RNetCDF::var.inq.nc(nc1, ii)$name

@@ -47,7 +47,8 @@ calc.sst.par <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, s
 
   # GET EVERYTHING SETUP BEFORE PARALLEL
   # open day's sst data
-  nc <- RNetCDF::open.nc(paste(sst.dir, filename, '_', as.Date(dateVec[tag.sst$dateVec[1]]), '.nc', sep=''))
+  #nc <- RNetCDF::open.nc(dir(sst.dir, full.names = T)[1])
+  nc <- RNetCDF::open.nc(paste(sst.dir, filename, '_', as.Date(dateVec[min(tag.sst$dateVec)]), '.nc', sep=''))
   
   ## first successful iteration, define additional vars
   # get correct name in sst data
@@ -56,8 +57,8 @@ calc.sst.par <- function(tag.sst, filename, sst.dir, dateVec, focalDim = NULL, s
   for(ii in 0:nmax) ncnames[ii + 1] <- RNetCDF::var.inq.nc(nc, ii)$name
   nameidx <- grep('sst', ncnames, ignore.case=TRUE) - 1
   
-  lon <- RNetCDF::var.get.nc(nc, 'longitude')
-  lat <- RNetCDF::var.get.nc(nc, 'latitude')
+  lon <- c(RNetCDF::var.get.nc(nc, 'longitude'))
+  lat <- c(RNetCDF::var.get.nc(nc, 'latitude'))
   
   # result will be array of likelihood surfaces
   L.sst <- array(0, dim = c(length(lon), length(lat), T))

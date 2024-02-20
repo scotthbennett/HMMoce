@@ -93,9 +93,11 @@ hmm.smoother1 <- function(f, L, K, P=NULL){
         post[[ii]] <- f$phi[1,t,,] * 0
         if (ii == 1) post[[1]] <- L[t,,]
         fac <- sum(unlist(lapply(post, FUN = function(x) sum(x, na.rm = T))))
+        if (fac < 1e-200) fac <- 1e-200 ## added to prevent fac == 0
         smooth[ii,t,,] <- post[[ii]] / fac
         post[[ii]] <- post[[ii]] * f$phi[ii,t-1,,]
         fac <- sum(unlist(lapply(post, FUN = function(x) sum(x, na.rm = T))))
+        if (fac < 1e-200) fac <- 1e-200 ## added to prevent fac == 0
         smooth[ii,t-1,,] <- post[[ii]] / fac
         
         #post1 <- f$phi[1,t,,] * 0

@@ -6,6 +6,8 @@
 #' @param ras.list a list of likelihood rasters
 #' @param iniloc is data.frame of tag and pop locations. Required columns are 'date' (POSIX), 'lon', 'lat'.
 #' @param dateVec is vector of POSIXct dates for each time step of the likelihood
+#' @param maxDepth a vector of the daily max depths (must be positive and be zero-padded for NA days)
+#' @param bathy is the original bathy raster pre-resampling
 #' @param known.locs is data frame of known locations containing named columns 
 #'   of 'date' (POSIX), 'lon', 'lat'. Default is NULL.
 #' @return an overall likelihood array, L
@@ -17,11 +19,23 @@
 #' @export
 #'   
 
-make.L <- function(ras.list, iniloc, dateVec, known.locs = NULL){
-
+make.L <- function(ras.list, iniloc, dateVec, maxDepth, bathy, known.locs = NULL){
+  
   ## generate blank results likelihood
   L <- ras.list[[1]] * 0
   L[is.na(L)] <- 0
+  
+  # check bathy mask requirements
+  if (length(maxDepth) != length(dateVec)){
+    stop('Error: Vector of daily maximum depths is not same length at date vector. Ensure mmd was zero-padded for days with NA data.')
+  }
+  
+  ## convert a negative bathy grid to positive to match expectations and mask land
+  if (raster::cellStats(bathy, 'min', na.rm=T) < 0){
+    bathy <- bathy * -1
+    bathy[bathy < 0] <- NA
+  }
+  bathy <- raster::resample(bathy, L)
   
   ## COMBINE THE LIKELIHOOD LAYERS
   ## for each day:
@@ -70,13 +84,17 @@ make.L <- function(ras.list, iniloc, dateVec, known.locs = NULL){
       L[[i]] <- sum(s) / raster::cellStats(sum(s), 'max') ## do not remove NA yet  
     }
     
+    ## daily bathy mask
+    bathy.i <- maxDepth[i] * (1 - 20 / 100) # give 20% of max depth buffer for likelihood flexibility
+    L[[i]][bathy < bathy.i] <- 0
+    
   }
   
   ## ADD START/END LOCATIONS
   if(!is.null(iniloc)){
     # convert input date, lat, lon to likelihood surfaces
     print('Adding start and end locations from iniloc...')
-
+    
     # get lat/lon vectors
     #lon <- seq(raster::extent(L)[1], raster::extent(L)[2], length.out=dim(L)[2])
     #lat <- seq(raster::extent(L)[3], raster::extent(L)[4], length.out=dim(L)[1])
@@ -97,7 +115,7 @@ make.L <- function(ras.list, iniloc, dateVec, known.locs = NULL){
       L[[i]][raster::cellFromXY(L[[i]], known.locs.i[,c('lon','lat')])] <- 1
       
     }
-  
+    
   }
   
   ## ADD KNOWN LOCATIONS
@@ -137,9 +155,8 @@ make.L <- function(ras.list, iniloc, dateVec, known.locs = NULL){
   
   # CONVERT OUTPUT RASTER INTO AN ARRAY
   L <- aperm(raster::as.array(raster::flip(L, direction = 'y')), c(3, 2, 1))
-
+  
   print('Finishing make.L...', sep='')
   
   return(L)
 }
-  

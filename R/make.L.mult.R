@@ -19,7 +19,7 @@
 #' @export
 #'   
 
-make.L <- function(ras.list, iniloc, dateVec, maxDepth, bathy, known.locs = NULL){
+make.L.mult <- function(ras.list, iniloc, dateVec, maxDepth, bathy, known.locs = NULL){
   
   ## generate blank results likelihood
   L <- ras.list[[1]] * 0

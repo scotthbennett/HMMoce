@@ -155,7 +155,7 @@ calc.hycom <- function(pdt, filename, hycom.dir, focalDim = 9, dateVec, use.se =
     sd.i = array(NA, dim = c(dim(dat)[1:2], length(depIdx)))
     
     for(ii in 1:length(depIdx)){
-      r = raster::flip(raster::raster(t(dat[,,depIdx[ii]])), 2)
+      r = terra::flip(raster::raster(t(dat[,,depIdx[ii]])), 2)
       f1 = raster::focal(r, w = matrix(1, nrow = focalDim, ncol = focalDim), fun = function(x) stats::sd(x, na.rm = TRUE), pad = TRUE)
       f1 = t(raster::as.matrix(raster::flip(f1, 2)))
       sd.i[,,ii] = f1
